@@ -6,10 +6,15 @@ class Gig(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(), nullable=False)
-    description = db.Column(db.String())
+    description = db.Column(db.String(), default="N/A")
     start_time = db.Column(db.DateTime, nullable=False)
     price = db.Column(db.Integer, default=0)
     timestamp = db.Column(db.DateTime)
     
     venue_id = db.Column(db.Integer, db.ForeignKey("venues.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+
+    performances = db.relationship(
+        "Performance",
+        backref="g_gig"
+    )

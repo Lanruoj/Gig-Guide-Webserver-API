@@ -1,11 +1,12 @@
 from re import A
 import os
-from flask import Blueprint
+from flask import Blueprint, current_app
 from main import db, bcrypt
 from models.artist import Artist
 from models.gig import Gig
 from models.user import User
 from models.venue import Venue
+from models.performance import Performance
 from datetime import datetime
 
 
@@ -26,7 +27,7 @@ def drop_db():
 def seed_db():
     admin = User(
         username = "admin",
-        password = bcrypt.generate_password_hash(os.environ.get("ADMIN_PASSWORD")).decode("utf-8"),
+        password = bcrypt.generate_password_hash(current_app.config["ADMIN_PASSWORD"]).decode("utf-8"),
         email = "admin@email.com",
         first_name = "Admin",
         last_name = "User",
@@ -39,6 +40,16 @@ def seed_db():
         genre = "Alt. pop"
     )
     db.session.add(test_artist)
+    test_artist1 = Artist(
+        name = "Sweet Whirl",
+        genre = "Alt. pop"
+    )
+    db.session.add(test_artist1)
+    test_artist2 = Artist(
+        name = "Jordan Ireland",
+        genre = "Folk"
+    )
+    db.session.add(test_artist2)
 
     test_venue = Venue(
         name = "The Gasometer Hotel",
@@ -57,11 +68,15 @@ def seed_db():
         price = 20,
         timestamp = datetime.now(),
         venue_id = 1,
-        user_id = 1,
-        artist_id = 1
+        user_id = 1
     )
     db.session.add(test_gig)
     db.session.commit()
+
+    test_performance = Performance(
+        gig_id = 1,
+        artist_id = 1
+    )
 
 
     print("Tables seeded")

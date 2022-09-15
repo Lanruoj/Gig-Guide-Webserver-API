@@ -10,4 +10,5 @@ class Venue(db.Model):
     city = db.Column(db.String(), nullable=False)
     state = db.Column(db.String(), nullable=False)
     country = db.Column(db.String(), nullable=False)
+    type = db.Column(db.String())
     

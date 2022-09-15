@@ -32,4 +32,4 @@ def register_user():
 
     token = create_access_token(identity=str(user.id), expires_delta=timedelta(days=1))
 
-    return jsonify(user_schema.dump(user), token)
+    return jsonify(token)

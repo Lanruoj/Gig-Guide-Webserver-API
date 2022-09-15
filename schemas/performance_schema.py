@@ -7,7 +7,6 @@ class PerformanceSchema(ma.Schema):
     class Meta:
         ordered = True
         fields = ("id", "gig_id", "artist_id", "artist")
-
     artist = fields.Nested("ArtistSchema")
 
 

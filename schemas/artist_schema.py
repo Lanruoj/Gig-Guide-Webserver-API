@@ -6,7 +6,7 @@ class ArtistSchema(ma.Schema):
     class Meta:
         ordered = True
         fields = ("id", "name", "genre")
-    performances = fields.List(fields.Nested("PerformanceSchema"))
+    # performances = fields.List(fields.Nested("PerformanceSchema"))
 
 
 artist_schema = ArtistSchema()

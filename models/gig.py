@@ -13,9 +13,3 @@ class Gig(db.Model):
     
     venue_id = db.Column(db.Integer, db.ForeignKey("venues.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    artist_id = db.Column(db.Integer, db.ForeignKey("artists.id"))
-
-    artists = db.relationship(
-        "Artist",
-        backref="gig"
-    )

@@ -8,13 +8,13 @@ class Performance(db.Model):
     gig_id = db.Column(db.Integer, db.ForeignKey("gigs.id"), nullable=False)
     artist_id = db.Column(db.Integer, db.ForeignKey("artists.id"), nullable=False)
 
-    artist = db.relationship(
-        "Artist",
-        backref="p_artist"
-    )
+    # artist = db.relationship(
+    #     "Artist",
+    #     backref="p_artist"
+    # )
 
-    gig = db.relationship(
-        "Gig",
-        backref="p_gig"
-    )
+    # gig = db.relationship(
+    #     "Gig",
+    #     backref="p_gig"
+    # )
     

@@ -36,22 +36,32 @@ def add_gig():
         price = gig_fields["price"],
         timestamp = datetime.now(),
         venue_id = gig_fields["venue_id"],
-        user_id = get_jwt_identity()
+        user_id = get_jwt_identity(),
+        artists = gig_fields["artists"]
     )
     db.session.add(gig)
     db.session.commit()
+    
+    for artist in gig.artists.split(', '):
+        artist = Artist.query.filter_by(name=artist).first()
+        performance = Performance(
+            gig_id = gig.id,
+            artist_id = artist.id
+        )
+        db.session.add(performance)
+        db.session.commit()
 
     return jsonify(gig_schema.dump(gig))
 
 
-@gigs.route("/<int:gig_id>/performance", methods=["POST"])
-def add_performance(gig_id):
-    performance_fields = performance_schema.load(request.json)
-    performance = Performance(
-        gig_id = gig_id,
-        artist_id = performance_fields["artist_id"]
-    )
-    db.session.add(performance)
-    db.session.commit()
+# @gigs.route("/<int:gig_id>/performance", methods=["POST"])
+# def add_performance(gig_id):
+#     performance_fields = performance_schema.load(request.json)
+#     performance = Performance(
+#         gig_id = gig_id,
+#         artist_id = performance_fields["artist_id"]
+#     )
+#     db.session.add(performance)
+#     db.session.commit()
 
-    return jsonify(performance_schema.dump(performance))
+#     return jsonify(performance_schema.dump(performance))

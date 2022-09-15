@@ -50,6 +50,8 @@ def seed_db():
         genre = "Folk"
     )
     db.session.add(test_artist2)
+    db.session.commit()
+
 
     test_venue = Venue(
         name = "The Gasometer Hotel",
@@ -59,6 +61,22 @@ def seed_db():
         country = "Australia"
     )
     db.session.add(test_venue)
+    test_venue1 = Venue(
+        name = "The Forum",
+        street_address = "154 Flinders St",
+        city = "Melbourne",
+        state = "Victoria",
+        country = "Australia"
+    )
+    db.session.add(test_venue1)
+    test_venue2 = Venue(
+        name = "The Jazz Lab",
+        street_address = "27 Leslie street",
+        city = "Brunswick",
+        state = "Victoria",
+        country = "Australia"
+    )
+    db.session.add(test_venue2)
     db.session.commit()
 
     test_gig = Gig(
@@ -72,11 +90,5 @@ def seed_db():
     )
     db.session.add(test_gig)
     db.session.commit()
-
-    test_performance = Performance(
-        gig_id = 1,
-        artist_id = 1
-    )
-
 
     print("Tables seeded")

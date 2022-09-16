@@ -47,3 +47,31 @@ def auth_login():
 
     token = create_access_token(identity=str(user.id), expires_delta=timedelta(days=1))
     return jsonify(token=token, user=user.username)
+
+
+@auth.route("/<int:id>/<value>", methods=["PUT"])
+@jwt_required()
+def auth_update_username(id, value):
+    user_id = int(get_jwt_identity())
+    # RETRIEVE A User WITH THE id OF THE URL ARGUMENT IF EXISTS
+    user = User.query.get(id)
+    if not user:
+        return abort(404, description="User not found")
+    if user.id != user_id:
+        return abort(401, description="Unauthorised")
+    user_fields = user_schema.load(request.json, partial=True)
+
+    if value=="username":
+        user.username = user_fields["username"]
+    elif value=="password":
+        user.password = bcrypt.generate_password_hash(user_fields["password"]).decode("utf-8")
+    elif value=="email":
+        user.email = user_fields["email"]
+    elif value=="first_name":
+        user.first_name = user_fields["first_name"]
+    elif value=="last_name":
+        user.last_name = user_fields["last_name"]
+
+    db.session.commit()
+
+    return jsonify(user_schema.dump(user))

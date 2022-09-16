@@ -51,7 +51,7 @@ def auth_login():
 
 @auth.route("/<value>", methods=["PUT"])
 @jwt_required()
-def auth_update_value(value):
+def auth_update(value):
     # CHECK IF USER HAS VALID ACCESS TOKEN - IF YES RETURN USER'S id
     id = int(get_jwt_identity())
     # ATTEMPT RETRIEVE A User WITH THE id RETURNED FROM THE get_jwt_identity() FUNCTION

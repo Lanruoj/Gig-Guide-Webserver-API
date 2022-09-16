@@ -40,14 +40,30 @@ def add_gig():
     )
     db.session.add(gig)
     db.session.commit()
-    
-    for artist in gig.artists.split(', '):
-        artist = Artist.query.filter_by(name=artist).first()
-        performance = Performance(
-            gig_id = gig.id,
-            artist_id = artist.id
-        )
-        db.session.add(performance)
-        db.session.commit()
+
+    artist_input = gig.artists.split(", ")
+    for artist in artist_input:
+        artist_exists = Artist.query.filter_by(name=artist).first()
+        if not artist_exists:
+            artist = Artist(
+                name = artist
+            )
+            db.session.add(artist)
+            db.session.commit()
+        
+            performance = Performance(
+                gig_id = gig.id,
+                artist_id = artist.id
+            )
+            db.session.add(performance)
+            db.session.commit()
+        
+        else:
+            performance = Performance(        # <------- REFACTOR / DRY
+                gig_id = gig.id,
+                artist_id = artist_exists.id
+            )
+            db.session.add(performance)
+            db.session.commit()  
 
     return jsonify(gig_schema.dump(gig))

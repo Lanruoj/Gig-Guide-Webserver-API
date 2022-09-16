@@ -85,6 +85,7 @@ def seed_db():
         start_time = datetime(year=2022, month=9, day=17, hour=18),
         price = 20,
         timestamp = datetime.now(),
+        artists = "Gregor",
         venue_id = 1,
         user_id = 1
     )

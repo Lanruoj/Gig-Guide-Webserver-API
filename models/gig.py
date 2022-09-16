@@ -15,6 +15,11 @@ class Gig(db.Model):
     venue_id = db.Column(db.Integer, db.ForeignKey("venues.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
+    venue = db.relationship(
+        "Venue",
+        backref="gig_venue"
+    )
+    
     performances = db.relationship(
         "Performance",
         backref="g_gig"

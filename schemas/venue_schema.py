@@ -7,7 +7,7 @@ class VenueSchema(ma.Schema):
         ordered = True
         fields = ("id", "name", "street_address", "city", "state", "country", "type")
     
-    gigs = fields.List(fields.Nested("GigSchema"))
+    # gigs = fields.List(fields.Nested("GigSchema"))
 
 venue_schema = VenueSchema()
 venues_schema = VenueSchema(many=True)

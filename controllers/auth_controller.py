@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request, abort
 from main import db, bcrypt, jwt
 from datetime import timedelta
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from flask_jwt_extended import create_access_token, get_jwt_identity,jwt_required
 from models.user import User
 from schemas.user_schema import user_schema
 
@@ -49,16 +49,19 @@ def auth_login():
     return jsonify(token=token, user=user.username)
 
 
-@auth.route("/<int:id>/<value>", methods=["PUT"])
+@auth.route("/<value>", methods=["PUT"])
 @jwt_required()
-def auth_update_username(id, value):
-    user_id = int(get_jwt_identity())
-    # RETRIEVE A User WITH THE id OF THE URL ARGUMENT IF EXISTS
+def auth_update_value(value):
+    # CHECK IF USER HAS VALID ACCESS TOKEN - IF YES RETURN USER'S id
+    id = int(get_jwt_identity())
+    # ATTEMPT RETRIEVE A User WITH THE id RETURNED FROM THE get_jwt_identity() FUNCTION
     user = User.query.get(id)
     if not user:
         return abort(404, description="User not found")
-    if user.id != user_id:
+    if user.id != id:
         return abort(401, description="Unauthorised")
+    
+    # IF USER EXISTS, USE AS THE RECORD TO UPDATE    
     user_fields = user_schema.load(request.json, partial=True)
 
     if value=="username":

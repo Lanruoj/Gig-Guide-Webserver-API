@@ -70,3 +70,10 @@ def add_gig():
 
     return jsonify(gig_schema.dump(gig))
 
+
+@gigs.route("/watched/<arg>", methods=["GET"])
+@jwt_required()
+def venue_watchlist(arg):
+    # GET THE id OF THE JWT ACCESS TOKEN FROM @jwt_required()
+    id = int(get_jwt_identity())
+

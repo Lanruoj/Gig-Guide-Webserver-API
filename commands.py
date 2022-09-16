@@ -8,6 +8,9 @@ from models.user import User
 from models.venue import Venue
 from models.performance import Performance
 from datetime import datetime
+from models.watch_venue import WatchVenue
+from schemas.watch_venue_schema import watch_venue_schema, watch_venues_schema
+
 
 
 db_commands = Blueprint("db", __name__)
@@ -90,6 +93,18 @@ def seed_db():
         user_id = 1
     )
     db.session.add(test_gig)
+    db.session.commit()
+
+    wv = WatchVenue(
+        user_id = 1,
+        venue_id = 1
+    )
+    db.session.add(wv)
+    wv2 = WatchVenue(
+        user_id = 1,
+        venue_id = 2
+    )
+    db.session.add(wv2)
     db.session.commit()
 
     print("Tables seeded")

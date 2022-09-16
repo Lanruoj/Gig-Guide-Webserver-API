@@ -14,6 +14,7 @@ class Venue(db.Model):
 
     gigs = db.relationship(
         "Gig",
-        backref="venue_gigs"
+        backref="venue_gigs",
+        viewonly=True
     )
     

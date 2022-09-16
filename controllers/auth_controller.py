@@ -12,10 +12,16 @@ auth = Blueprint("auth", __name__, url_prefix="/auth")
 @auth.route("/register", methods=["POST"])
 def auth_register():
     user_fields = user_schema.load(request.json)
-    # CHECK IF A RECORD WITH THE INPUT username ALREADY EXISTS IN DATABASE - username MUST BE UNIQUE. IF IT DOES EXIST, THROW A DESCRIPTIVE ERROR MESSAGE. OTHERWISE, CREATE user OBJECT
-    user = User.query.filter_by(username=user_fields["username"]).first()
-    if user:
-        return abort(409, "Username already exists")
+    # CHECK IF THE username VALUE IN THE REQUEST EXISTS IN THE users TABLE. IF A MATCH IS FOUND, THROW A DESCRIPTIVE ERROR AS username MUST BE UNIQUE
+    username_exists = User.query.filter_by(username=user_fields["username"]).first()
+    if username_exists:
+        print(username_exists.username)
+        return abort(409, f"Username {username_exists.username} already exists")
+    # CHECK IF THE email VALUE IN THE REQUEST EXISTS IN THE users TABLE. IF A MATCH IS FOUND, THROW A DESCRIPTIVE ERROR AS email MUST BE UNIQUE
+    email_exists = User.query.filter_by(email=user_fields["email"]).first()
+    if email_exists:
+        print(email_exists.email)
+        return abort(409, f"Email address {email_exists.email} already exists")
     
     user = User(
         username = user_fields["username"],
@@ -34,6 +40,7 @@ def auth_register():
 def auth_login():
     # username NOT REQUIRED FOR LOGIN
     user_fields = user_schema.load(request.json, partial=("username",))
+    # SEARCH users FOR RECORD MATCHING THE INPUT email, ABORT IF NO EXISTING USER OR WRONG PASSWORD
     user = User.query.filter_by(email=user_fields["email"]).first()
     if not user or not bcrypt.check_password_hash(user.password, user_fields["password"]):
         return abort(401, description="Invalid email or password, please try again")

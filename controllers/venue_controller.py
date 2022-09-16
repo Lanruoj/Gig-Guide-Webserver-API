@@ -26,6 +26,9 @@ def venues_show_all():
 @venues.route("/", methods=["POST"])
 @jwt_required()
 def venues_add():
+    user = User.query.get(int(get_jwt_identity()))
+    if not user and not user.admin:
+        return abort(401, description="Unauthorised")
     venue_fields = venue_schema.load(request.json)
     venue = Venue(
         name = venue_fields["name"],

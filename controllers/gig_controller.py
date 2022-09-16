@@ -70,15 +70,3 @@ def add_gig():
 
     return jsonify(gig_schema.dump(gig))
 
-
-@gigs.route("/venues", methods=["GET"])
-@jwt_required()
-def gigs_watched_venues():
-    # CHECK IF USER HAS VALID ACCESS TOKEN - IF YES RETURN USER'S id
-    id = int(get_jwt_identity())
-    # ATTEMPT RETRIEVE A User WITH THE id RETURNED FROM THE get_jwt_identity() FUNCTION
-    user = User.query.get(id)
-    if not user:
-        return abort(404, description="Unauthorised - must be logged in")
-    if user.id != id:
-        return abort(401, description="Unauthorised")

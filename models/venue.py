@@ -11,4 +11,9 @@ class Venue(db.Model):
     state = db.Column(db.String(), nullable=False)
     country = db.Column(db.String(), nullable=False)
     type = db.Column(db.String())
+
+    gigs = db.relationship(
+        "Gig",
+        backref="venue"
+    )
     

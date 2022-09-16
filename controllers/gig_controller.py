@@ -13,7 +13,6 @@ from schemas.artist_schema import artist_schema, artists_schema
 gigs = Blueprint("gigs", __name__, url_prefix="/gigs")
 
 
-
 @gigs.route("/", methods=["GET"])
 def show_all_gigs():
     # SELECT ALL RECORDS FROM THE gigs TABLE. IF NO RECORDS, RETURN DESCRIPTIVE MESSAGE
@@ -36,7 +35,7 @@ def add_gig():
         price = gig_fields["price"],
         timestamp = datetime.now(),
         venue_id = gig_fields["venue_id"],
-        user_id = get_jwt_identity(),
+        user_id = get_jwt_identity(),    #### <----- GET user_id FROM CHECK ^^^
         artists = gig_fields["artists"]
     )
     db.session.add(gig)
@@ -52,16 +51,3 @@ def add_gig():
         db.session.commit()
 
     return jsonify(gig_schema.dump(gig))
-
-
-# @gigs.route("/<int:gig_id>/performance", methods=["POST"])
-# def add_performance(gig_id):
-#     performance_fields = performance_schema.load(request.json)
-#     performance = Performance(
-#         gig_id = gig_id,
-#         artist_id = performance_fields["artist_id"]
-#     )
-#     db.session.add(performance)
-#     db.session.commit()
-
-#     return jsonify(performance_schema.dump(performance))

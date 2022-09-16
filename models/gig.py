@@ -19,6 +19,11 @@ class Gig(db.Model):
         "Venue",
         backref="gig_venue"
     )
+
+    user = db.relationship(
+        "User",
+        backref="gig_user"
+    )
     
     performances = db.relationship(
         "Performance",

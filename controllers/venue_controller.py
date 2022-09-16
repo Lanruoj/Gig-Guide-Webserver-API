@@ -10,6 +10,8 @@ from models.artist import Artist
 from schemas.artist_schema import artist_schema, artists_schema
 from models.venue import Venue
 from schemas.venue_schema import venue_schema, venues_schema
+from models.user import User
+from schemas.user_schema import user_schema
 
 
 venues = Blueprint("venues", __name__, url_prefix="/venues")
@@ -21,17 +23,18 @@ def venues_show_all():
     return jsonify(venues_schema.dump(venue_list))
 
 
-# @venues.route("/", methods=["POST"])
-# def venues_add():
-#     venue_fields = venue_schema.load(request.json)
-#     venue = Venue(
-#         name = venue_fields["name"],
-#         street_address = venue_fields["street_address"],
-#         city = venue_fields["city"],
-#         state = venue_fields["state"],
-#         country = venue_fields["country"]
-#     )
-#     db.session.add(venue)
-#     db.session.commit()
+@venues.route("/", methods=["POST"])
+@jwt_required()
+def venues_add():
+    venue_fields = venue_schema.load(request.json)
+    venue = Venue(
+        name = venue_fields["name"],
+        street_address = venue_fields["street_address"],
+        city = venue_fields["city"],
+        state = venue_fields["state"],
+        country = venue_fields["country"]
+    )
+    db.session.add(venue)
+    db.session.commit()
     
-#     return jsonify(venue_schema.dump(venue))
+    return jsonify(venue_schema.dump(venue))

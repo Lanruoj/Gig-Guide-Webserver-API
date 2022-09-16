@@ -52,14 +52,10 @@ def auth_login():
 @auth.route("/<value>", methods=["PUT"])
 @jwt_required()
 def auth_update(value):
-    # CHECK IF USER HAS VALID ACCESS TOKEN - IF YES RETURN USER'S id
+    # GET THE id OF THE JWT ACCESS TOKEN FROM @jwt_required()
     id = int(get_jwt_identity())
-    # ATTEMPT RETRIEVE A User WITH THE id RETURNED FROM THE get_jwt_identity() FUNCTION
+    # RETRIEVE THE User OBJECT WITH THE id FROM get_jwt_identity() SO IT CAN BE UPDATED
     user = User.query.get(id)
-    if not user:
-        return abort(404, description="User not found")
-    if user.id != id:
-        return abort(401, description="Unauthorised")
     
     # IF USER EXISTS, USE AS THE RECORD TO UPDATE    
     user_fields = user_schema.load(request.json, partial=True)

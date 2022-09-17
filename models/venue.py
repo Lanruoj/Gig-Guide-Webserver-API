@@ -17,4 +17,9 @@ class Venue(db.Model):
         backref="venue_gigs",
         viewonly=True
     )
+
+    watched_venues = db.relationship(
+        "WatchVenue",
+        backref="venue_wv"
+    )
     

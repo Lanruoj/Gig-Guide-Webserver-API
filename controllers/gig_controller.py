@@ -14,6 +14,8 @@ from models.venue import Venue
 from schemas.venue_schema import venue_schema, venues_schema
 from models.watch_venue import WatchVenue
 from schemas.watch_venue_schema import watch_venue_schema, watch_venues_schema
+from models.watch_artist import WatchArtist
+from schemas.watch_artist_schema import watch_artist_schema, watch_artists_schema
 
 
 gigs = Blueprint("gigs", __name__, url_prefix="/gigs")
@@ -80,15 +82,28 @@ def add_gig():
 def venue_watchlist():
     # # GET THE id OF THE JWT ACCESS TOKEN FROM @jwt_required()
     user_id = int(get_jwt_identity())
+    gig_list = []
 
+
+    ## WATCHED VENUES
     watch_venue_query = WatchVenue.query.filter_by(user_id=user_id)
     result = watch_venues_schema.dump(watch_venue_query)
-    if not len(result):
-        return abort(404, description="No venues being watched")
+    # return jsonify(result)
+
+    # if not len(result):
+    #     return abort(404, description="No venues being watched")
     
-    gig_list = []
     for wv in watch_venue_query:
         gig_query = Gig.query.filter_by(venue_id=wv.venue_id)
         gig_list.append(gigs_schema.dump(gig_query))
+
+    ### WATCHED ARTISTS
+    # watch_artist_query = WatchArtist.query.filter_by(user_id=user_id)
+    # result = watch_artists_schema.dump(watch_artist_query)
+    # # if not len(result):
+    # #     return abort(404, description="No artists being watched")
+    # for wa in watch_artist_query:
+    #     gig_query = Gig.query.join(Artist, Gig.artists)
+    #     gig_list.append(gigs_schema.dump(gig_query))
 
     return jsonify(gig_list)

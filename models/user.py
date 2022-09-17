@@ -11,3 +11,9 @@ class User(db.Model):
     first_name = db.Column(db.String())
     last_name = db.Column(db.String())
     admin = db.Column(db.Boolean, default=False)
+
+    ####
+    watched_venues = db.relationship(
+        "WatchVenue",
+        backref="user_wv"
+    )

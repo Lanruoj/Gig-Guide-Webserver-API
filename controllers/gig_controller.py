@@ -10,6 +10,10 @@ from models.artist import Artist
 from schemas.artist_schema import artist_schema, artists_schema
 from models.user import User
 from schemas.user_schema import user_schema
+from models.venue import Venue
+from schemas.venue_schema import venue_schema, venues_schema
+from models.watch_venue import WatchVenue
+from schemas.watch_venue_schema import watch_venue_schema, watch_venues_schema
 
 
 gigs = Blueprint("gigs", __name__, url_prefix="/gigs")
@@ -71,9 +75,29 @@ def add_gig():
     return jsonify(gig_schema.dump(gig))
 
 
-@gigs.route("/watched/<arg>", methods=["GET"])
+@gigs.route("/watchlist", methods=["GET"])
 @jwt_required()
-def venue_watchlist(arg):
-    # GET THE id OF THE JWT ACCESS TOKEN FROM @jwt_required()
-    id = int(get_jwt_identity())
+def venue_watchlist():
+    # # GET THE id OF THE JWT ACCESS TOKEN FROM @jwt_required()
+    user_id = int(get_jwt_identity())
 
+    watch_venue_query = WatchVenue.query.filter_by(user_id=user_id)
+    result = watch_venues_schema.dump(watch_venue_query)
+    if not len(result):
+        return abort(404, description="No venues being watched")
+    
+    ###### WORKING - DUPLICATE?
+    gig_list = []
+    for wv in watch_venue_query:
+        gig_query = Gig.query.filter_by(venue_id=wv.venue_id)
+        gig_list.append(gigs_schema.dump(gig_query))
+
+    return jsonify(gig_list)
+    ###### ------
+
+    # for wv in watch_venue_query:
+    #     gig_query = Gig.query.filter_by(venue_id=wv.venue_id)
+    #     ## RETURNS MULTI GIGS BUT ONLY 1 VENUE
+    #     return jsonify(gigs_schema.dump(gig_query))
+    # # RETURNS ONLY LAST GIG FOUND
+    # return jsonify(gigs_schema.dump(gig_query))

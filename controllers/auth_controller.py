@@ -33,7 +33,7 @@ def auth_register():
 
     token = create_access_token(identity=str(user.id), expires_delta=timedelta(days=1))
 
-    return jsonify(token)
+    return jsonify(token=token, user=user.username)
 
 
 @auth.route("/login", methods=["POST"])

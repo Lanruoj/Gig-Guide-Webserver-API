@@ -9,7 +9,7 @@ from schemas.performance_schema import performance_schema
 from models.artist import Artist
 from schemas.artist_schema import artist_schema, artists_schema
 from models.user import User
-from schemas.user_schema import user_schema
+from schemas.user_schema import user_schema, UserSchema
 from models.venue import Venue
 from schemas.venue_schema import venue_schema, venues_schema
 from models.watch_venue import WatchVenue
@@ -82,28 +82,7 @@ def add_gig():
 def venue_watchlist():
     # # GET THE id OF THE JWT ACCESS TOKEN FROM @jwt_required()
     user_id = int(get_jwt_identity())
-    gig_list = []
+    user = User.query.get(user_id)
+    user_wv_schema = UserSchema(only=("username", "watched_venues"))
 
-
-    ## WATCHED VENUES
-    watch_venue_query = WatchVenue.query.filter_by(user_id=user_id)
-    result = watch_venues_schema.dump(watch_venue_query)
-    # return jsonify(result)
-
-    # if not len(result):
-    #     return abort(404, description="No venues being watched")
-    
-    for wv in watch_venue_query:
-        gig_query = Gig.query.filter_by(venue_id=wv.venue_id)
-        gig_list.append(gigs_schema.dump(gig_query))
-
-    ### WATCHED ARTISTS
-    # watch_artist_query = WatchArtist.query.filter_by(user_id=user_id)
-    # result = watch_artists_schema.dump(watch_artist_query)
-    # # if not len(result):
-    # #     return abort(404, description="No artists being watched")
-    # for wa in watch_artist_query:
-    #     gig_query = Gig.query.join(Artist, Gig.artists)
-    #     gig_list.append(gigs_schema.dump(gig_query))
-
-    return jsonify(gig_list)
+    return jsonify(user_wv_schema.dump(user))

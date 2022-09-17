@@ -5,6 +5,7 @@ from marshmallow import fields
 
 class UserSchema(ma.Schema):
     class Meta:
+        ordered = True
         fields = ("user_id", "username", "email", "password", "first_name", "last_name", "watched_venues")
     password = ma.String(validate=Length(min=8))
     username = ma.String(required=True)

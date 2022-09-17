@@ -86,18 +86,9 @@ def venue_watchlist():
     if not len(result):
         return abort(404, description="No venues being watched")
     
-    ###### WORKING - DUPLICATE?
     gig_list = []
     for wv in watch_venue_query:
         gig_query = Gig.query.filter_by(venue_id=wv.venue_id)
         gig_list.append(gigs_schema.dump(gig_query))
 
     return jsonify(gig_list)
-    ###### ------
-
-    # for wv in watch_venue_query:
-    #     gig_query = Gig.query.filter_by(venue_id=wv.venue_id)
-    #     ## RETURNS MULTI GIGS BUT ONLY 1 VENUE
-    #     return jsonify(gigs_schema.dump(gig_query))
-    # # RETURNS ONLY LAST GIG FOUND
-    # return jsonify(gigs_schema.dump(gig_query))

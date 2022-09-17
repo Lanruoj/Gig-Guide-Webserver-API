@@ -1,10 +1,13 @@
 from main import ma
+from marshmallow import fields
 
 
 class WatchArtistSchema(ma.Schema):
     class Meta:
         ordered = True
-        fields = ("id", "user_id", "artist_id")
+        fields = ("id", "user_id", "artist_id", "artist")
+    
+    artist = fields.Nested("ArtistSchema")
 
 
 watch_artist_schema = WatchArtistSchema()

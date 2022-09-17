@@ -83,6 +83,8 @@ def venue_watchlist():
     # # GET THE id OF THE JWT ACCESS TOKEN FROM @jwt_required()
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
-    user_wv_schema = UserSchema(only=("username", "watched_venues"))
+    watchlist_schema = UserSchema(only=("username", "watched_venues", "watched_artists"))
 
-    return jsonify(user_wv_schema.dump(user))
+
+
+    return jsonify(watchlist_schema.dump(user))

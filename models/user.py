@@ -17,3 +17,8 @@ class User(db.Model):
         "WatchVenue",
         backref="user_wv"
     )
+
+    watched_artists = db.relationship(
+        "WatchArtist",
+        backref="user_wa"
+    )

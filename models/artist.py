@@ -12,8 +12,3 @@ class Artist(db.Model):
         "Performance",
         backref="a_gig"
     )
-
-    # gigs = db.relationship(
-    #     "Gig",
-    #     backref="artist_gigs"
-    # )

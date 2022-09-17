@@ -7,3 +7,8 @@ class WatchArtist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     artist_id = db.Column(db.Integer, db.ForeignKey("artists.id"), nullable=False)
+
+    artist = db.relationship(
+        "Artist",
+        backref="wa_artist"
+    )

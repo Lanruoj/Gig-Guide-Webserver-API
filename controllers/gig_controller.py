@@ -43,11 +43,18 @@ def add_gig():
         price = gig_fields["price"],
         timestamp = datetime.now(),
         venue_id = gig_fields["venue_id"],
-        user_id = get_jwt_identity(),    #### <----- GET user_id FROM CHECK ^^^
+        user_id = get_jwt_identity(),
         artists = gig_fields["artists"]
     )
     db.session.add(gig)
     db.session.commit()
+
+    ###
+    # venue = Venue.query.get(gig.venue_id)
+    # for vg in venue.gigs:
+    #     if vg.start_time 
+    ###
+
 
     artist_input = gig.artists.split(", ")
     for artist in artist_input:
@@ -79,7 +86,7 @@ def add_gig():
 
 @gigs.route("/watchlist", methods=["GET"])
 @jwt_required()
-def venue_watchlist():
+def show_watchlist():
     # # GET THE id OF THE JWT ACCESS TOKEN FROM @jwt_required()
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)

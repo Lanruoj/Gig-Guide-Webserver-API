@@ -1,7 +1,7 @@
 from main import db, bcrypt, jwt
 from flask import Blueprint, jsonify, request, abort
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
-from datetime import datetime, date, time
+from datetime import datetime, date, time, timedelta
 from models.gig import Gig
 from schemas.gig_schema import gig_schema, gigs_schema
 from models.performance import Performance
@@ -37,12 +37,13 @@ def show_all_gigs():
 def add_gig():
     gig_fields = gig_schema.load(request.json)
 
+    # CHECK IF GIG EXISTS WITHIN 2 HOURS OF GIG IN REQUEST
     gigs_at_this_venue = Gig.query.filter_by(venue_id=gig_fields["venue_id"]).all()
-    new_gd = datetime.strptime(gig_fields["start_time"], "%Y-%m-%d %H:%M:%S").date()
+    new_gdt = datetime.strptime(gig_fields["start_time"], "%Y-%m-%d %H:%M:%S")
     for g in gigs_at_this_venue:
-        gd = g.start_time.date()
-        if gd == new_gd:
-            return abort(409, description="Gig already exists at this time at this venue")
+        delta = g.start_time - new_gdt
+        if delta < timedelta(days=0, hours=2):
+            return abort(409, description=f"{g.artists} has a gig within 2 hours of this at {g.venue.name}")
 
     gig = Gig(
         title = gig_fields["title"],

@@ -12,6 +12,8 @@ from models.venue import Venue
 from schemas.venue_schema import venue_schema, venues_schema
 from models.user import User
 from schemas.user_schema import user_schema
+from models.watch_venue import WatchVenue
+from schemas.watch_venue_schema import watch_venue_schema
 
 
 venues = Blueprint("venues", __name__, url_prefix="/venues")
@@ -56,3 +58,17 @@ def venues_add():
     
     return jsonify(venue_schema.dump(venue))
 
+
+@venues.route("/watch", methods=["POST"])
+@jwt_required()
+def add_watched_venue():
+    user_id = int(get_jwt_identity())
+    watch_venue_fields = watch_venue_schema.load(request.json)
+    watch_venue = WatchVenue(
+        user_id = user_id,
+        venue_id = watch_venue_fields["venue_id"]
+    )
+    db.session.add(watch_venue)
+    db.session.commit()
+    
+    return jsonify(watch_venue_schema.dump(watch_venue))

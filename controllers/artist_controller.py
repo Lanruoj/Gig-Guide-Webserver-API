@@ -10,6 +10,8 @@ from models.artist import Artist
 from schemas.artist_schema import artist_schema, artists_schema
 from models.watch_artist import WatchArtist
 from schemas.watch_artist_schema import watch_artist_schema
+from models.user import User
+from schemas.user_schema import user_schema
 
 
 artists = Blueprint("artists", __name__, url_prefix="/artists")
@@ -33,12 +35,16 @@ def show_all_artists():
 @artists.route("/watch", methods=["POST"])
 @jwt_required()
 def watch_artist():
-    user_id = int(get_jwt_identity())
+    user = User.query.get(int(get_jwt_identity()))
 
     watch_artist_fields = watch_artist_schema.load(request.json)
+    users_watched_artists = WatchArtist.query.filter_by(user_id=user.id).all()
+    for wa in users_watched_artists:
+        if wa.artist_id ==  watch_artist_fields["artist_id"]:
+            return abort(400, description=f"{user.first_name} already watching <artist>")
 
     new_watched_artist = WatchArtist(
-        user_id = user_id,
+        user_id = user.id,
         artist_id = watch_artist_fields["artist_id"]
     )
     db.session.add(new_watched_artist)

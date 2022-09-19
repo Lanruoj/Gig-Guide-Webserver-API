@@ -62,13 +62,23 @@ def venues_add():
 @venues.route("/watch", methods=["POST"])
 @jwt_required()
 def add_watched_venue():
-    user_id = int(get_jwt_identity())
     watch_venue_fields = watch_venue_schema.load(request.json)
+
+    user = User.query.get(int(get_jwt_identity()))
+    users_watched_venues = WatchVenue.query.filter_by(user_id=user.id).all()
+    venue_exists = Venue.query.get(watch_venue_fields["venue_id"])
+    if not venue_exists:
+        return abort(404, description="Venue does not exist")
+
+    for wa in users_watched_venues:
+        if wa.venue_id ==  watch_venue_fields["venue_id"]:
+            return abort(400, description=f"{user.first_name} already watching {wa.name}")
+
     watch_venue = WatchVenue(
-        user_id = user_id,
+        user_id = user.id,
         venue_id = watch_venue_fields["venue_id"]
     )
     db.session.add(watch_venue)
     db.session.commit()
-    
+
     return jsonify(watch_venue_schema.dump(watch_venue))

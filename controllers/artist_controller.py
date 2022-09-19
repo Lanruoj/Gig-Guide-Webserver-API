@@ -35,13 +35,18 @@ def show_all_artists():
 @artists.route("/watch", methods=["POST"])
 @jwt_required()
 def watch_artist():
-    user = User.query.get(int(get_jwt_identity()))
-
     watch_artist_fields = watch_artist_schema.load(request.json)
+    
+    user = User.query.get(int(get_jwt_identity()))
     users_watched_artists = WatchArtist.query.filter_by(user_id=user.id).all()
+    artist = Artist.query.get(watch_artist_fields["artist_id"])
+    if not artist:
+        return abort(404, description="Artist does not exist")
+
     for wa in users_watched_artists:
         if wa.artist_id ==  watch_artist_fields["artist_id"]:
             return abort(400, description=f"{user.first_name} already watching <artist>")
+    
 
     new_watched_artist = WatchArtist(
         user_id = user.id,

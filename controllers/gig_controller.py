@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request, abort
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from datetime import datetime, date, time, timedelta
 from models.gig import Gig
-from schemas.gig_schema import gig_schema, gigs_schema
+from schemas.gig_schema import gig_schema, gigs_schema, GigSchema
 from models.performance import Performance
 from schemas.performance_schema import performance_schema
 from models.artist import Artist
@@ -21,10 +21,18 @@ from schemas.watch_artist_schema import watch_artist_schema, watch_artists_schem
 gigs = Blueprint("gigs", __name__, url_prefix="/gigs")
 
 
+@gigs.route("/template", methods=["GET"])
+def get_gig_template():
+    template = Gig.query.get(1)
+    template_schema = GigSchema(only=("title", "artists", "description", "start_time", "price", "venue_id"))
+    return jsonify(template_schema.dump(template))
+
+
+
 @gigs.route("/", methods=["GET"])
 def show_all_gigs():
     # SELECT ALL RECORDS FROM THE gigs TABLE. IF NO RECORDS, RETURN DESCRIPTIVE MESSAGE
-    gig_list = Gig.query.all()
+    gig_list = Gig.query.filter(Gig.id != 1).all()
 
     if not gig_list:
         return jsonify(message="Currently no gigs")
@@ -42,7 +50,7 @@ def add_gig():
     new_gdt = datetime.strptime(gig_fields["start_time"], "%Y-%m-%d %H:%M:%S")
     for g in gigs_at_this_venue:
         delta = g.start_time - new_gdt
-        if delta < timedelta(days=0, hours=2):
+        if (g.start_time.date()==new_gdt.date()) and (delta < timedelta(days=0, hours=2)):
             return abort(409, description=f"{g.artists} has a gig within 2 hours of this at {g.venue.name}")
 
     gig = Gig(
@@ -93,8 +101,7 @@ def show_watchlist():
     # # GET THE id OF THE JWT ACCESS TOKEN FROM @jwt_required()
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
+    
     watchlist_schema = UserSchema(only=("username", "watched_venues", "watched_artists"))
-
-
 
     return jsonify(watchlist_schema.dump(user))

@@ -9,6 +9,18 @@ from schemas.user_schema import user_schema
 auth = Blueprint("auth", __name__, url_prefix="/auth")
 
 
+@auth.route("/template", methods=["GET"])
+def get_auth_template():
+    user_template = {
+        "email": "...",
+        "username": "...",
+        "password": "... [minimum 8 characters]",
+        "first_name": "...",
+        "last_name": "..."
+    }
+    return user_template
+
+
 @auth.route("/register", methods=["POST"])
 def auth_register():
     user_fields = user_schema.load(request.json)
@@ -26,7 +38,9 @@ def auth_register():
     user = User(
         username = user_fields["username"],
         email = user_fields["email"],
-        password = bcrypt.generate_password_hash(user_fields["password"]).decode("utf-8")
+        password = bcrypt.generate_password_hash(user_fields["password"]).decode("utf-8"),
+        first_name = user_fields["first_name"],
+        last_name = user_fields["last_name"]
     )
     db.session.add(user)
     db.session.commit()

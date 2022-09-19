@@ -1,11 +1,12 @@
 from main import db
+from datetime import timedelta, datetime
 
 
 class Gig(db.Model):
     __tablename__ = "gigs"
 
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(), nullable=False)
+    title = db.Column(db.String())
     description = db.Column(db.String(), default="N/A")
     start_time = db.Column(db.DateTime, nullable=False)
     price = db.Column(db.Integer, default=0)

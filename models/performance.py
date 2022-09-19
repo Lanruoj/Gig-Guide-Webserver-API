@@ -10,5 +10,6 @@ class Performance(db.Model):
     
     gig = db.relationship(
         "Gig",
-        backref="perf_gig"
+        backref="perf_gig",
+        viewonly=True
     )

@@ -41,3 +41,4 @@ def venues_add():
     db.session.commit()
     
     return jsonify(venue_schema.dump(venue))
+

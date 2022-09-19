@@ -36,7 +36,7 @@ def show_all_artists():
 @jwt_required()
 def watch_artist():
     watch_artist_fields = watch_artist_schema.load(request.json)
-    
+
     user = User.query.get(int(get_jwt_identity()))
     users_watched_artists = WatchArtist.query.filter_by(user_id=user.id).all()
     artist = Artist.query.get(watch_artist_fields["artist_id"])
@@ -45,7 +45,8 @@ def watch_artist():
 
     for wa in users_watched_artists:
         if wa.artist_id ==  watch_artist_fields["artist_id"]:
-            return abort(400, description=f"{user.first_name} already watching <artist>")
+            artist = Artist.query.get(watch_artist_fields["artist_id"])
+            return abort(400, description=f"{user.first_name} already watching {artist.name}")
     
 
     new_watched_artist = WatchArtist(

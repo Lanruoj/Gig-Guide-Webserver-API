@@ -72,7 +72,8 @@ def add_watched_venue():
 
     for wa in users_watched_venues:
         if wa.venue_id ==  watch_venue_fields["venue_id"]:
-            return abort(400, description=f"{user.first_name} already watching {wa.name}")
+            venue = Venue.query.get(watch_venue_fields["venue_id"])
+            return abort(400, description=f"{user.username} already watching {venue.name}")
 
     watch_venue = WatchVenue(
         user_id = user.id,

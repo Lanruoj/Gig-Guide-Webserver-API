@@ -8,6 +8,8 @@ from models.performance import Performance
 from schemas.performance_schema import performance_schema
 from models.artist import Artist
 from schemas.artist_schema import artist_schema, artists_schema
+from models.watch_artist import WatchArtist
+from schemas.watch_artist_schema import watch_artist_schema
 
 
 artists = Blueprint("artists", __name__, url_prefix="/artists")
@@ -26,3 +28,21 @@ def get_artist_template():
 def show_all_artists():
     artist_list = Artist.query.all()
     return jsonify(artists_schema.dump(artist_list))
+
+
+@artists.route("/watch", methods=["POST"])
+@jwt_required()
+def watch_artist():
+    user_id = int(get_jwt_identity())
+
+    watch_artist_fields = watch_artist_schema.load(request.json)
+
+    new_watched_artist = WatchArtist(
+        user_id = user_id,
+        artist_id = watch_artist_fields["artist_id"]
+    )
+    db.session.add(new_watched_artist)
+    db.session.commit()
+
+    return jsonify(watch_artist_schema.dump(new_watched_artist))
+

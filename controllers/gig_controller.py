@@ -1,7 +1,7 @@
 from main import db, bcrypt, jwt
 from flask import Blueprint, jsonify, request, abort
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
-from datetime import datetime
+from datetime import datetime, date, time
 from models.gig import Gig
 from schemas.gig_schema import gig_schema, gigs_schema
 from models.performance import Performance
@@ -37,10 +37,20 @@ def show_all_gigs():
 def add_gig():
     gig_fields = gig_schema.load(request.json)
 
-    gigs_with_same_time = Gig.query.filter_by(start_time=gig_fields["start_time"]).all()
-    for g in gigs_with_same_time:
-        if g.venue_id == gig_fields["venue_id"]:
-            return abort(409, description="Gig already exists at this time at this venue")
+    # gigs_with_same_time = Gig.query.filter_by(start_time=gig_fields["start_time"]).all()
+    # for g in gigs_with_same_time:
+    #     if g.venue_id == gig_fields["venue_id"]:
+    #         return abort(409, description="Gig already exists at this time at this venue")
+
+    gigs_at_this_venue = Gig.query.filter_by(venue_id=gig_fields["venue_id"]).all()
+    new_gd = datetime.strptime(gig_fields["start_time"], "%Y-%m-%d %H:%M:%S").date()
+    for g in gigs_at_this_venue:
+        # if g.start_time == gig_fields["start_time"]
+        gd = g.start_time.date()
+        if gd == new_gd:
+            print(gd)
+        # if t != 0:
+        #     return abort(409, description="Gig already exists at this time at this venue")
 
     gig = Gig(
         title = gig_fields["title"],

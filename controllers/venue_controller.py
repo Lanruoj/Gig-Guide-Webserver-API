@@ -16,6 +16,20 @@ from schemas.user_schema import user_schema
 
 venues = Blueprint("venues", __name__, url_prefix="/venues")
 
+
+@venues.route("/template", methods=["GET"])
+def get_venue_template():
+    venue_template = {
+        "name": "...",
+        "street_address": "...",
+        "city": "...",
+        "state": "...",
+        "country": "...",
+        "type": "... [e.g Music venue, Pub, Restaurant, Bar, Nightclub etc.]"
+    }
+    return venue_template
+
+
 @venues.route("/", methods=["GET"])
 def venues_show_all():
     venue_list = Venue.query.all()

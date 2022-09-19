@@ -55,14 +55,6 @@ def seed_db():
     db.session.add(test_artist2)
     db.session.commit()
 
-    venue_template = Venue(
-        name = "Name of venue",
-        street_address = "Street address (123 Fake st)",
-        city = "City/town",
-        state = "State",
-        country = "Country"
-    )
-    db.session.add(venue_template)
     test_venue = Venue(
         name = "The Gasometer Hotel",
         street_address = "484 Smith St",
@@ -89,17 +81,6 @@ def seed_db():
     db.session.add(test_venue2)
     db.session.commit()
 
-    gig_template = Gig(
-        title = "Title of show (e.g Artist at the Venue)",
-        description = "Description of the show, who the artists are and what punters can expect [optional]",
-        start_time = datetime(year=2000, month=1, day=1, hour=0),
-        price = 0,
-        timestamp = datetime.now(),
-        artists = "Name of artists seperated by a comma and space (e.g Artist1, Artist2, Artist3)",
-        venue_id = 1,
-        user_id = 1
-    )
-    db.session.add(gig_template)
     test_gig = Gig(
         title = "Gregor",
         description = "Gregor plays Destiny at the Gaso!",

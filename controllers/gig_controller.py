@@ -23,16 +23,22 @@ gigs = Blueprint("gigs", __name__, url_prefix="/gigs")
 
 @gigs.route("/template", methods=["GET"])
 def get_gig_template():
-    template = Gig.query.get(1)
-    template_schema = GigSchema(only=("title", "artists", "description", "start_time", "price", "venue_id"))
-    return jsonify(template_schema.dump(template))
+    gig_template = {
+    "title": "...",
+    "artists": "Artist 1, Artist 2, Artist 3",
+    "venue_id": None,
+    "description": "...",
+    "start_time": "YYYY-MM-DD HH:MM:SS",
+    "price": None
+    }
+    return gig_template
 
 
 
 @gigs.route("/", methods=["GET"])
 def show_all_gigs():
     # SELECT ALL RECORDS FROM THE gigs TABLE. IF NO RECORDS, RETURN DESCRIPTIVE MESSAGE
-    gig_list = Gig.query.filter(Gig.id != 1).all()
+    gig_list = Gig.query.all()
 
     if not gig_list:
         return jsonify(message="Currently no gigs")
@@ -101,7 +107,7 @@ def show_watchlist():
     # # GET THE id OF THE JWT ACCESS TOKEN FROM @jwt_required()
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
-    
+
     watchlist_schema = UserSchema(only=("username", "watched_venues", "watched_artists"))
 
     return jsonify(watchlist_schema.dump(user))

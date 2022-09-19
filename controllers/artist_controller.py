@@ -12,6 +12,15 @@ from schemas.artist_schema import artist_schema, artists_schema
 
 artists = Blueprint("artists", __name__, url_prefix="/artists")
 
+@artists.route("/template", methods=["GET"])
+def get_artist_template():
+    artist_template = {
+        "name": "...",
+        "genre": "..."
+    }
+
+    return artist_template
+
 
 @artists.route("/", methods=["GET"])
 def show_all_artists():

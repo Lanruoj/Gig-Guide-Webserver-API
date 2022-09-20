@@ -32,6 +32,48 @@ def show_all_artists():
     return jsonify(artists_schema.dump(artist_list))
 
 
+@artists.route("/", methods=["POST"])
+@jwt_required()
+def add_artist():
+    user_id = int(get_jwt_identity())
+    user = User.query.get(user_id)
+    if not user:
+        return abort(401, description="Unauthorised, must be logged in")
+    
+    artist_fields = artist_schema.load(request.json)
+    artist = Artist(
+        name = artist_fields["name"],
+        genre = artist_fields["genre"]
+    )
+    db.session.add(artist)
+    db.session.commit()
+
+    return jsonify(artist_schema.dump(artist))
+
+
+@artists.route("/<int:artist_id>/<attr>", methods=["PUT"])
+@jwt_required()
+def update_artist(artist_id, attr):
+    user_id = int(get_jwt_identity())
+    user = User.query.get(user_id)
+    if not user:
+        return abort(401, description="Unauthorised, must be logged in")
+
+    artist_fields = artist_schema.load(request.json, partial=True)
+    
+    artist = Artist.query.get(artist_id)
+    print(artist.name)
+
+    if attr == "name":
+        artist.name = artist_fields["name"]
+    if attr == "genre":
+        artist.genre = artist_fields["genre"]
+    db.session.commit()
+
+    return jsonify(artist_schema.dump(artist))
+
+
+
 @artists.route("/watch", methods=["POST"])
 @jwt_required()
 def watch_artist():

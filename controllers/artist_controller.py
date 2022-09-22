@@ -57,8 +57,8 @@ def add_artist():
 def update_artist(artist_id, attr):
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
-    if not user:
-        return abort(401, description="Unauthorised, must be logged in")
+    if not user.admin:
+        return abort(401, description="Unauthorised, must be an administrator to update artists")
 
     artist_fields = artist_schema.load(request.json, partial=True)
     
@@ -73,7 +73,7 @@ def update_artist(artist_id, attr):
         message = Markup(f"{old_name}'s name updated to '{artist.name}'")
 
         return jsonify(message=message)
-        
+
     if attr == "genre":
         new_genre = artist_fields["genre"]
         artist.genre = new_genre

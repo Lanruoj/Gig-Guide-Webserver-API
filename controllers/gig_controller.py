@@ -1,5 +1,5 @@
 from main import db, bcrypt, jwt
-from flask import Blueprint, jsonify, request, abort
+from flask import Blueprint, jsonify, request, abort, Markup
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from datetime import datetime, date, time, timedelta
 from models.gig import Gig
@@ -99,6 +99,42 @@ def add_gig():
             db.session.commit()  
 
     return jsonify(gig_schema.dump(gig))
+
+
+@gigs.route("/<int:gig_id>/<attr>", methods=["PUT"])
+@jwt_required()
+def update_gig(gig_id, attr):
+    user = User.query.get(int(get_jwt_identity()))
+    gig = Gig.query.filter(Gig.id==gig_id, Gig.user_id==user.id).first()
+    if not gig:
+        return abort(404, description=Markup(f"Invalid gig ID. Please try again"))
+    
+    if (user.id != gig.user_id):
+        return abort(401, description="Unauthorised - user must be logged in")
+
+    gig_fields = gig_schema.load(request.json, partial=True)
+    if attr == "title":
+        gig.title = new_value = gig_fields["title"]
+        new_value = gig_fields["title"]
+        db.session.commit()
+        return jsonify(message=Markup(f"{attr} updated to {new_value}"))
+    if attr == "description":
+        gig.description = gig_fields["description"]
+        new_value = gig_fields["description"]
+        db.session.commit()
+    if attr == "start_time":
+        gig.start_time = gig_fields["start_time"]
+        new_value = gig_fields["start_time"]
+        db.session.commit()
+    if attr == "price":
+        gig.price = gig_fields["price"]
+        new_value = gig_fields["price"]
+        db.session.commit()
+
+    return jsonify(message=Markup(f"{attr} updated to {new_value} for the {gig.title} gig"))
+        
+    
+
 
 
 @gigs.route("/watchlist", methods=["GET"])

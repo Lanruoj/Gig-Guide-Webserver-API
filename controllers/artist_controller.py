@@ -93,8 +93,8 @@ def update_artist(artist_id, attr):
 @jwt_required()
 def delete_artist(artist_id):
     user = User.query.get(int(get_jwt_identity()))
-    if not user:
-        return abort(401, description="Unauthorised, must be logged in")
+    if not user.admin:
+        return abort(401, description="Unauthorised, must be an administrator to delete artists")
     
     artist = Artist.query.get(artist_id)
     if not artist:

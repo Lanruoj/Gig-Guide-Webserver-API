@@ -57,35 +57,32 @@ def add_artist():
 def update_artist(artist_id, attr):
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
-    if not user.admin:
-        return abort(401, description="Unauthorised, must be an administrator to update artists")
+    if not user:
+        return abort(401, description="Unauthorised - must be logged in to update artists")
 
     artist_fields = artist_schema.load(request.json, partial=True)
     
     artist = Artist.query.get(artist_id)
     if not artist:
-        return abort(404, description="Artist does not exists")
+        return abort(404, description="Artist does not exist")
 
     if attr == "name":
         old_name = artist.name
         artist.name = artist_fields["name"]
         db.session.commit()
-        message = Markup(f"{old_name}'s name updated to '{artist.name}'")
 
-        return jsonify(message=message)
+        return jsonify(message=Markup(f"{old_name}'s name updated to '{artist.name}'"))
 
     if attr == "genre":
         new_genre = artist_fields["genre"]
         artist.genre = new_genre
         db.session.commit()
-        message = Markup(f"{artist.name}'s genre updated to '{new_genre}'")
 
-        return jsonify(message=message)
+        return jsonify(message=Markup(f"{artist.name}'s genre updated to '{new_genre}'"))
 
     else:
-        message = Markup(f"'{attr}' is not a valid argument. Attributes that can be updated are 'name' and 'genre")
 
-        return abort(400, description=message)
+        return abort(400, description=Markup(f"'{attr}' is not a valid argument. Attributes that can be updated are 'name' and 'genre"))
 
 
 
@@ -94,7 +91,7 @@ def update_artist(artist_id, attr):
 def delete_artist(artist_id):
     user = User.query.get(int(get_jwt_identity()))
     if not user.admin:
-        return abort(401, description="Unauthorised, must be an administrator to delete artists")
+        return abort(401, description="Unauthorised - must be an administrator to delete artists")
     
     artist = Artist.query.get(artist_id)
     if not artist:

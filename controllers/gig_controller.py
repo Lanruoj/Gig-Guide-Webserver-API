@@ -118,14 +118,17 @@ def update_gig(gig_id, attr):
         new_value = gig_fields["title"]
         db.session.commit()
         return jsonify(message=Markup(f"{attr} updated to {new_value}"))
+
     if attr == "description":
         gig.description = gig_fields["description"]
         new_value = gig_fields["description"]
         db.session.commit()
+
     if attr == "start_time":
         gig.start_time = gig_fields["start_time"]
         new_value = gig_fields["start_time"]
         db.session.commit()
+
     if attr == "price":
         gig.price = gig_fields["price"]
         new_value = gig_fields["price"]

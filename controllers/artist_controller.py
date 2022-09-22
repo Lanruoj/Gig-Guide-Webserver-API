@@ -1,5 +1,5 @@
 from main import db, bcrypt, jwt
-from flask import Blueprint, jsonify, request, abort
+from flask import Blueprint, jsonify, request, abort, Markup
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from datetime import datetime
 from models.gig import Gig
@@ -29,6 +29,7 @@ def get_artist_template():
 @artists.route("/", methods=["GET"])
 def show_all_artists():
     artist_list = Artist.query.all()
+
     return jsonify(artists_schema.dump(artist_list))
 
 
@@ -62,15 +63,47 @@ def update_artist(artist_id, attr):
     artist_fields = artist_schema.load(request.json, partial=True)
     
     artist = Artist.query.get(artist_id)
-    print(artist.name)
+    if not artist:
+        return abort(404, description="Artist does not exists")
 
     if attr == "name":
+        old_name = artist.name
         artist.name = artist_fields["name"]
+        db.session.commit()
+        message = Markup(f"{old_name}'s name updated to '{artist.name}'")
+
+        return jsonify(message=message)
+        
     if attr == "genre":
-        artist.genre = artist_fields["genre"]
+        new_genre = artist_fields["genre"]
+        artist.genre = new_genre
+        db.session.commit()
+        message = Markup(f"{artist.name}'s genre updated to '{new_genre}'")
+
+        return jsonify(message=message)
+
+    else:
+        message = Markup(f"'{attr}' is not a valid argument. Attributes that can be updated are 'name' and 'genre")
+
+        return abort(400, description=message)
+
+
+
+@artists.route("/<int:artist_id>", methods=["DELETE"])
+@jwt_required()
+def delete_artist(artist_id):
+    user = User.query.get(int(get_jwt_identity()))
+    if not user:
+        return abort(401, description="Unauthorised, must be logged in")
+    
+    artist = Artist.query.get(artist_id)
+    if not artist:
+        return abort(404, description="Artist does not exist")
+    
+    db.session.delete(artist)
     db.session.commit()
 
-    return jsonify(artist_schema.dump(artist))
+    return jsonify(message=f"{artist.name} has been deleted")
 
 
 

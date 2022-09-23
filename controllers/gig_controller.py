@@ -108,9 +108,10 @@ def update_gig(gig_id, attr):
     gig = Gig.query.filter(Gig.id==gig_id, Gig.user_id==user.id).first()
     if not gig:
         return abort(404, description=Markup(f"Invalid gig ID. Please try again"))
-    
-    if (user.id != gig.user_id):
+    if not user:
         return abort(401, description="Unauthorised - user must be logged in")
+    if (user.id != gig.user_id):
+        return abort(401, description="Unauthorised - user did not post the gig")
 
     gig_fields = gig_schema.load(request.json, partial=True)
     if attr == "title":

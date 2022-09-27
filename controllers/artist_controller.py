@@ -39,6 +39,7 @@ def add_artist():
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
     if not user:
+        
         return abort(401, description="Unauthorised, must be logged in")
     
     artist_fields = artist_schema.load(request.json)
@@ -91,10 +92,12 @@ def update_artist(artist_id, attr):
 def delete_artist(artist_id):
     user = User.query.get(int(get_jwt_identity()))
     if not user.admin:
+
         return abort(401, description="Unauthorised - must be an administrator to delete artists")
     
     artist = Artist.query.get(artist_id)
     if not artist:
+
         return abort(404, description="Artist does not exist")
     
     db.session.delete(artist)
@@ -113,11 +116,13 @@ def watch_artist():
     users_watched_artists = WatchArtist.query.filter_by(user_id=user.id).all()
     artist = Artist.query.get(watch_artist_fields["artist_id"])
     if not artist:
+
         return abort(404, description="Artist does not exist")
 
     for wa in users_watched_artists:
         if wa.artist_id ==  watch_artist_fields["artist_id"]:
             artist = Artist.query.get(watch_artist_fields["artist_id"])
+
             return abort(400, description=f"{user.first_name} already watching {artist.name}")
     
 

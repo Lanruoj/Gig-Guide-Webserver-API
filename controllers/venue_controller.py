@@ -1,5 +1,5 @@
 from main import db, bcrypt, jwt
-from flask import Blueprint, jsonify, request, abort
+from flask import Blueprint, jsonify, request, abort, Markup
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from datetime import datetime
 from models.gig import Gig
@@ -57,6 +57,24 @@ def venues_add():
     db.session.commit()
     
     return jsonify(venue_schema.dump(venue))
+
+
+@venues.route("/<int:venue_id>", methods=["DELETE"])
+@jwt_required()
+def delete_venue(venue_id):
+    user = User.query.get(int(get_jwt_identity()))
+    if not user.admin:
+
+        return abort(401, description="Must be an administrator to perform this action. If you need help, send a message in the body of a POST request to this address: localhost:5000/help/ followed by your username")
+
+    venue = Venue.query.get(venue_id)
+    if not venue:
+        return abort(401, description=Markup(f"No venue with that ID exists"))
+
+    db.session.delete(venue)
+    db.session.commit()
+
+    return jsonify(message="Venue deleted")
 
 
 @venues.route("/watch", methods=["POST"])

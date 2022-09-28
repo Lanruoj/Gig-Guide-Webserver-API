@@ -39,9 +39,9 @@ def venues_show_all():
     return jsonify(venues_schema.dump(venue_list))
 
 
-@venues.route("/<name>", methods=["GET"])
-def search_for_venue(name):
-    venue = Venue.query.filter(Venue.name.match(name)).all()
+@venues.route("/<venue_name>", methods=["GET"])
+def search_for_venue(venue_name):
+    venue = Venue.query.filter(Venue.name.match(venue_name)).all()
     if not venue:
         return abort(404, description="No venues exist with that name")
     

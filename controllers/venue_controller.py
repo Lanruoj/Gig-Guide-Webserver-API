@@ -92,17 +92,19 @@ def update_venue(venue_id, attr):
 def delete_venue(venue_id):
     user = User.query.get(int(get_jwt_identity()))
     if not user.admin:
-
         return abort(401, description="Must be an administrator to perform this action")
 
     venue = Venue.query.get(venue_id)
     if not venue:
         return abort(401, description=Markup(f"No venue with that ID exists"))
+    
+    if venue.gigs:
+        return abort(409, description=Markup(f"Deletion cannot be performed because there are upcoming gigs at {venue.name}"))
 
     db.session.delete(venue)
     db.session.commit()
 
-    return jsonify(message="Venue deleted")
+    return jsonify(message=Markup(f"{venue.name} has been deleted"))
 
 
 @venues.route("/watch", methods=["POST"])

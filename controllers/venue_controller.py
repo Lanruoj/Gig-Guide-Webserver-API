@@ -59,13 +59,41 @@ def venues_add():
     return jsonify(venue_schema.dump(venue))
 
 
+@venues.route("/<int:venue_id>/<attr>", methods=["PUT"])
+@jwt_required()
+def update_venue(venue_id, attr):
+    user = User.query.get(get_jwt_identity())
+    if not user.admin:
+        return abort(401, description="Must be an administrator to perform this action")
+    
+    venue = Venue.query.get(venue_id)
+    if not venue:
+        return abort(401, description=Markup(f"No venue with that ID exists"))
+    
+    venue_fields = venue_schema.load(request.json, partial=True)
+    if attr == "name":
+        venue.name = venue_fields["name"]
+    if attr == "street_address":
+        venue.street_address = venue_fields["street_address"]
+    if attr == "city":
+        venue.city = venue_fields["city"]
+    if attr == "state":
+        venue.state = venue_fields["state"]
+    if attr == "country":
+        venue.country = venue_fields["country"]
+    if attr == "type":
+        venue.type = venue_fields["type"]
+    
+    return jsonify(venue_schema.dump(venue))
+
+
 @venues.route("/<int:venue_id>", methods=["DELETE"])
 @jwt_required()
 def delete_venue(venue_id):
     user = User.query.get(int(get_jwt_identity()))
     if not user.admin:
 
-        return abort(401, description="Must be an administrator to perform this action. If you need help, send a message in the body of a POST request to this address: localhost:5000/help/ followed by your username")
+        return abort(401, description="Must be an administrator to perform this action")
 
     venue = Venue.query.get(venue_id)
     if not venue:

@@ -20,6 +20,7 @@ class Venue(db.Model):
 
     watched_venues = db.relationship(
         "WatchVenue",
-        backref="venue"
+        backref="venue",
+        cascade="all, delete"
     )
     

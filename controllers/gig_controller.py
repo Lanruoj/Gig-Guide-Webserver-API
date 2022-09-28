@@ -138,24 +138,25 @@ def update_gig(gig_id, attr):
     return jsonify(message=Markup(f"{attr} updated to {new_value} for the {gig.title} gig"))
         
 
-# @gigs.route("/<int:gig_id>", methods=["DELETE"])
-# @jwt_required()
-# def delete_gig(gig_id):
-#     user = User.query.get(int(get_jwt_identity()))
-#     gig = Gig.query.get(gig_id)
-#     if not user:
-#         return abort(404, description="User must be logged in")
-#     if not gig:
-#         return abort(404, description="Gig not found with that ID")
+@gigs.route("/<int:gig_id>", methods=["DELETE"])
+@jwt_required()
+def delete_gig(gig_id):
+    user = User.query.get(int(get_jwt_identity()))
+    gig = Gig.query.get(gig_id)
+    if not user:
+        return abort(404, description="User must be logged in")
+    if not gig:
+        return abort(404, description="Gig not found with that ID")
 
-#     user_created_gig = Gig.query.filter(Gig.user_id==user.id, Gig.id==gig_id).first()
-#     if not user_created_gig:
-#         return abort(401, description=Markup(f"User didn't create gig"))
+    user_created_gig = Gig.query.filter(Gig.user_id==user.id, Gig.id==gig_id).first()
+    if not user_created_gig:
+        return abort(401, description=Markup(f"User didn't create gig"))
     
-#     db.session.delete(gig)
-#     db.session.commit()
+    db.session.delete(gig)
+    db.session.commit()
 
-#     return jsonify(message=Markup(f"{gig.title} has been deleted"))
+    return jsonify(message=Markup(f"{gig.title} has been deleted"))
+
 
 @gigs.route("/watchlist", methods=["GET"])
 @jwt_required()

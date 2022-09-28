@@ -83,7 +83,7 @@ def seed_db():
 
     test_gig = Gig(
         title = "Gregor",
-        description = "Gregor plays Destiny at the Gaso!",
+        description = "Gregor plays Destiny at the Forum!",
         start_time = datetime(year=2022, month=9, day=17, hour=18),
         price = 20,
         timestamp = datetime.now(),

@@ -9,7 +9,7 @@ from schemas.performance_schema import performance_schema
 from models.artist import Artist
 from schemas.artist_schema import artist_schema, artists_schema
 from models.venue import Venue
-from schemas.venue_schema import venue_schema, venues_schema
+from schemas.venue_schema import venue_schema, venues_schema, VenueSchema
 from models.user import User
 from schemas.user_schema import user_schema
 from models.watch_venue import WatchVenue
@@ -19,7 +19,7 @@ from schemas.watch_venue_schema import watch_venue_schema
 venues = Blueprint("venues", __name__, url_prefix="/venues")
 
 
-@venues.route("/", methods=["GET"])
+@venues.route("/template", methods=["GET"])
 def get_venue_template():
     venue_template = {
         "name": "...",
@@ -32,11 +32,21 @@ def get_venue_template():
     return venue_template
 
 
-@venues.route("/all", methods=["GET"])
+@venues.route("/", methods=["GET"])
 def venues_show_all():
     venue_list = Venue.query.all()
     
     return jsonify(venues_schema.dump(venue_list))
+
+
+@venues.route("/<name>", methods=["GET"])
+def search_for_venue(name):
+    venue = Venue.query.filter(Venue.name.match(name)).all()
+    if not venue:
+        return abort(404, description="No venues exist with that name")
+    
+    result_schema = VenueSchema(exclude=("gigs",), many=True)
+    return jsonify(result_schema.dump(venue))
 
 
 @venues.route("/", methods=["POST"])

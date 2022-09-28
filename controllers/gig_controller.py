@@ -35,14 +35,13 @@ def get_gig_template():
 
 
 @gigs.route("/all", methods=["GET"])
-def show_all_gigs():
-    # SELECT ALL RECORDS FROM THE gigs TABLE. IF NO RECORDS, RETURN DESCRIPTIVE MESSAGE
-    gig_list = Gig.query.filter_by(is_active=True).all()
+def show_upcoming_gigs():
+    now = datetime.now()
+    active_gigs = Gig.query.filter(Gig.is_active==True, Gig.start_time>now).all()
+    if not active_gigs:
+        return jsonify(message="There are currently no upcoming gigs")
 
-    if not gig_list:
-        return jsonify(message="Currently no gigs")
-
-    return jsonify(gigs_schema.dump(gig_list))
+    return jsonify(gigs_schema.dump(active_gigs))
 
 
 @gigs.route("/history", methods=["GET"])

@@ -21,7 +21,7 @@ from schemas.watch_artist_schema import watch_artist_schema, watch_artists_schem
 gigs = Blueprint("gigs", __name__, url_prefix="/gigs")
 
 
-@gigs.route("/template", methods=["GET"])
+@gigs.route("/", methods=["GET"])
 def get_gig_template():
     gig_template = {
     "title": "...",
@@ -35,7 +35,7 @@ def get_gig_template():
 
 
 
-@gigs.route("/", methods=["GET"])
+@gigs.route("/all", methods=["GET"])
 def show_all_gigs():
     # SELECT ALL RECORDS FROM THE gigs TABLE. IF NO RECORDS, RETURN DESCRIPTIVE MESSAGE
     gig_list = Gig.query.filter_by(is_active=True).all()

@@ -16,7 +16,7 @@ from schemas.user_schema import user_schema
 
 artists = Blueprint("artists", __name__, url_prefix="/artists")
 
-@artists.route("/template", methods=["GET"])
+@artists.route("/", methods=["GET"])
 def get_artist_template():
     artist_template = {
         "name": "...",
@@ -26,7 +26,7 @@ def get_artist_template():
     return artist_template
 
 
-@artists.route("/", methods=["GET"])
+@artists.route("/all", methods=["GET"])
 def show_all_artists():
     artist_list = Artist.query.all()
 
@@ -39,7 +39,7 @@ def add_artist():
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
     if not user:
-        
+
         return abort(401, description="Unauthorised, must be logged in")
     
     artist_fields = artist_schema.load(request.json)

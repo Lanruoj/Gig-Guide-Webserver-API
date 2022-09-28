@@ -19,7 +19,7 @@ from schemas.watch_venue_schema import watch_venue_schema
 venues = Blueprint("venues", __name__, url_prefix="/venues")
 
 
-@venues.route("/template", methods=["GET"])
+@venues.route("/", methods=["GET"])
 def get_venue_template():
     venue_template = {
         "name": "...",
@@ -32,7 +32,7 @@ def get_venue_template():
     return venue_template
 
 
-@venues.route("/", methods=["GET"])
+@venues.route("/all", methods=["GET"])
 def venues_show_all():
     venue_list = Venue.query.all()
     

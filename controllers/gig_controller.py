@@ -34,7 +34,7 @@ def get_gig_template():
     return gig_template
 
 
-@gigs.route("/upcoming/all", methods=["GET"])
+@gigs.route("/upcoming", methods=["GET"])
 def show_upcoming_gigs():
     now = datetime.now()
     active_gigs = Gig.query.filter(Gig.is_deleted==False, Gig.start_time>now).all()
@@ -61,9 +61,9 @@ def add_gig():
     gig_fields = gig_schema.load(request.json)
 
     # CHECK IF GIG EXISTS WITHIN 2 HOURS OF GIG IN REQUEST
-    gigs_at_this_venue = Gig.query.filter_by(venue_id=gig_fields["venue_id"]).all()
+    active_gigs_at_this_venue = Gig.query.filter(Gig.venue_id==gig_fields["venue_id"], Gig.is_deleted==False).all()
     new_gdt = datetime.strptime(gig_fields["start_time"], "%Y-%m-%d %H:%M:%S")
-    for g in gigs_at_this_venue:
+    for g in active_gigs_at_this_venue:
         delta = g.start_time - new_gdt
         if (g.start_time.date()==new_gdt.date()) and (delta < timedelta(days=0, hours=2)):
             return abort(409, description=f"{g.artists} has a gig within 2 hours of this at {g.venue.name}")

@@ -5,7 +5,7 @@ from marshmallow import fields
 class GigSchema(ma.Schema):
     class Meta:
         ordered = True
-        fields = ("id", "title", "artists", "venue", "description", "start_time", "price", "timestamp", "is_deleted", "venue_id", "user_id", "user", "performances")
+        fields = ("id", "title", "artists", "venue", "description", "start_time", "price", "timestamp", "is_deleted", "is_expired", "venue_id", "user_id", "user", "performances")
         load_only = ["user_id", "performances"]
     performances = fields.List(fields.Nested("PerformanceSchema"))
     venue = fields.Pluck("VenueSchema", "name")

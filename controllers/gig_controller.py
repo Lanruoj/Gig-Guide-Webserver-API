@@ -21,6 +21,14 @@ from schemas.watch_artist_schema import watch_artist_schema, watch_artists_schem
 gigs = Blueprint("gigs", __name__, url_prefix="/gigs")
 
 
+@gigs.before_request
+def gigs_before_request():
+    expired_gigs = Gig.query.filter(Gig.start_time<datetime.now()).all()
+    for gig in expired_gigs:
+        gig.is_expired = True
+        db.session.commit()
+
+
 @gigs.route("/", methods=["GET"])
 def get_gig_template():
     gig_template = {
@@ -36,8 +44,7 @@ def get_gig_template():
 
 @gigs.route("/upcoming", methods=["GET"])
 def show_upcoming_gigs():
-    now = datetime.now()
-    active_gigs = Gig.query.filter(Gig.is_deleted==False, Gig.start_time>now).all()
+    active_gigs = Gig.query.filter(Gig.is_deleted==False, Gig.is_expired==False).all()
     if not active_gigs:
         return jsonify(message="There are currently no upcoming gigs")
 
@@ -47,7 +54,7 @@ def show_upcoming_gigs():
 @gigs.route("/history", methods=["GET"])
 def show_inactive_gigs():
     # SELECT ALL RECORDS FROM THE gigs TABLE. IF NO RECORDS, RETURN DESCRIPTIVE MESSAGE
-    inactive_gigs = Gig.query.filter((Gig.is_deleted==True) | (Gig.start_time<datetime.now())).all()
+    inactive_gigs = Gig.query.filter((Gig.is_deleted==True) | (Gig.is_expired==True)).all()
 
     if not inactive_gigs:
         return jsonify(message="There are currently no inactive gigs")

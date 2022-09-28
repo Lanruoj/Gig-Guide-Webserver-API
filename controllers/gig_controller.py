@@ -145,22 +145,22 @@ def update_gig(gig_id, attr):
         db.session.commit()
         return jsonify(message=Markup(f"{attr} updated to {new_value}"))
 
-    if attr == "description":
+    elif attr == "description":
         gig.description = gig_fields["description"]
         new_value = gig_fields["description"]
         db.session.commit()
 
-    if attr == "start_time":
+    elif attr == "start_time":
         gig.start_time = gig_fields["start_time"]
         new_value = gig_fields["start_time"]
         db.session.commit()
 
-    if attr == "price":
+    elif attr == "price":
         gig.price = gig_fields["price"]
         new_value = gig_fields["price"]
         db.session.commit()
 
-    return jsonify(message=Markup(f"{attr} updated to {new_value} for the {gig.title} gig"))
+    return jsonify(message=Markup(f"{gig.title}'s {attr} updated to '{new_value}'"))
         
 
 @gigs.route("/<int:gig_id>", methods=["DELETE"])

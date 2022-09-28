@@ -12,7 +12,7 @@ class Gig(db.Model):
     price = db.Column(db.Integer, default=0)
     timestamp = db.Column(db.DateTime)
     artists = db.Column(db.String(), nullable=False)
-    is_active = db.Column(db.Boolean, default=True)
+    is_deleted = db.Column(db.Boolean, default=False)
     
     venue_id = db.Column(db.Integer, db.ForeignKey("venues.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)

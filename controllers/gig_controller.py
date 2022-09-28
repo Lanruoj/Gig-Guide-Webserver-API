@@ -34,10 +34,10 @@ def get_gig_template():
     return gig_template
 
 
-@gigs.route("/all", methods=["GET"])
+@gigs.route("/upcoming/all", methods=["GET"])
 def show_upcoming_gigs():
     now = datetime.now()
-    active_gigs = Gig.query.filter(Gig.is_active==True, Gig.start_time>now).all()
+    active_gigs = Gig.query.filter(Gig.is_deleted==False, Gig.start_time>now).all()
     if not active_gigs:
         return jsonify(message="There are currently no upcoming gigs")
 
@@ -47,12 +47,12 @@ def show_upcoming_gigs():
 @gigs.route("/history", methods=["GET"])
 def show_inactive_gigs():
     # SELECT ALL RECORDS FROM THE gigs TABLE. IF NO RECORDS, RETURN DESCRIPTIVE MESSAGE
-    gig_list = Gig.query.filter_by(is_active=False).all()
+    inactive_gigs = Gig.query.filter((Gig.is_deleted==True) | (Gig.start_time<datetime.now())).all()
 
-    if not gig_list:
-        return jsonify(message="No inactive gigs")
+    if not inactive_gigs:
+        return jsonify(message="There are currently no inactive gigs")
 
-    return jsonify(gigs_schema.dump(gig_list))
+    return jsonify(gigs_schema.dump(inactive_gigs))
 
 
 @gigs.route("/", methods=["POST"])
@@ -161,7 +161,7 @@ def delete_gig(gig_id):
     if not user_created_gig:
         return abort(401, description=Markup(f"User didn't create gig"))
     
-    gig.is_active = False
+    gig.is_deleted = True
     db.session.commit()
 
     return jsonify(message=Markup(f"{gig.title} has been deleted"))

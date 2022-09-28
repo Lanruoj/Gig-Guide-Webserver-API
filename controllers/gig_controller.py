@@ -83,6 +83,9 @@ def add_gig():
         delta = g.start_time - new_gdt
         if (g.start_time.date()==new_gdt.date()) and (delta < timedelta(days=0, hours=2)):
             return abort(409, description=f"{g.artists} has a gig within 2 hours of this at {g.venue.name}")
+    
+    if datetime.strptime(gig_fields["start_time"], "%Y-%m-%d %H:%M:%S") < datetime.now():
+        return abort(409, description=Markup(f"Invalid input - start time must be in the future"))
 
     gig = Gig(
         title = gig_fields["title"],
@@ -143,7 +146,7 @@ def update_gig(gig_id, attr):
         gig.title = new_value = gig_fields["title"]
         new_value = gig_fields["title"]
         db.session.commit()
-        return jsonify(message=Markup(f"{attr} updated to {new_value}"))
+        return jsonify(message=Markup(f"Gig's {attr} updated to {new_value}"))
 
     elif attr == "description":
         gig.description = gig_fields["description"]

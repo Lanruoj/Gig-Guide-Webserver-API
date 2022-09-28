@@ -35,9 +35,10 @@ def get_gig_template():
     "title": "...",
     "artists": "Artist 1, Artist 2, Artist 3",
     "venue_id": None,
-    "description": "...",
     "start_time": "YYYY-MM-DD HH:MM:SS",
-    "price": None
+    "description": "[string: optional]",
+    "price": "[integer: optional]",
+    "tickets_url": "[string: optional]"
     }
     return gig_template
 
@@ -92,6 +93,7 @@ def add_gig():
         description = gig_fields["description"],
         start_time = gig_fields["start_time"],
         price = gig_fields["price"],
+        tickets_url = gig_fields["tickets_url"],
         timestamp = datetime.now(),
         venue_id = gig_fields["venue_id"],
         user_id = get_jwt_identity(),

@@ -97,6 +97,7 @@ def seed_db():
         description = "Jordan Ireland plays at the Jazzlab!",
         start_time = datetime(year=2023, month=9, day=17, hour=18),
         price = 20,
+        tickets_url = "https://tickets.gig.com",
         timestamp = datetime.now(),
         artists = "Jordan Ireland",
         venue_id = 3,

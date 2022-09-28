@@ -10,6 +10,7 @@ class Gig(db.Model):
     description = db.Column(db.String(), default="N/A")
     start_time = db.Column(db.DateTime, nullable=False)
     price = db.Column(db.Integer, default=0)
+    tickets_url = db.Column(db.String)
     timestamp = db.Column(db.DateTime)
     artists = db.Column(db.String(), nullable=False)
     is_deleted = db.Column(db.Boolean, default=False)

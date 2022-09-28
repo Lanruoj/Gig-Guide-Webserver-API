@@ -34,7 +34,6 @@ def get_gig_template():
     return gig_template
 
 
-
 @gigs.route("/all", methods=["GET"])
 def show_all_gigs():
     # SELECT ALL RECORDS FROM THE gigs TABLE. IF NO RECORDS, RETURN DESCRIPTIVE MESSAGE
@@ -42,6 +41,17 @@ def show_all_gigs():
 
     if not gig_list:
         return jsonify(message="Currently no gigs")
+
+    return jsonify(gigs_schema.dump(gig_list))
+
+
+@gigs.route("/history", methods=["GET"])
+def show_inactive_gigs():
+    # SELECT ALL RECORDS FROM THE gigs TABLE. IF NO RECORDS, RETURN DESCRIPTIVE MESSAGE
+    gig_list = Gig.query.filter_by(is_active=False).all()
+
+    if not gig_list:
+        return jsonify(message="No inactive gigs")
 
     return jsonify(gigs_schema.dump(gig_list))
 

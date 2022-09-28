@@ -60,7 +60,7 @@ def show_specific_gig(gig_id):
     return jsonify(gig_schema.dump(gig))
 
 
-@gigs.route("/history", methods=["GET"])
+@gigs.route("/bin", methods=["GET"])
 def show_inactive_gigs():
     # SELECT ALL RECORDS FROM THE gigs TABLE. IF NO RECORDS, RETURN DESCRIPTIVE MESSAGE
     inactive_gigs = Gig.query.filter((Gig.is_deleted==True) | (Gig.is_expired==True)).all()

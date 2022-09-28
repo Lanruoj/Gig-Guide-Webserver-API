@@ -38,7 +38,7 @@ def get_gig_template():
 @gigs.route("/", methods=["GET"])
 def show_all_gigs():
     # SELECT ALL RECORDS FROM THE gigs TABLE. IF NO RECORDS, RETURN DESCRIPTIVE MESSAGE
-    gig_list = Gig.query.all()
+    gig_list = Gig.query.filter_by(is_active=True).all()
 
     if not gig_list:
         return jsonify(message="Currently no gigs")
@@ -146,13 +146,13 @@ def delete_gig(gig_id):
     if not user:
         return abort(404, description="User must be logged in")
     if not gig:
-        return abort(404, description="Gig not found with that ID")
+        return abort(404, description=Markup(f"Gig doesn't exist with that ID"))
 
     user_created_gig = Gig.query.filter(Gig.user_id==user.id, Gig.id==gig_id).first()
     if not user_created_gig:
         return abort(401, description=Markup(f"User didn't create gig"))
     
-    db.session.delete(gig)
+    gig.is_active = False
     db.session.commit()
 
     return jsonify(message=Markup(f"{gig.title} has been deleted"))

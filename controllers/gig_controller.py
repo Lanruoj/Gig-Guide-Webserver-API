@@ -29,7 +29,7 @@ def gigs_before_request():
         db.session.commit()
 
 
-@gigs.route("/", methods=["GET"])
+@gigs.route("/template", methods=["GET"])
 def get_gig_template():
     gig_template = {
     "title": "...",
@@ -42,13 +42,22 @@ def get_gig_template():
     return gig_template
 
 
-@gigs.route("/upcoming", methods=["GET"])
-def show_upcoming_gigs():
+@gigs.route("/", methods=["GET"])
+def show_all_active_gigs():
     active_gigs = Gig.query.filter(Gig.is_deleted==False, Gig.is_expired==False).all()
     if not active_gigs:
         return jsonify(message="There are currently no upcoming gigs")
 
     return jsonify(gigs_schema.dump(active_gigs))
+
+
+@gigs.route("/<int:gig_id>", methods=["GET"])
+def show_specific_gig(gig_id):
+    gig = Gig.query.get(gig_id)
+    if not gig:
+        return abort(404, description=Markup(f"Gig not found with the ID of {gig_id}. Please try again"))
+    
+    return jsonify(gig_schema.dump(gig))
 
 
 @gigs.route("/history", methods=["GET"])

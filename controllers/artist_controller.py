@@ -38,9 +38,8 @@ def show_all_artists():
 def add_artist():
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
-    if not user:
-
-        return abort(401, description="Unauthorised, must be logged in")
+    if not user or not user.logged_in:
+        return abort(401, description="User must be logged in")
     
     artist_fields = artist_schema.load(request.json)
     artist = Artist(
@@ -58,8 +57,8 @@ def add_artist():
 def update_artist(artist_id, attr):
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
-    if not user:
-        return abort(401, description="Unauthorised - must be logged in to update artists")
+    if not user or not user.logged_in:
+        return abort(401, description="User must be logged in")
 
     artist_fields = artist_schema.load(request.json, partial=True)
     
@@ -91,8 +90,7 @@ def update_artist(artist_id, attr):
 @jwt_required()
 def delete_artist(artist_id):
     user = User.query.get(int(get_jwt_identity()))
-    if not user.admin:
-
+    if not user.admin or not user.logged_in:
         return abort(401, description="Unauthorised - must be an administrator to delete artists")
     
     artist = Artist.query.get(artist_id)
@@ -113,6 +111,9 @@ def watch_artist():
     watch_artist_fields = watch_artist_schema.load(request.json)
 
     user = User.query.get(int(get_jwt_identity()))
+    if not user or not user.logged_in:
+        return abort(401, description="Unauthorised - user must be logged in")
+        
     users_watched_artists = WatchArtist.query.filter_by(user_id=user.id).all()
     artist = Artist.query.get(watch_artist_fields["artist_id"])
     if not artist:

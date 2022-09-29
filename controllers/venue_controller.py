@@ -53,8 +53,8 @@ def search_for_venue(venue_name):
 @jwt_required()
 def venues_add():
     user = User.query.get(int(get_jwt_identity()))
-    if not user and not user.admin:
-        return abort(401, description="Unauthorised")
+    if not user and not user.admin or not user.logged_in:
+        return abort(401, description="User not logged in")
     venue_fields = venue_schema.load(request.json)
     venue = Venue(
         name = venue_fields["name"],
@@ -73,7 +73,7 @@ def venues_add():
 @jwt_required()
 def update_venue(venue_id, attr):
     user = User.query.get(get_jwt_identity())
-    if not user.admin:
+    if not user.admin or not user.logged_in:
         return abort(401, description="Must be an administrator to perform this action")
     
     venue = Venue.query.get(venue_id)
@@ -101,7 +101,7 @@ def update_venue(venue_id, attr):
 @jwt_required()
 def delete_venue(venue_id):
     user = User.query.get(int(get_jwt_identity()))
-    if not user.admin:
+    if not user.admin or not user.logged_in:
         return abort(401, description="Must be an administrator to perform this action")
 
     venue = Venue.query.get(venue_id)
@@ -123,6 +123,9 @@ def add_watched_venue():
     watch_venue_fields = watch_venue_schema.load(request.json)
 
     user = User.query.get(int(get_jwt_identity()))
+    if not user or not user.logged_in:
+        return abort(401, description="Unauthorised - user must be logged in")
+        
     users_watched_venues = WatchVenue.query.filter_by(user_id=user.id).all()
     venue_exists = Venue.query.get(watch_venue_fields["venue_id"])
     if not venue_exists:

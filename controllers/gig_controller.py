@@ -75,8 +75,11 @@ def show_inactive_gigs():
 @gigs.route("/", methods=["POST"])
 @jwt_required()
 def add_gig():
+    user = User.query.get(get_jwt_identity())
+    if not user or not user.logged_in:
+        return abort(401, description="User not logged in")       
+        
     gig_fields = gig_schema.load(request.json)
-
     # CHECK IF GIG EXISTS WITHIN 2 HOURS OF GIG IN REQUEST
     active_gigs_at_this_venue = Gig.query.filter(Gig.venue_id==gig_fields["venue_id"], Gig.is_deleted==False).all()
     new_gdt = datetime.strptime(gig_fields["start_time"], "%Y-%m-%d %H:%M:%S")
@@ -138,7 +141,7 @@ def update_gig(gig_id, attr):
     gig = Gig.query.filter(Gig.id==gig_id, Gig.user_id==user.id).first()
     if not gig:
         return abort(404, description=Markup(f"Invalid gig ID. Please try again"))
-    if not user:
+    if not user or not user.logged_in:
         return abort(401, description="Unauthorised - user must be logged in")
     if (user.id != gig.user_id):
         return abort(401, description="Unauthorised - user did not post the gig")
@@ -173,8 +176,9 @@ def update_gig(gig_id, attr):
 def delete_gig(gig_id):
     user = User.query.get(int(get_jwt_identity()))
     gig = Gig.query.get(gig_id)
-    if not user:
-        return abort(404, description="User must be logged in")
+    if not user or not user.logged_in:
+        return abort(401, description="User not logged in")
+
     if not gig:
         return abort(404, description=Markup(f"Gig doesn't exist with that ID"))
 
@@ -194,6 +198,8 @@ def show_watchlist():
     # # GET THE id OF THE JWT ACCESS TOKEN FROM @jwt_required()
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
+    if not user or not user.logged_in:
+        return abort(401, description="User not logged in")
 
     watchlist_schema = UserSchema(only=("username", "watched_venues", "watched_artists"))
 

@@ -61,7 +61,7 @@ def auth_login():
     token = create_access_token(identity=str(user.id), expires_delta=timedelta(days=1))
     user.logged_in = True
     db.session.commit()
-    
+
     return jsonify(token=token, user=user.username)
 
 
@@ -69,7 +69,7 @@ def auth_login():
 @jwt_required()
 def auth_logout():
     user = User.query.get(get_jwt_identity())
-    if not user:
+    if not user or not user.logged_in:
         return abort(400, description="User not logged in")
     
     user.logged_in = False
@@ -87,6 +87,8 @@ def auth_update(value):
     user_id = int(get_jwt_identity())
     # RETRIEVE THE User OBJECT WITH THE id FROM get_jwt_identity() SO IT CAN BE UPDATED
     user = User.query.get(user_id)
+    if not user or not user.logged_in:
+        return abort(401, description="User not logged in")
     
     # IF USER EXISTS, USE AS THE RECORD TO UPDATE    
     user_fields = user_schema.load(request.json, partial=True)
@@ -112,7 +114,7 @@ def auth_update(value):
 def auth_delete(id):
     token_id = int(get_jwt_identity())
     user = User.query.get(token_id)
-    if not user:
+    if not user or not user.logged_in:
         return abort(401, description="Unauthorised - user must be logged in")
     if (user.id != id) and (not user.admin):
         return abort(401, description="Unauthorised - can only delete own profile")
@@ -122,3 +124,16 @@ def auth_delete(id):
 
     return jsonify(message=f"{user.username} has been deleted")
     
+
+
+
+
+
+# @auth.route("/test", methods=["GET"])
+# @jwt_required()
+# def test():
+#     user = User.query.get(get_jwt_identity())
+#     if not user or not user.logged_in:
+#         return abort(401, description="NOT LOGGED IN M8")
+    
+#     return jsonify(message="GR8 SUCCESS")

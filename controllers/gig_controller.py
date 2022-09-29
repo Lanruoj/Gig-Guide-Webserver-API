@@ -1,6 +1,7 @@
 from main import db, bcrypt, jwt
 from flask import Blueprint, jsonify, request, abort, Markup
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from sqlalchemy import func
 from datetime import datetime, date, time, timedelta
 from models.gig import Gig
 from schemas.gig_schema import gig_schema, gigs_schema, GigSchema
@@ -113,7 +114,7 @@ def add_gig():
 
     artist_input = gig.artists.split(", ")
     for artist in artist_input:
-        artist_exists = Artist.query.filter_by(name=artist).first()
+        artist_exists = Artist.query.filter(func.lower(Artist.name)==(func.lower(artist))).first()
         if not artist_exists:
             artist = Artist(
                 name = artist

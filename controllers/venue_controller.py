@@ -1,6 +1,7 @@
 from main import db, bcrypt, jwt
 from flask import Blueprint, jsonify, request, abort, Markup
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from sqlalchemy import func
 from datetime import datetime
 from models.gig import Gig
 from schemas.gig_schema import gig_schema, gigs_schema
@@ -55,7 +56,12 @@ def venues_add():
     user = User.query.get(int(get_jwt_identity()))
     if not user or not user.logged_in:
         return abort(401, description="User not logged in")
+
     venue_fields = venue_schema.load(request.json)
+    venue_exists = Venue.query.filter(func.lower(Venue.name) == func.lower(venue_fields["name"]), func.lower(Venue.city) == func.lower(venue_fields["city"])).first()
+    if venue_exists:
+        return abort(409, description=Markup(f"A venue called {venue_exists.name} already exists in {venue_exists.city}. Venue ID: {venue_exists.id}"))
+    
     venue = Venue(
         name = venue_fields["name"],
         street_address = venue_fields["street_address"],

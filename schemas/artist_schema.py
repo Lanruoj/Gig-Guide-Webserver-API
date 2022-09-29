@@ -1,5 +1,6 @@
 from main import ma
 from marshmallow import fields
+from marshmallow.validate import Length
 
 
 class ArtistSchema(ma.Schema):
@@ -7,8 +8,9 @@ class ArtistSchema(ma.Schema):
         ordered = True
         fields = ("id", "name", "genre", "performances")
 
-    name = ma.String(required=True, allow_none=False)
+    name = ma.String(required=True, validate=Length(min=1))
     genre = ma.String()
+
     performances = fields.List(fields.Nested("PerformanceSchema"))
 
 

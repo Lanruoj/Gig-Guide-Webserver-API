@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, abort
+from flask import Blueprint, jsonify, request, abort, Markup
 from main import db, bcrypt, jwt
 from datetime import timedelta
 from flask_jwt_extended import create_access_token, get_jwt_identity,jwt_required
@@ -27,12 +27,10 @@ def auth_register():
     # CHECK IF THE username VALUE IN THE REQUEST EXISTS IN THE users TABLE. IF A MATCH IS FOUND, THROW A DESCRIPTIVE ERROR AS username MUST BE UNIQUE
     username_exists = User.query.filter_by(username=user_fields["username"]).first()
     if username_exists:
-        print(username_exists.username)
         return abort(409, f"Username {username_exists.username} already exists")
     # CHECK IF THE email VALUE IN THE REQUEST EXISTS IN THE users TABLE. IF A MATCH IS FOUND, THROW A DESCRIPTIVE ERROR AS email MUST BE UNIQUE
     email_exists = User.query.filter_by(email=user_fields["email"]).first()
     if email_exists:
-        print(email_exists.email)
         return abort(409, f"Email address {email_exists.email} already exists")
     
     user = User(
@@ -40,14 +38,15 @@ def auth_register():
         email = user_fields["email"],
         password = bcrypt.generate_password_hash(user_fields["password"]).decode("utf-8"),
         first_name = user_fields["first_name"],
-        last_name = user_fields["last_name"]
+        last_name = user_fields["last_name"],
+        logged_in = True
     )
     db.session.add(user)
     db.session.commit()
 
     token = create_access_token(identity=str(user.id), expires_delta=timedelta(days=1))
 
-    return jsonify(token=token, user=user.username, id=user.id)
+    return jsonify(message=Markup(f"{user.first_name} successfully logged in"), user=user.username, id=user.id, token=token)
 
 
 @auth.route("/login", methods=["POST"])
@@ -61,6 +60,21 @@ def auth_login():
 
     token = create_access_token(identity=str(user.id), expires_delta=timedelta(days=1))
     return jsonify(token=token, user=user.username)
+
+
+@auth.route("/logout", methods=["POST"])
+@jwt_required()
+def auth_logout():
+    user = User.query.get(get_jwt_identity())
+    if not user:
+        return abort(400, description="User not logged in")
+    
+    user.logged_in = False
+    db.session.commit()
+
+    return jsonify(message=Markup(f"{user.username} successfully logged out"))
+    
+    
 
 
 @auth.route("/<value>", methods=["PUT"])

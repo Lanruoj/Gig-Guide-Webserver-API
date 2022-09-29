@@ -11,6 +11,7 @@ class User(db.Model):
     first_name = db.Column(db.String(), nullable=False)
     last_name = db.Column(db.String(), nullable=False)
     admin = db.Column(db.Boolean, default=False)
+    logged_in = db.Column(db.Boolean, default=False, nullable=False)
 
     watched_venues = db.relationship(
         "WatchVenue",

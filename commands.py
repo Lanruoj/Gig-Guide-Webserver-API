@@ -72,7 +72,7 @@ def seed_db():
     )
     db.session.add(test_venue1)
     test_venue2 = Venue(
-        name = "The Jazz Lab",
+        name = "The Jazzlab",
         street_address = "27 Leslie street",
         city = "Brunswick",
         state = "Victoria",
@@ -82,7 +82,7 @@ def seed_db():
     db.session.commit()
 
     test_gig = Gig(
-        title = "Gregor [should be expired]",
+        title = "Gregor [EXPIRED]",
         description = "Gregor plays Destiny at the Forum!",
         start_time = datetime(year=2022, month=9, day=17, hour=18),
         price = 20,
@@ -93,7 +93,7 @@ def seed_db():
     )
     db.session.add(test_gig)
     test_gig1 = Gig(
-        title = "Jordan Ireland at the Jazzlab [should be active]",
+        title = "Jordan Ireland at the Jazzlab [ACTIVE]",
         description = "Jordan Ireland plays at the Jazzlab!",
         start_time = datetime(year=2023, month=9, day=17, hour=18),
         price = 20,

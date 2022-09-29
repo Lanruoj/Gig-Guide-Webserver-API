@@ -57,8 +57,11 @@ def auth_login():
     user = User.query.filter_by(email=user_fields["email"]).first()
     if not user or not bcrypt.check_password_hash(user.password, user_fields["password"]):
         return abort(401, description="Invalid email or password, please try again")
-
+    
     token = create_access_token(identity=str(user.id), expires_delta=timedelta(days=1))
+    user.logged_in = True
+    db.session.commit()
+    
     return jsonify(token=token, user=user.username)
 
 

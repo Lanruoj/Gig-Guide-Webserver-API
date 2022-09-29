@@ -6,6 +6,9 @@ class WatchVenueSchema(ma.Schema):
         ordered = True
         fields = ("id", "user_id", "venue_id", "venue")
     
+    user_id = ma.Integer(required=True)
+    venue_id = ma.Integer(required=True)
+    
     venue = fields.Nested("VenueSchema")
     
 

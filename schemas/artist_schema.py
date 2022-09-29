@@ -5,7 +5,7 @@ from marshmallow import fields
 class ArtistSchema(ma.Schema):
     class Meta:
         ordered = True
-        fields = ("id", "name", "genre", "performances", "gigs")
+        fields = ("id", "name", "genre", "performances")
 
     name = ma.String(required=True, allow_none=False)
     genre = ma.String()

@@ -9,7 +9,7 @@ from schemas.user_schema import user_schema
 auth = Blueprint("auth", __name__, url_prefix="/auth")
 
 
-@auth.route("/", methods=["GET"])
+@auth.route("/template", methods=["GET"])
 def get_auth_template():
     user_template = {
         "email": "...",

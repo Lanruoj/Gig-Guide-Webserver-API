@@ -7,8 +7,9 @@ class ArtistSchema(ma.Schema):
         ordered = True
         fields = ("id", "name", "genre", "performances", "gigs")
 
+    name = ma.String(required=True, allow_none=False)
+    genre = ma.String()
     performances = fields.List(fields.Nested("PerformanceSchema"))
-    # gigs = fields.List(fields.Nested("GigSchema", only=("title",)))
 
 
 artist_schema = ArtistSchema()

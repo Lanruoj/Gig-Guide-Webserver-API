@@ -16,7 +16,7 @@ from schemas.user_schema import user_schema
 
 artists = Blueprint("artists", __name__, url_prefix="/artists")
 
-@artists.route("/", methods=["GET"])
+@artists.route("/template", methods=["GET"])
 def get_artist_template():
     artist_template = {
         "name": "...",
@@ -26,7 +26,7 @@ def get_artist_template():
     return artist_template
 
 
-@artists.route("/all", methods=["GET"])
+@artists.route("/", methods=["GET"])
 def show_all_artists():
     artist_list = Artist.query.all()
 

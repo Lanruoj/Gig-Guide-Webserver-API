@@ -52,7 +52,7 @@ def auth_register():
 @auth.route("/login", methods=["POST"])
 def auth_login():
     # username NOT REQUIRED FOR LOGIN
-    user_fields = user_schema.load(request.json, partial=("username",))
+    user_fields = user_schema.load(request.json, partial=True)
     # SEARCH users FOR RECORD MATCHING THE INPUT email, ABORT IF NO EXISTING USER OR WRONG PASSWORD
     user = User.query.filter_by(email=user_fields["email"]).first()
     if not user or not bcrypt.check_password_hash(user.password, user_fields["password"]):

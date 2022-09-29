@@ -8,11 +8,11 @@ class Gig(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String())
     description = db.Column(db.String(), default="N/A")
+    artists = db.Column(db.String(), nullable=False)
     start_time = db.Column(db.DateTime, nullable=False)
     price = db.Column(db.Integer, default=0)
-    tickets_url = db.Column(db.String)
+    tickets_url = db.Column(db.String(), default="N/A")
     timestamp = db.Column(db.DateTime)
-    artists = db.Column(db.String(), nullable=False)
     is_deleted = db.Column(db.Boolean, default=False)
     is_expired = db.Column(db.Boolean, default=False)
     

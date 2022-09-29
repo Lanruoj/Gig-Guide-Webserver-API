@@ -79,16 +79,16 @@ def add_gig():
     if not user or not user.logged_in:
         return abort(401, description="User not logged in")       
         
-    gig_fields = gig_schema.load(request.json)
+    gig_fields = gig_schema.load(request.json, partial=True)
     # CHECK IF GIG EXISTS WITHIN 2 HOURS OF GIG IN REQUEST
     active_gigs_at_this_venue = Gig.query.filter(Gig.venue_id==gig_fields["venue_id"], Gig.is_deleted==False).all()
-    new_gdt = datetime.strptime(gig_fields["start_time"], "%Y-%m-%d %H:%M:%S")
+    # new_gdt = datetime.strptime(gig_fields["start_time"], "%Y-%m-%d %H:%M:%S")
     for g in active_gigs_at_this_venue:
-        delta = g.start_time - new_gdt
-        if (g.start_time.date()==new_gdt.date()) and (delta < timedelta(days=0, hours=2)):
+        delta = g.start_time - gig_fields["start_time"]
+        if (g.start_time.date()==gig_fields["start_time"].date()) and (delta < timedelta(days=0, hours=2)):
             return abort(409, description=f"{g.artists} has a gig within 2 hours of this at {g.venue.name}")
     
-    if datetime.strptime(gig_fields["start_time"], "%Y-%m-%d %H:%M:%S") < datetime.now():
+    if gig_fields["start_time"] < datetime.now():
         return abort(409, description=Markup(f"Invalid input - start time must be in the future"))
 
     gig = Gig(

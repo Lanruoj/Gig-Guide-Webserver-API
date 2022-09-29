@@ -7,6 +7,9 @@ class WatchArtistSchema(ma.Schema):
         ordered = True
         fields = ("id", "user_id", "artist_id", "artist")
     
+    user_id = ma.Integer(required=True)
+    artist_id = ma.Integer(required=True)
+    
     artist = fields.Nested("ArtistSchema")
 
 

@@ -93,15 +93,20 @@ def add_gig():
 
     gig = Gig(
         title = gig_fields["title"],
-        description = gig_fields["description"],
         start_time = gig_fields["start_time"],
-        price = gig_fields["price"],
-        tickets_url = gig_fields["tickets_url"],
         timestamp = datetime.now(),
         venue_id = gig_fields["venue_id"],
         user_id = get_jwt_identity(),
         artists = gig_fields["artists"]
     )
+    # OPTIONAL FIELDS
+    request_data = request.get_json()
+    if "tickets_url" in request_data.keys():
+        gig.tickets_url = gig_fields["tickets_url"]
+    if "price" in request_data.keys():
+        gig.price = gig_fields["price"]
+    if "description" in request_data.keys():
+        gig.description = gig_fields["description"]
     db.session.add(gig)
     db.session.commit()
 

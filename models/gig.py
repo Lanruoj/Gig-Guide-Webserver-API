@@ -6,7 +6,7 @@ class Gig(db.Model):
     __tablename__ = "gigs"
 
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String())
+    title = db.Column(db.String(), nullable=False)
     description = db.Column(db.String(), default="N/A")
     artists = db.Column(db.String(), nullable=False)
     start_time = db.Column(db.DateTime, nullable=False)

@@ -53,7 +53,7 @@ def search_for_venue(venue_name):
 @jwt_required()
 def venues_add():
     user = User.query.get(int(get_jwt_identity()))
-    if not user and not user.admin or not user.logged_in:
+    if not user or not user.logged_in:
         return abort(401, description="User not logged in")
     venue_fields = venue_schema.load(request.json)
     venue = Venue(
@@ -63,6 +63,10 @@ def venues_add():
         state = venue_fields["state"],
         country = venue_fields["country"]
     )
+    # OPTIONAL FIELDS
+    request_data = request.get_json()
+    if "type" in request_data.keys():
+        venue.type = venue_fields["type"]
     db.session.add(venue)
     db.session.commit()
     

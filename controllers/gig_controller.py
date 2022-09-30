@@ -1,7 +1,7 @@
 from main import db, bcrypt, jwt
 from flask import Blueprint, jsonify, request, abort, Markup
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
-from sqlalchemy import func, desc
+from sqlalchemy import func, desc, and_
 from datetime import datetime, date, time, timedelta
 from models.gig import Gig
 from schemas.gig_schema import gig_schema, gigs_schema, GigSchema
@@ -50,17 +50,28 @@ def show_upcoming_gigs():
     if not all_upcoming_gigs:
         return jsonify(message="There are currently no upcoming gigs")
     
+    # ## SORTING
+    # if request.query_string:
+    #     if request.args.get("sort"):
+    #         for attr_arg in request.args.values():
+    #             attr = attr_arg.split(":", 1)[0]
+    #             order = attr_arg.split(":", 1)[1]
+    #             if order == "asc":
+    #                 result = Gig.query.order_by(getattr(Gig, attr))
+    #                 return jsonify(gigs_schema.dump(result))
+    #             elif order == "desc":
+    #                 result = Gig.query.order_by(desc(getattr(Gig, attr)))
+    #                 return jsonify(gigs_schema.dump(result))
+
+    # FILTERS
     if request.query_string:
-        if request.args.get("sort"):
-            for attr_arg in request.args.values():
-                attr = attr_arg.split(":", 1)[0]
-                order = attr_arg.split(":", 1)[1]
-                if order == "asc":
-                    result = Gig.query.order_by(getattr(Gig, attr))
-                    return jsonify(gigs_schema.dump(result))
-                elif order == "desc":
-                    result = Gig.query.order_by(desc(getattr(Gig, attr)))
-                    return jsonify(gigs_schema.dump(result))
+        queries = []
+        for arg in request.args:
+            query = getattr(Gig, arg) == request.args[arg]
+            queries.append(query)
+        
+        results = Gig.query.filter(*(queries)).all()
+        return jsonify(gigs_schema.dump(results))
                     
     else:
         return jsonify(gigs_schema.dump(all_upcoming_gigs))

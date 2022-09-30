@@ -45,28 +45,25 @@ def get_gig_template():
 
 
 @gigs.route("/", methods=["GET"])
-def show_all_active_gigs():
-    active_gigs = Gig.query.filter(Gig.is_deleted==False, Gig.is_expired==False).all()
-    if not active_gigs:
+def show_upcoming_gigs():
+    all_upcoming_gigs = Gig.query.filter(Gig.is_deleted==False, Gig.is_expired==False).all()
+    if not all_upcoming_gigs:
         return jsonify(message="There are currently no upcoming gigs")
     
-
-    ###
-    if request.args.get("sort"):
-        for attr_arg in request.args.values():
-            attr = attr_arg.split(":", 1)[0]
-            order = attr_arg.split(":", 1)[1]
-            print(attr)
-            print(order)
-            if order == "asc":
-                result = Gig.query.order_by(getattr(Gig, attr))
-                return jsonify(gigs_schema.dump(result))
-            elif order == "desc":
-                result = Gig.query.order_by(desc(getattr(Gig, attr)))
-                return jsonify(gigs_schema.dump(result))
-    ###
-        
-    return jsonify(gigs_schema.dump(active_gigs))
+    if request.query_string:
+        if request.args.get("sort"):
+            for attr_arg in request.args.values():
+                attr = attr_arg.split(":", 1)[0]
+                order = attr_arg.split(":", 1)[1]
+                if order == "asc":
+                    result = Gig.query.order_by(getattr(Gig, attr))
+                    return jsonify(gigs_schema.dump(result))
+                elif order == "desc":
+                    result = Gig.query.order_by(desc(getattr(Gig, attr)))
+                    return jsonify(gigs_schema.dump(result))
+                    
+    else:
+        return jsonify(gigs_schema.dump(all_upcoming_gigs))
 
 
 @gigs.route("/<int:gig_id>", methods=["GET"])

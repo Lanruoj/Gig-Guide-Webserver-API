@@ -1,3 +1,4 @@
+from re import S
 from main import db, bcrypt, jwt
 from flask import Blueprint, jsonify, request, abort, Markup
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
@@ -45,36 +46,25 @@ def get_gig_template():
 
 
 @gigs.route("/", methods=["GET"])
-def show_upcoming_gigs():
-    all_upcoming_gigs = Gig.query.filter(Gig.is_deleted==False, Gig.is_expired==False).all()
-    if not all_upcoming_gigs:
-        return jsonify(message="There are currently no upcoming gigs")
-    
-    # ## SORTING
-    # if request.query_string:
-    #     if request.args.get("sort"):
-    #         for attr_arg in request.args.values():
-    #             attr = attr_arg.split(":", 1)[0]
-    #             order = attr_arg.split(":", 1)[1]
-    #             if order == "asc":
-    #                 result = Gig.query.order_by(getattr(Gig, attr))
-    #                 return jsonify(gigs_schema.dump(result))
-    #             elif order == "desc":
-    #                 result = Gig.query.order_by(desc(getattr(Gig, attr)))
-    #                 return jsonify(gigs_schema.dump(result))
-
-    # FILTERS
+def get_gigs():
+    filters = [Gig.is_expired==False, Gig.is_deleted==False]
+    sort = None
+    error = "No upcoming gigs"
+    # FILTER AND SORT BY URL ARGUMENTS (IF ANY)
     if request.query_string:
-        queries = []
+        error = "No gigs found matching that criteria" #######
         for arg in request.args:
-            query = getattr(Gig, arg) == request.args[arg]
-            queries.append(query)
-        
-        results = Gig.query.filter(*(queries)).all()
-        return jsonify(gigs_schema.dump(results))
-                    
-    else:
-        return jsonify(gigs_schema.dump(all_upcoming_gigs))
+            if arg != "sort":
+                filter = getattr(Gig, arg) == request.args[arg]
+                filters.append(filter)
+            elif arg == "sort":
+                sort = getattr(Gig, request.args[arg])
+
+    results = Gig.query.filter(*(filters)).order_by(sort).all()
+    if not results:
+        return abort(404, description=error)
+
+    return jsonify(gigs_schema.dump(results))
 
 
 @gigs.route("/<int:gig_id>", methods=["GET"])

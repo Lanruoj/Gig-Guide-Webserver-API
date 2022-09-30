@@ -50,26 +50,21 @@ def show_all_active_gigs():
     if not active_gigs:
         return jsonify(message="There are currently no upcoming gigs")
     
-    sort = request.args.get("sort")
-    if sort:
-        if sort=="price:asc":
-            sorted_by_price_asc = Gig.query.filter(Gig.is_expired==False, Gig.is_deleted==False).order_by(Gig.price)
-            return jsonify(gigs_schema.dump(sorted_by_price_asc))
 
-        elif sort=="price:desc":
-            sorted_by_price_desc = Gig.query.filter(Gig.is_expired==False, Gig.is_deleted==False).order_by(desc(Gig.price))
-            return jsonify(gigs_schema.dump(sorted_by_price_desc))
-        
-        elif sort=="start_time:asc":
-            sorted_by_start_time_asc = Gig.query.filter(Gig.is_expired==False, Gig.is_deleted==False).order_by(Gig.start_time)
-            return jsonify(gigs_schema.dump(sorted_by_start_time_asc))
-        
-        elif sort=="start_time:desc":
-            sorted_by_start_time_desc = Gig.query.filter(Gig.is_expired==False, Gig.is_deleted==False).order_by(desc(Gig.start_time))
-            return jsonify(gigs_schema.dump(sorted_by_start_time_desc))
-        
-        else:
-            return abort(400, description=Markup(f"---- is an invalid request"))
+    ###
+    if request.args.get("sort"):
+        for attr_arg in request.args.values():
+            attr = attr_arg.split(":", 1)[0]
+            order = attr_arg.split(":", 1)[1]
+            print(attr)
+            print(order)
+            if order == "asc":
+                result = Gig.query.order_by(getattr(Gig, attr))
+                return jsonify(gigs_schema.dump(result))
+            elif order == "desc":
+                result = Gig.query.order_by(desc(getattr(Gig, attr)))
+                return jsonify(gigs_schema.dump(result))
+    ###
         
     return jsonify(gigs_schema.dump(active_gigs))
 

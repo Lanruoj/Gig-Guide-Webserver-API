@@ -4,7 +4,6 @@ from flask import request, abort, jsonify
 def search(table, schema, filters=None, sort=None, no_results="No results found"):
     if not filters:
         filters = []
-        
     if request.query_string:
         no_results = "No results matching that criteria"
         for arg in request.args:

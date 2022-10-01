@@ -1,5 +1,6 @@
 from re import S
 from main import db, bcrypt, jwt
+from utils import search
 from flask import Blueprint, jsonify, request, abort, Markup
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from sqlalchemy import func, desc, and_
@@ -47,24 +48,9 @@ def get_gig_template():
 
 @gigs.route("/", methods=["GET"])
 def get_gigs():
-    filters = [Gig.is_expired==False, Gig.is_deleted==False]
-    sort = None
-    error = "No upcoming gigs"
-    # FILTER AND SORT BY URL ARGUMENTS (IF ANY)
-    if request.query_string:
-        error = "No gigs found matching that criteria" #######
-        for arg in request.args:
-            if arg != "sort":
-                filter = getattr(Gig, arg) == request.args[arg]
-                filters.append(filter)
-            elif arg == "sort":
-                sort = getattr(Gig, request.args[arg])
+    gigs = search(Gig, gigs_schema, [Gig.is_expired==False, Gig.is_deleted==False])
 
-    results = Gig.query.filter(*(filters)).order_by(sort).all()
-    if not results:
-        return abort(404, description=error)
-
-    return jsonify(gigs_schema.dump(results))
+    return gigs
 
 
 @gigs.route("/<int:gig_id>", methods=["GET"])

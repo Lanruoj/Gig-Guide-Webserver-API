@@ -1,4 +1,5 @@
 from main import db, bcrypt, jwt
+from utils import search
 from flask import Blueprint, jsonify, request, abort, Markup
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from datetime import datetime
@@ -27,10 +28,9 @@ def get_artist_template():
 
 
 @artists.route("/", methods=["GET"])
-def show_all_artists():
-    artist_list = Artist.query.all()
-
-    return jsonify(artists_schema.dump(artist_list))
+def get_artists():
+    artists = search(Artist, artists_schema)
+    return artists
 
 
 @artists.route("/", methods=["POST"])

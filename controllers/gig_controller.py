@@ -3,6 +3,7 @@ from main import db, bcrypt, jwt
 from utils import search_table
 from flask import Blueprint, jsonify, request, abort, Markup
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from marshmallow.exceptions import ValidationError
 from sqlalchemy import func, desc, and_
 from datetime import datetime, date, time, timedelta
 from models.gig import Gig
@@ -138,9 +139,9 @@ def add_gig():
     return jsonify(gig_schema.dump(gig))
 
 
-@gigs.route("/<int:gig_id>/<attr>", methods=["PUT"])
+@gigs.route("/<int:gig_id>", methods=["PUT"])
 @jwt_required()
-def update_gig(gig_id, attr):
+def update_gig(gig_id):
     user = User.query.get(int(get_jwt_identity()))
     gig = Gig.query.filter(Gig.id==gig_id, Gig.user_id==user.id).first()
     if not gig:
@@ -150,29 +151,51 @@ def update_gig(gig_id, attr):
     if (user.id != gig.user_id):
         return abort(401, description="Unauthorised - user did not post the gig")
 
-    gig_fields = gig_schema.load(request.json, partial=True)
-    if attr == "title":
-        gig.title = new_value = gig_fields["title"]
-        new_value = gig_fields["title"]
-        db.session.commit()
-        return jsonify(message=Markup(f"Gig's {attr} updated to {new_value}"))
+    try: 
+        gig_fields = gig_schema.load(request.json, partial=True)
+    except ValidationError as err:
+        return jsonify(err.messages)
+    
+    gig = Gig.query.get(gig_id)
+    if not gig:
+        return abort(404, description=Markup(f"No gigs found with ID: {gig.id}"))
+    
+    request_data = request.get_json()
+    fields, new_values = [], []
+    for attribute in request_data.keys():
+        if attribute in vars(Gig):
+            setattr(gig, attribute, gig_fields[attribute])
+            new_values.append(gig_fields[attribute])
+            fields.append(attribute)
+            if attribute == "artists":
+                artist_input = gig.artists.split(", ")
+                for artist in artist_input:
+                    artist_exists = Artist.query.filter(func.lower(Artist.name)==(func.lower(artist))).first()
+                    if not artist_exists:
+                        artist = Artist(
+                            name = artist
+                        )
+                        db.session.add(artist)
+                        db.session.commit()
+                    
+                        performance = Performance(
+                            gig_id = gig.id,
+                            artist_id = artist.id
+                        )
+                        db.session.add(performance)
+                        db.session.commit()
+                    
+                    else:
+                        performance = Performance(        # <------- REFACTOR / DRY
+                            gig_id = gig.id,
+                            artist_id = artist_exists.id
+                        )
+                        db.session.add(performance)
+                        db.session.commit()  
 
-    elif attr == "description":
-        gig.description = gig_fields["description"]
-        new_value = gig_fields["description"]
-        db.session.commit()
+    db.session.commit()
 
-    elif attr == "start_time":
-        gig.start_time = gig_fields["start_time"]
-        new_value = gig_fields["start_time"]
-        db.session.commit()
-
-    elif attr == "price":
-        gig.price = gig_fields["price"]
-        new_value = gig_fields["price"]
-        db.session.commit()
-
-    return jsonify(message=Markup(f"{gig.title}'s {attr} updated to '{new_value}'"))
+    return jsonify(message=Markup(f"Gig's {', '.join(str(field) for field in fields)} successfully updated to {', '.join(str(value) for value in new_values)}"))
         
 
 @gigs.route("/<int:gig_id>", methods=["DELETE"])

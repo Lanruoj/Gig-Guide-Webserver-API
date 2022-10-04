@@ -69,7 +69,6 @@ def update_artist(artist_id):
         return abort(401, description="User must be logged in")
 
     update = update_record(artist_id, Artist, artist_schema)
-    print(update)
 
     db.session.commit()
     return update

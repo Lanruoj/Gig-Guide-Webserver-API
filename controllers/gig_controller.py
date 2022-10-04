@@ -162,14 +162,29 @@ def update_gig(gig_id):
     
     request_data = request.get_json()
     fields, new_values = [], []
+    # PARSE COLUMNS TO UPDATE FROM THE REQUEST DATA
     for attribute in request_data.keys():
+        # IF VALUE IS A VALID ATTRIBUTE OF Gig
         if attribute in vars(Gig):
+            old_input = getattr(gig, attribute)
+            # SET THE ATTRIBUTE TO THE RELEVANT INPUT DATA
             setattr(gig, attribute, gig_fields[attribute])
             new_values.append(gig_fields[attribute])
             fields.append(attribute)
             if attribute == "artists":
-                artist_input = gig.artists.split(", ")
-                for artist in artist_input:
+                old_artists = old_input.split(", ")
+                new_artists = gig.artists.split(", ")
+                for artist in old_artists:
+                    # FETCH OLD ARTIST FROM DATABASE
+                    old_artist = Artist.query.filter_by(name=artist).first()
+                    # IF Artist HAS BEEN REMOVED FROM Gig, DELETE THE RELATED Performance
+                    if not artist in new_artists:
+                        # FETCH Performance WITH MATCHING gig_id & artist_id
+                        performance = Performance.query.filter(Performance.artist_id==old_artist.id, Performance.gig_id==gig.id).first()
+                        # DELETE RECORD
+                        db.session.delete(performance)
+
+                for artist in new_artists:
                     artist_exists = Artist.query.filter(func.lower(Artist.name)==(func.lower(artist))).first()
                     if artist_exists:
                         duplicate = Performance.query.filter(Performance.artist_id==artist_exists.id, Performance.gig_id==gig.id).first()
@@ -180,6 +195,7 @@ def update_gig(gig_id):
                             )
                             db.session.add(performance)
                             db.session.commit()
+
                     if not artist_exists:
                         artist = Artist(
                             name = artist

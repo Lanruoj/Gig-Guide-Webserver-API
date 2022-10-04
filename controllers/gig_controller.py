@@ -48,7 +48,7 @@ def get_gig_template():
 
 @gigs.route("/", methods=["GET"])
 def get_gigs():
-    gigs = search(Gig, gigs_schema, [Gig.is_expired==False])
+    gigs = search(Gig, gigs_schema, [Gig.is_expired==False], sort=Gig.date_added)
 
     return gigs
 
@@ -83,11 +83,10 @@ def add_gig():
     gig_fields = gig_schema.load(request.json, partial=True)
     # CHECK IF GIG EXISTS WITHIN 2 HOURS OF GIG IN REQUEST
     active_gigs_at_this_venue = Gig.query.filter(Gig.venue_id==gig_fields["venue_id"], Gig.is_expired==False).all()
-    # new_gdt = datetime.strptime(gig_fields["start_time"], "%Y-%m-%d %H:%M:%S")
     for g in active_gigs_at_this_venue:
         delta = g.start_time - gig_fields["start_time"]
-        if (g.start_time.date()==gig_fields["start_time"].date()) and (delta < timedelta(days=0, hours=2)):
-            return abort(409, description=f"{g.artists} has a gig within 2 hours of this at {g.venue.name}")
+        if (g.start_time.date()==gig_fields["start_time"].date()) and (delta.total_seconds() <= 7200) and (delta.total_seconds() >= -7200):
+            return abort(409, description=Markup(f"{g.artists} has a gig within 2 hours of this at {g.venue.name} (ID: {g.id})"))
     
     if gig_fields["start_time"] < datetime.now():
         return abort(409, description=Markup(f"Invalid input - start time must be in the future"))
@@ -95,7 +94,7 @@ def add_gig():
     gig = Gig(
         title = gig_fields["title"],
         start_time = gig_fields["start_time"],
-        timestamp = datetime.now(),
+        date_added = datetime.now(),
         venue_id = gig_fields["venue_id"],
         user_id = get_jwt_identity(),
         artists = gig_fields["artists"]

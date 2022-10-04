@@ -2,13 +2,14 @@ from main import db, bcrypt, jwt
 from utils import search
 from flask import Blueprint, jsonify, request, abort, Markup
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from marshmallow.exceptions import ValidationError
 from datetime import datetime
 from models.gig import Gig
 from schemas.gig_schema import gig_schema, gigs_schema
 from models.performance import Performance
 from schemas.performance_schema import performance_schema
 from models.artist import Artist
-from schemas.artist_schema import artist_schema, artists_schema
+from schemas.artist_schema import artist_schema, artists_schema, ArtistSchema
 from models.watch_artist import WatchArtist
 from schemas.watch_artist_schema import watch_artist_schema
 from models.user import User
@@ -28,8 +29,9 @@ def get_artist_template():
 
 
 @artists.route("/", methods=["GET"])
-def get_artists():
+def search_artists():
     artists = search(Artist, artists_schema)
+
     return artists
 
 
@@ -52,38 +54,45 @@ def add_artist():
     return jsonify(artist_schema.dump(artist))
 
 
-@artists.route("/<int:artist_id>/<attr>", methods=["PUT"])
+@artists.route("/<int:artist_id>", methods=["GET"])
+def get_artist(artist_id):
+    artist = Artist.query.get(artist_id)
+    return jsonify(artist_schema.dump(artist))
+
+
+@artists.route("/<int:artist_id>", methods=["PUT"])
 @jwt_required()
-def update_artist(artist_id, attr):
+def update_artist(artist_id):
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
     if not user or not user.logged_in:
         return abort(401, description="User must be logged in")
 
-    artist_fields = artist_schema.load(request.json, partial=True)
+    try: 
+        artist_fields = artist_schema.load(request.json, partial=True)
+    except ValidationError as err:
+        return jsonify(err.messages)
     
     artist = Artist.query.get(artist_id)
     if not artist:
         return abort(404, description="Artist does not exist")
+    
+    request_data = request.get_json()
 
-    if attr == "name":
-        old_name = artist.name
-        artist.name = artist_fields["name"]
-        db.session.commit()
+    fields, new_values = [], []
+    if "name" in request_data.keys():
+        if user.admin:
+            fields.append("name")
+            artist.name = artist_fields["name"]
+            new_values.append(artist_fields["name"])
+    if "genre" in request_data.keys():
+        fields.append("genre")
+        artist.genre = artist_fields["genre"]
+        new_values.append(artist_fields["genre"])
 
-        return jsonify(message=Markup(f"{old_name}'s name updated to '{artist.name}'"))
+    db.session.commit()
 
-    if attr == "genre":
-        new_genre = artist_fields["genre"]
-        artist.genre = new_genre
-        db.session.commit()
-
-        return jsonify(message=Markup(f"{artist.name}'s genre updated to '{new_genre}'"))
-
-    else:
-
-        return abort(400, description=Markup(f"'{attr}' is not a valid argument. Attributes that can be updated are 'name' and 'genre"))
-
+    return jsonify(message=Markup(f"{artist.name}'s {', '.join(str(field) for field in fields)} successfully updated to {', '.join(str(value) for value in new_values)}"))
 
 
 @artists.route("/<int:artist_id>", methods=["DELETE"])

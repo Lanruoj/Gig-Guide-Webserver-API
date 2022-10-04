@@ -41,7 +41,7 @@ def get_gig_template():
     "start_time": "YYYY-MM-DD HH:MM:SS",
     "description": "[string: optional]",
     "price": "[integer: optional]",
-    "tickets_url": "[string: optional]"
+    "tickets_url": "https://...[string: optional]"
     }
     return gig_template
 
@@ -86,7 +86,7 @@ def add_gig():
     for g in active_gigs_at_this_venue:
         delta = g.start_time - gig_fields["start_time"]
         if (g.start_time.date()==gig_fields["start_time"].date()) and (delta.total_seconds() <= 7200) and (delta.total_seconds() >= -7200):
-            return abort(409, description=Markup(f"{g.artists} has a gig within 2 hours of this at {g.venue.name} (ID: {g.id})"))
+            return abort(409, description=Markup(f"{g.artists} has a gig within 2 hours of this at {g.venue.name} (http://localhost:5000/gigs/{g.id})"))
     
     if gig_fields["start_time"] < datetime.now():
         return abort(409, description=Markup(f"Invalid input - start time must be in the future"))

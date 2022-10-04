@@ -78,8 +78,6 @@ def auth_logout():
     return jsonify(message=Markup(f"{user.username} successfully logged out"))
     
     
-
-
 @auth.route("/<value>", methods=["PUT"])
 @jwt_required()
 def auth_update(value):
@@ -123,17 +121,3 @@ def auth_delete(id):
     db.session.commit()
 
     return jsonify(message=f"{user.username} has been deleted")
-    
-
-
-
-
-
-# @auth.route("/test", methods=["GET"])
-# @jwt_required()
-# def test():
-#     user = User.query.get(get_jwt_identity())
-#     if not user or not user.logged_in:
-#         return abort(401, description="NOT LOGGED IN M8")
-    
-#     return jsonify(message="GR8 SUCCESS")

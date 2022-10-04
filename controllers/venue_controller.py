@@ -1,4 +1,5 @@
 from main import db, bcrypt, jwt
+from utils import search
 from flask import Blueprint, jsonify, request, abort, Markup
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from sqlalchemy import func
@@ -34,10 +35,10 @@ def get_venue_template():
 
 
 @venues.route("/", methods=["GET"])
-def venues_show_all():
-    venue_list = Venue.query.all()
+def get_venues():
+    venues = search(Venue, venues_schema)
     
-    return jsonify(venues_schema.dump(venue_list))
+    return venues
 
 
 @venues.route("/<venue_name>", methods=["GET"])

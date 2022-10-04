@@ -171,6 +171,15 @@ def update_gig(gig_id):
                 artist_input = gig.artists.split(", ")
                 for artist in artist_input:
                     artist_exists = Artist.query.filter(func.lower(Artist.name)==(func.lower(artist))).first()
+                    if artist_exists:
+                        duplicate = Performance.query.filter(Performance.artist_id==artist_exists.id, Performance.gig_id==gig.id).first()
+                        if not duplicate:
+                            performance = Performance(        # <------- REFACTOR / DRY
+                            gig_id = gig.id,
+                            artist_id = artist_exists.id
+                            )
+                            db.session.add(performance)
+                            db.session.commit()
                     if not artist_exists:
                         artist = Artist(
                             name = artist
@@ -184,18 +193,10 @@ def update_gig(gig_id):
                         )
                         db.session.add(performance)
                         db.session.commit()
-                    
-                    else:
-                        performance = Performance(        # <------- REFACTOR / DRY
-                            gig_id = gig.id,
-                            artist_id = artist_exists.id
-                        )
-                        db.session.add(performance)
-                        db.session.commit()  
 
     db.session.commit()
 
-    return jsonify(message=Markup(f"Gig's {', '.join(str(field) for field in fields)} successfully updated to {', '.join(str(value) for value in new_values)}"))
+    return jsonify(message=Markup(f"Gig {gig.id}'s {', '.join(str(field) for field in fields)} successfully updated to {', '.join(str(value) for value in new_values)}"))
         
 
 @gigs.route("/<int:gig_id>", methods=["DELETE"])

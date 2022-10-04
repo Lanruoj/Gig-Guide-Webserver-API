@@ -1,5 +1,5 @@
 from main import db, bcrypt, jwt
-from utils import search
+from utils import search_table, update_record
 from flask import Blueprint, jsonify, request, abort, Markup
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from marshmallow.exceptions import ValidationError
@@ -30,7 +30,7 @@ def get_artist_template():
 
 @artists.route("/", methods=["GET"])
 def search_artists():
-    artists = search(Artist, artists_schema)
+    artists = search_table(Artist, artists_schema)
 
     return artists
 
@@ -68,31 +68,11 @@ def update_artist(artist_id):
     if not user or not user.logged_in:
         return abort(401, description="User must be logged in")
 
-    try: 
-        artist_fields = artist_schema.load(request.json, partial=True)
-    except ValidationError as err:
-        return jsonify(err.messages)
-    
-    artist = Artist.query.get(artist_id)
-    if not artist:
-        return abort(404, description="Artist does not exist")
-    
-    request_data = request.get_json()
-
-    fields, new_values = [], []
-    if "name" in request_data.keys():
-        if user.admin:
-            fields.append("name")
-            artist.name = artist_fields["name"]
-            new_values.append(artist_fields["name"])
-    if "genre" in request_data.keys():
-        fields.append("genre")
-        artist.genre = artist_fields["genre"]
-        new_values.append(artist_fields["genre"])
+    update = update_record(artist_id, Artist, artist_schema)
+    print(update)
 
     db.session.commit()
-
-    return jsonify(message=Markup(f"{artist.name}'s {', '.join(str(field) for field in fields)} successfully updated to {', '.join(str(value) for value in new_values)}"))
+    return update
 
 
 @artists.route("/<int:artist_id>", methods=["DELETE"])

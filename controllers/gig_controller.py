@@ -1,6 +1,6 @@
 from re import S
 from main import db, bcrypt, jwt
-from utils import search
+from utils import search_table
 from flask import Blueprint, jsonify, request, abort, Markup
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from sqlalchemy import func, desc, and_
@@ -48,7 +48,7 @@ def get_gig_template():
 
 @gigs.route("/", methods=["GET"])
 def get_gigs():
-    gigs = search(Gig, gigs_schema, [Gig.is_expired==False], sort=Gig.date_added)
+    gigs = search_table(Gig, gigs_schema, [Gig.is_expired==False], sort=Gig.date_added)
 
     return gigs
 
@@ -65,7 +65,7 @@ def show_specific_gig(gig_id):
 @gigs.route("/bin", methods=["GET"])
 def show_expired_gigs():
     # SELECT ALL RECORDS FROM THE gigs TABLE. IF NO RECORDS, RETURN DESCRIPTIVE MESSAGE
-    expired_gigs = search(Gig, gigs_schema, [Gig.is_expired==True])
+    expired_gigs = search_table(Gig, gigs_schema, [Gig.is_expired==True])
 
     if not expired_gigs:
         return jsonify(message="There are currently no expired gigs")

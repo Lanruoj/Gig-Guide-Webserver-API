@@ -1,5 +1,5 @@
 from main import db, bcrypt, jwt
-from utils import search
+from utils import search_table
 from flask import Blueprint, jsonify, request, abort, Markup
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from sqlalchemy import func
@@ -36,7 +36,7 @@ def get_venue_template():
 
 @venues.route("/", methods=["GET"])
 def get_venues():
-    venues = search(Venue, venues_schema)
+    venues = search_table(Venue, venues_schema)
     
     return venues
 

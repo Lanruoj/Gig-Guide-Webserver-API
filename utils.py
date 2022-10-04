@@ -1,8 +1,10 @@
 from flask import request, abort, jsonify, Markup
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import desc
+from marshmallow.exceptions import ValidationError
 
 
-def search(table, schema, filters=None, sort=None, asc=True, no_results="No results found"):
+def search_table(table, schema, filters=None, sort=None, asc=True, no_results="No results found"):
     if not filters:
         filters = []
     if request.query_string:
@@ -38,3 +40,25 @@ def search(table, schema, filters=None, sort=None, asc=True, no_results="No resu
         return abort(404, description=no_results)
 
     return jsonify(schema.dump(results))
+
+
+def update_record(record_id, table, schema):
+    try: 
+        schema_fields = schema.load(request.json, partial=True)
+    except ValidationError as err:
+        return jsonify(err.messages)
+    
+    record = table.query.get(record_id)
+    if not record:
+        return abort(404, description=Markup(f"{table.__name__} does not exist"))
+    
+    request_data = request.get_json()
+
+    fields, new_values = [], []
+    for attribute in request_data.keys():
+        if attribute in vars(table):
+            setattr(record, attribute, schema_fields[attribute])
+            new_values.append(schema_fields[attribute])
+            fields.append(attribute)
+
+    return jsonify(message=Markup(f"{record.name}'s {', '.join(str(field) for field in fields)} successfully updated to {', '.join(str(value) for value in new_values)}"))

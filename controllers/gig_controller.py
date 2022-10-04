@@ -48,7 +48,7 @@ def get_gig_template():
 
 @gigs.route("/", methods=["GET"])
 def get_gigs():
-    gigs = search(Gig, gigs_schema, [Gig.is_expired==False, Gig.is_deleted==False])
+    gigs = search(Gig, gigs_schema, [Gig.is_expired==False])
 
     return gigs
 
@@ -63,14 +63,14 @@ def show_specific_gig(gig_id):
 
 
 @gigs.route("/bin", methods=["GET"])
-def show_inactive_gigs():
+def show_expired_gigs():
     # SELECT ALL RECORDS FROM THE gigs TABLE. IF NO RECORDS, RETURN DESCRIPTIVE MESSAGE
-    inactive_gigs = Gig.query.filter((Gig.is_deleted==True) | (Gig.is_expired==True)).all()
+    expired_gigs = search(Gig, gigs_schema, [Gig.is_expired==True])
 
-    if not inactive_gigs:
-        return jsonify(message="There are currently no inactive gigs")
+    if not expired_gigs:
+        return jsonify(message="There are currently no expired gigs")
 
-    return jsonify(gigs_schema.dump(inactive_gigs))
+    return expired_gigs
 
 
 @gigs.route("/", methods=["POST"])
@@ -82,7 +82,7 @@ def add_gig():
         
     gig_fields = gig_schema.load(request.json, partial=True)
     # CHECK IF GIG EXISTS WITHIN 2 HOURS OF GIG IN REQUEST
-    active_gigs_at_this_venue = Gig.query.filter(Gig.venue_id==gig_fields["venue_id"], Gig.is_deleted==False).all()
+    active_gigs_at_this_venue = Gig.query.filter(Gig.venue_id==gig_fields["venue_id"], Gig.is_expired==False).all()
     # new_gdt = datetime.strptime(gig_fields["start_time"], "%Y-%m-%d %H:%M:%S")
     for g in active_gigs_at_this_venue:
         delta = g.start_time - gig_fields["start_time"]
@@ -110,7 +110,6 @@ def add_gig():
         gig.description = gig_fields["description"]
     db.session.add(gig)
     db.session.commit()
-
 
     artist_input = gig.artists.split(", ")
     for artist in artist_input:
@@ -192,7 +191,7 @@ def delete_gig(gig_id):
     if not user_created_gig:
         return abort(401, description=Markup(f"User didn't create gig"))
     
-    gig.is_deleted = True
+    db.session.delete(gig)
     db.session.commit()
 
     return jsonify(message=Markup(f"{gig.title} has been deleted"))

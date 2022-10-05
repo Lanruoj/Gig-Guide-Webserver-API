@@ -42,7 +42,7 @@ def update_user(value):
     
     # IF USER EXISTS, USE AS THE RECORD TO UPDATE    
     user_fields = user_schema.load(request.json, partial=True)
-
+    # CHECK IF ARGUMENT FROM PATH PARAMETER MATCHES THE FOLLOWING ATTRIBUTES, AND IF SO THEN UPDATE THE CORRESPONDING COLUMN WITH THE VALUE FROM REQUEST FIELDS
     if value=="username":
         user.username = user_fields["username"]
     elif value=="password":
@@ -53,7 +53,7 @@ def update_user(value):
         user.first_name = user_fields["first_name"]
     elif value=="last_name":
         user.last_name = user_fields["last_name"]
-
+    # COMMIT CHANGES TO DATABASE
     db.session.commit()
 
     return jsonify(user_schema.dump(user))
@@ -63,13 +63,15 @@ def update_user(value):
 @jwt_required()
 def delete_user(user_id):
     token_id = int(get_jwt_identity())
+    # FETCH USER FROM USER TABLE USING PATH PAREMETER user_id
     user = User.query.get(user_id)
     if not user:
         return abort(401, description="Must be logged in to perform this action")
     if not user.admin:
+        # IF token_id RETURNED FROM JWT TOKEN VIA get_jwt_identity() DOESN'T MATCH THE TARGET USER TO DELETE THEN ABORT
         if token_id != user_id:
             return abort(401, description="Must be an administrator to delete other profiles")
-
+    # OTHERWISE, IF USER IS ADMIN OR OWNER OF PROFILE THEN DELETE USER AND COMMIT TO DATABASE
     db.session.delete(user)
     db.session.commit()
 

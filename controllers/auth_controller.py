@@ -82,32 +82,3 @@ def auth_logout():
     db.session.commit()
 
     return jsonify(message=Markup(f"{user.username} successfully logged out"))
-    
-    
-@auth.route("/<value>", methods=["PUT"])
-@jwt_required()
-def auth_update(value):
-    # GET THE id OF THE JWT ACCESS TOKEN FROM @jwt_required()
-    user_id = int(get_jwt_identity())
-    # RETRIEVE THE User OBJECT WITH THE id FROM get_jwt_identity() SO IT CAN BE UPDATED
-    user = User.query.get(user_id)
-    if not user or not user.logged_in:
-        return abort(401, description="User not logged in")
-    
-    # IF USER EXISTS, USE AS THE RECORD TO UPDATE    
-    user_fields = user_schema.load(request.json, partial=True)
-    # CHECK IF ARGUMENT FROM PATH PARAMETER MATCHES THE FOLLOWING ATTRIBUTES, AND IF SO THEN UPDATE THE CORRESPONDING COLUMN WITH THE VALUE FROM REQUEST FIELDS
-    if value=="username":
-        user.username = user_fields["username"]
-    elif value=="password":
-        user.password = bcrypt.generate_password_hash(user_fields["password"]).decode("utf-8")
-    elif value=="email":
-        user.email = user_fields["email"]
-    elif value=="first_name":
-        user.first_name = user_fields["first_name"]
-    elif value=="last_name":
-        user.last_name = user_fields["last_name"]
-    # COMMIT CHANGES TO DATABASE
-    db.session.commit()
-
-    return jsonify(user_schema.dump(user))

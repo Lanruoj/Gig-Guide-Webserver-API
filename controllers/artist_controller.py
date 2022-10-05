@@ -30,7 +30,7 @@ def get_artist_template():
 
 
 @artists.route("/", methods=["GET"])
-def search_artists():
+def get_artists():
     # SEARCH ARTISTS TABLE - BY DEFAULT RETURN ALL BUT TAKES OPTIONAL QUERY STRING ARGUMENTS FOR FILTERING AND SORTING
     artists = search_table(Artist)
     
@@ -116,10 +116,10 @@ def watch_artist():
     artist = Artist.query.get(watch_artist_fields["artist_id"])
     if not artist:
         return abort(404, description="Artist does not exist")
-    # CHECK IF USER IS ALREADY WATCHING THE ARTIST
+    # LOOK THROUGH ALL OF USER'S WATCHED ARTISTS TO CHECK IF USER IS ALREADY WATCHING THE ARTIST FROM THE REQUEST (CHECK FOR DUPLICATE)
     for wa in users_watched_artists:
         if wa.artist_id == watch_artist_fields["artist_id"]:
-            # IF artist_id ALREADY IN USER'S WATCHED ARTISTS, FETCH ARTIST FOR DESCRIPTIVE MESSAGE
+            # IF artist_id ALREADY IN USER'S WATCHED ARTISTS, FETCH ARTIST'S NAME FOR DESCRIPTIVE MESSAGE
             artist = Artist.query.get(watch_artist_fields["artist_id"])
 
             return abort(400, description=f"{user.first_name} already watching {artist.name}")

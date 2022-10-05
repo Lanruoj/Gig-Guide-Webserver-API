@@ -57,7 +57,8 @@ def auth_login():
     user = User.query.filter_by(email=user_fields["email"]).first()
     if not user or not bcrypt.check_password_hash(user.password, user_fields["password"]):
         return abort(401, description="Invalid email or password, please try again")
-    
+    if user.logged_in:
+        return abort(400, description="User already logged in")
     token = create_access_token(identity=str(user.id), expires_delta=timedelta(days=1))
     user.logged_in = True
     db.session.commit()
@@ -107,17 +108,17 @@ def auth_update(value):
     return jsonify(user_schema.dump(user))
 
 
-@auth.route("/<int:id>", methods=["DELETE"])
-@jwt_required()
-def auth_delete(id):
-    token_id = int(get_jwt_identity())
-    user = User.query.get(token_id)
-    if not user or not user.logged_in:
-        return abort(401, description="Unauthorised - user must be logged in")
-    if (user.id != id) and (not user.admin):
-        return abort(401, description="Unauthorised - can only delete own profile")
+# @auth.route("/<int:id>", methods=["DELETE"])
+# @jwt_required()
+# def auth_delete(id):
+#     token_id = int(get_jwt_identity())
+#     user = User.query.get(token_id)
+#     if not user or not user.logged_in:
+#         return abort(401, description="Unauthorised - user must be logged in")
+#     if (user.id != id) and (not user.admin):
+#         return abort(401, description="Unauthorised - can only delete own profile")
     
-    db.session.delete(user)
-    db.session.commit()
+#     db.session.delete(user)
+#     db.session.commit()
 
-    return jsonify(message=f"{user.username} has been deleted")
+#     return jsonify(message=f"{user.username} has been deleted")

@@ -131,7 +131,7 @@ def delete_venue(venue_id):
 @venues.route("/watch", methods=["POST"])
 @jwt_required()
 def add_watched_venue():
-    watch_venue_fields = watch_venue_schema.load(request.json)
+    watch_venue_fields = watch_venue_schema.load(request.json, partial=True)
 
     user = User.query.get(int(get_jwt_identity()))
     if not user or not user.logged_in:

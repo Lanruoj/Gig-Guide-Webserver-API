@@ -6,7 +6,7 @@ from marshmallow.validate import Length, ContainsOnly
 class GigSchema(ma.Schema):
     class Meta:
         ordered = True
-        fields = ("id", "title", "description", "artists", "venue", "start_time", "price", "tickets_url", "date_added", "is_expired", "venue_id", "user_id", "user", "performances")
+        fields = ("id", "title", "description", "artists", "venue", "start_time", "price", "tickets_url", "date_added", "is_expired", "venue_id", "user_id", "posted_by", "performances")
         load_only = ["user_id", "performances"]
 
     title = ma.String(required=True, validate=Length(max=32))
@@ -19,7 +19,7 @@ class GigSchema(ma.Schema):
 
     performances = fields.List(fields.Nested("PerformanceSchema"))
     venue = fields.Pluck("VenueSchema", "name")
-    user = fields.Pluck("UserSchema", "username")
+    # posted_by = fields.Pluck("UserSchema", "username")
 
 gig_schema = GigSchema()
 gigs_schema = GigSchema(many=True)

@@ -13,12 +13,20 @@ class User(db.Model):
     admin = db.Column(db.Boolean, default=False)
     logged_in = db.Column(db.Boolean, default=False, nullable=False)
 
+    gigs = db.relationship(
+        "Gig",
+        backref="user_gigs",
+        cascade="all, delete"
+    )
+
     watched_venues = db.relationship(
         "WatchVenue",
-        backref="user_wv"
+        backref="user_wv",
+        cascade="all, delete"
     )
 
     watched_artists = db.relationship(
         "WatchArtist",
-        backref="user_wa"
+        backref="user_wa",
+        cascade="all, delete"
     )

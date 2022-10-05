@@ -81,7 +81,7 @@ def seed_db():
     db.session.add(test_venue2)
     db.session.commit()
 
-    test_gig = Gig(
+    test_gig1 = Gig(
         title = "Gregor [EXPIRED]",
         description = "Gregor plays Destiny at the Forum!",
         start_time = datetime(year=2022, month=9, day=17, hour=18),
@@ -91,8 +91,8 @@ def seed_db():
         venue_id = 2,
         user_id = 1
     )
-    db.session.add(test_gig)
-    test_gig1 = Gig(
+    db.session.add(test_gig1)
+    test_gig2 = Gig(
         title = "Jordan Ireland at the Jazzlab [ACTIVE]",
         description = "Jordan Ireland plays at the Jazzlab!",
         start_time = datetime(year=2023, month=9, day=17, hour=18),
@@ -103,7 +103,20 @@ def seed_db():
         venue_id = 3,
         user_id = 1
     )
-    db.session.add(test_gig1)
+    db.session.add(test_gig2)
+    db.session.commit()
+    test_gig3 = Gig(
+        title = "Sweet Whirl at the Forum [ACTIVE]",
+        description = "...",
+        start_time = datetime(year=2023, month=5, day=17, hour=18),
+        price = 13,
+        tickets_url = "https://tickets.gig.com",
+        date_added = datetime.now(),
+        artists = "Sweet Whirl",
+        venue_id = 2,
+        user_id = 1
+    )
+    db.session.add(test_gig3)
     db.session.commit()
 
     wv = WatchVenue(

@@ -39,7 +39,7 @@ def search_table(table, schema, filters=None, sort=None, asc=True, no_results="N
     if not results:
         return abort(404, description=no_results)
 
-    return jsonify(schema.dump(results))
+    return results
 
 
 def update_record(record_id, table, schema):

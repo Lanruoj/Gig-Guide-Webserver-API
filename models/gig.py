@@ -23,10 +23,10 @@ class Gig(db.Model):
         backref="gig_venue"
     )
 
-    user = db.relationship(
-        "User",
-        backref="gig_user"
-    )
+    # posted_by = db.relationship(
+    #     "User",
+    #     backref("gig_user", cascade="all, delete")
+    # )
     
     performances = db.relationship(
         "Performance",

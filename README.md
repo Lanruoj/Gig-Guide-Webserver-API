@@ -46,3 +46,10 @@ https://blog.bitsrc.io/what-is-an-orm-and-why-you-should-use-it-b2b6f75f5e2a
 * For sensitive data storage I will use **Flask-Bcrypt** (`flask_bcrypt`) for its hashing tools to ensure that sensitive information such as passwords are not stored in plain-text in the database.
 
 
+
+
+***
+## **8. Describe your projects models in terms of the relationships they have with each other**
+***
+
+The models that will be included in my project are `User`, `Gig`, `Venue` and `Artist`. A `User` is a user's profile that holds their identifying information such as `username`, `first_name`, `last_name` as well as their login credentials `email` and `password`. `Users` create `Gigs` 

@@ -15,7 +15,7 @@ class User(db.Model):
 
     gigs = db.relationship(
         "Gig",
-        backref="user_gigs",
+        back_populates="posted_by",
         cascade="all, delete"
     )
 

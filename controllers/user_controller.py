@@ -64,9 +64,11 @@ def update_user(value):
 def delete_user(user_id):
     token_id = int(get_jwt_identity())
     user = User.query.get(user_id)
+    if not user:
+        return abort(401, description="Must be logged in to perform this action")
     if not user.admin:
         if token_id != user_id:
-            return abort(401, description="Unauthorised - must be an administrator to delete other profiles")
+            return abort(401, description="Must be an administrator to delete other profiles")
 
     db.session.delete(user)
     db.session.commit()

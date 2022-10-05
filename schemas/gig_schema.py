@@ -19,7 +19,7 @@ class GigSchema(ma.Schema):
 
     performances = fields.List(fields.Nested("PerformanceSchema"))
     venue = fields.Pluck("VenueSchema", "name")
-    # posted_by = fields.Pluck("UserSchema", "username")
+    posted_by = fields.Pluck("UserSchema", "username")
 
 gig_schema = GigSchema()
 gigs_schema = GigSchema(many=True)

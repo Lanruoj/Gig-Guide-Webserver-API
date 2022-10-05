@@ -142,13 +142,15 @@ def add_gig():
 @gigs.route("/<int:gig_id>", methods=["PUT"])
 @jwt_required()
 def update_gig(gig_id):
+    # FETCH USER FROM THEIR JWT TOKEN
     user = User.query.get(int(get_jwt_identity()))
-    gig = Gig.query.filter(Gig.id==gig_id, Gig.user_id==user.id).first()
+    # FETCH GIG WITH gig_id FROM PATH ARGUMENT
+    gig = Gig.query.filter(Gig.id==gig_id).first()
     if not gig:
         return abort(404, description=Markup(f"Invalid gig ID. Please try again"))
     if not user or not user.logged_in:
         return abort(401, description="Unauthorised - user must be logged in")
-    if (user.id != gig.user_id):
+    if user.id != gig.user_id:
         return abort(401, description="Unauthorised - user did not post the gig")
 
     try: 
@@ -175,11 +177,11 @@ def update_gig(gig_id):
                 old_artists = old_input.split(", ")
                 new_artists = gig.artists.split(", ")
                 for artist in old_artists:
-                    # FETCH OLD ARTIST FROM DATABASE
+                    # FETCH ARTISTS THAT WERE ORIGINALLY IN THE "artists" COLUMN FROM DATABASE
                     old_artist = Artist.query.filter_by(name=artist).first()
-                    # IF Artist HAS BEEN REMOVED FROM Gig, DELETE THE RELATED Performance
+                    # IF ARTIST HAS BEEN REMOVED FROM GIG, DELETE THE RELATED PERFORMANCE
                     if not artist in new_artists:
-                        # FETCH Performance WITH MATCHING gig_id & artist_id
+                        # FETCH PERFORMANCE WITH MATCHING gig_id & artist_id
                         performance = Performance.query.filter(Performance.artist_id==old_artist.id, Performance.gig_id==gig.id).first()
                         # DELETE RECORD
                         db.session.delete(performance)

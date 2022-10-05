@@ -18,15 +18,14 @@ class Gig(db.Model):
     venue_id = db.Column(db.Integer, db.ForeignKey("venues.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
-    venue = db.relationship(
+    gig_venue = db.relationship(
         "Venue",
-        backref="gig_venue"
+        back_populates="venue_gigs"
     )
 
     posted_by = db.relationship(
         "User",
-        back_populates="gigs",
-        cascade="all, delete"
+        back_populates="gigs"
     )
     
     performances = db.relationship(

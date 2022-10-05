@@ -12,15 +12,15 @@ class Venue(db.Model):
     country = db.Column(db.String(), nullable=False)
     type = db.Column(db.String())
 
-    gigs = db.relationship(
+    venue_gigs = db.relationship(
         "Gig",
-        backref="venue_gigs",
-        viewonly=True
+        back_populates="gig_venue",
+        cascade="all, delete"
     )
 
-    watched_venues = db.relationship(
+    wv_venue = db.relationship(
         "WatchVenue",
-        backref="venue",
+        backref="venue_wv",
         cascade="all, delete"
     )
     

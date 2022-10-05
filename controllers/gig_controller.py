@@ -52,7 +52,7 @@ def get_gig_template():
 @gigs.route("/", methods=["GET"])
 def get_gigs():
     # SEARCH GIGS TABLE - BY DEFAULT RETURN ALL NON-EXPIRED GIGS BUT TAKES OPTIONAL QUERY STRING ARGUMENTS FOR FILTERING AND SORTING
-    gigs = search_table(Gig, gigs_schema, [Gig.is_expired==False], sort=Gig.date_added)
+    gigs = search_table(Gig, filters=[Gig.is_expired==False], sort=Gig.date_added)
 
     return jsonify(gigs_schema.dump(gigs))
 
@@ -70,7 +70,7 @@ def show_specific_gig(gig_id):
 @gigs.route("/bin", methods=["GET"])
 def show_expired_gigs():
     # SELECT ALL RECORDS FROM THE GIGS TABLE WITH is_expired=True
-    expired_gigs = search_table(Gig, gigs_schema, [Gig.is_expired==True])
+    expired_gigs = search_table(Gig, filters=[Gig.is_expired==True])
     if not expired_gigs:
         return jsonify(message="There are currently no expired gigs")
 

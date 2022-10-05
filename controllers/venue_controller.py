@@ -36,19 +36,18 @@ def get_venue_template():
 
 @venues.route("/", methods=["GET"])
 def get_venues():
-    venues = search_table(Venue, venues_schema)
+    venues = search_table(Venue)
     
-    return venues
+    return jsonify(venues_schema.dump(venues))
 
 
-@venues.route("/<venue_name>", methods=["GET"])
-def search_for_venue(venue_name):
-    venue = Venue.query.filter(Venue.name.match(venue_name)).all()
+@venues.route("/<int:venue_id>", methods=["GET"])
+def get_venue(venue_id):
+    venue = Venue.query.get(venue_id)
     if not venue:
-        return abort(404, description="No venues exist with that name")
+        return abort(404, description=f"No venues exist with ID={venue_id}")
     
-    result_schema = VenueSchema(exclude=("gigs",), many=True)
-    return jsonify(result_schema.dump(venue))
+    return jsonify(venue_schema.dump(venue))
 
 
 @venues.route("/", methods=["POST"])
@@ -112,15 +111,15 @@ def update_venue(venue_id, attr):
 @jwt_required()
 def delete_venue(venue_id):
     user = User.query.get(int(get_jwt_identity()))
-    if not user.admin or not user.logged_in:
+    if not user.admin:
         return abort(401, description="Must be an administrator to perform this action")
 
     venue = Venue.query.get(venue_id)
     if not venue:
-        return abort(401, description=Markup(f"No venue with that ID exists"))
+        return abort(401, description=Markup(f"No venues found with ID={venue_id}"))
     
-    if venue.gigs:
-        return abort(409, description=Markup(f"Deletion cannot be performed because there are upcoming gigs at {venue.name}"))
+    # if venue.gigs:
+    #     return abort(409, description=Markup(f"Deletion cannot be performed because there are upcoming gigs at {venue.name}"))
 
     db.session.delete(venue)
     db.session.commit()

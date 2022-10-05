@@ -10,7 +10,7 @@ alphanumeric = ascii_uppercase + ascii_lowercase + digits
 class VenueSchema(ma.Schema):
     class Meta:
         ordered = True
-        fields = ("id", "name", "street_address", "city", "state", "country", "type", "gigs")
+        fields = ("id", "name", "street_address", "city", "state", "country", "type", "venue_gigs")
     
     name = ma.String(required=True)
     street_address = ma.String(required=True, validate=ContainsOnly(alphanumeric + " /-,()&."))
@@ -19,7 +19,7 @@ class VenueSchema(ma.Schema):
     country = ma.String(required=True, validate=ContainsOnly(ascii_uppercase + ascii_lowercase + " '-."))
     type = ma.String()
 
-    gigs = fields.List(fields.Nested("GigSchema"))
+    venue_gigs = fields.List(fields.Nested("GigSchema"))
 
 venue_schema = VenueSchema()
 venues_schema = VenueSchema(many=True)

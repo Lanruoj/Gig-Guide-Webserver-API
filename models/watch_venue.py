@@ -7,3 +7,8 @@ class WatchVenue(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     venue_id = db.Column(db.Integer, db.ForeignKey("venues.id"), nullable=False)
+
+    # venue_wv = db.relationship(
+    #     "Venue",
+    #     backref="wv_venue"
+    # )

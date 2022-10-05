@@ -10,7 +10,7 @@ alphanumeric = ascii_uppercase + ascii_lowercase + digits
 class UserSchema(ma.Schema):
     class Meta:
         ordered = True
-        fields = ("user_id", "username", "email", "password", "first_name", "last_name", "logged_in", "watched_venues", "watched_artists", "gigs")
+        fields = ("user_id", "username", "email", "password", "first_name", "last_name", "logged_in", "watched_venues", "watched_artists")
         load_only = ["password"]
 
     username = ma.String(required=True, validate=[Length(min=1, max=32), ContainsOnly(alphanumeric + "_")])

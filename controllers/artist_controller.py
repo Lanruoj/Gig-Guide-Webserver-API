@@ -32,9 +32,9 @@ def get_artist_template():
 @artists.route("/", methods=["GET"])
 def search_artists():
     # SEARCH ARTISTS TABLE - BY DEFAULT RETURN ALL BUT TAKES OPTIONAL QUERY STRING ARGUMENTS FOR FILTERING AND SORTING
-    artists = search_table(Artist, artists_schema)
+    artists = search_table(Artist)
     
-    return artists
+    return jsonify(artists_schema.dump(artists))
 
 
 @artists.route("/", methods=["POST"])

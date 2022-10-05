@@ -4,7 +4,7 @@ from sqlalchemy import desc
 from marshmallow.exceptions import ValidationError
 
 
-def search_table(table, schema, filters=None, sort=None, asc=True, no_results="No results found"):
+def search_table(table, filters=None, sort=None, asc=True, no_results="No results found"):
     if not filters:
         filters = []
     if request.query_string:

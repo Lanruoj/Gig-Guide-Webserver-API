@@ -119,15 +119,17 @@ def watch_artist():
     # CHECK IF USER IS ALREADY WATCHING THE ARTIST
     for wa in users_watched_artists:
         if wa.artist_id == watch_artist_fields["artist_id"]:
+            # IF artist_id ALREADY IN USER'S WATCHED ARTISTS, FETCH ARTIST FOR DESCRIPTIVE MESSAGE
             artist = Artist.query.get(watch_artist_fields["artist_id"])
 
             return abort(400, description=f"{user.first_name} already watching {artist.name}")
     
-
+    # IF VALID REQUEST CREATE NEW WATCHARTIST RECORD
     new_watched_artist = WatchArtist(
         user_id = user.id,
         artist_id = watch_artist_fields["artist_id"]
     )
+    # ADD NEW RECORD TO SESSION AND COMMIT TO DATABASE
     db.session.add(new_watched_artist)
     db.session.commit()
 

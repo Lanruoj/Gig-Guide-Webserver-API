@@ -7,11 +7,11 @@ class Gig(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(), nullable=False)
-    description = db.Column(db.String(), default="N/A")
+    description = db.Column(db.String()) # , default="N/A"
     artists = db.Column(db.String(), nullable=False)
     start_time = db.Column(db.DateTime, nullable=False)
     price = db.Column(db.Integer, default=0)
-    tickets_url = db.Column(db.String(), default="N/A")
+    tickets_url = db.Column(db.String()) # , default="N/A"
     date_added = db.Column(db.DateTime)
     is_expired = db.Column(db.Boolean, default=False)
     
@@ -28,7 +28,8 @@ class Gig(db.Model):
         back_populates="gigs"
     )
     
-    performances = db.relationship(
+    gig_performances = db.relationship(
         "Performance",
-        backref="g_gig"
+        back_populates="performance_gig",
+        cascade="all, delete"
     )

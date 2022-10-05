@@ -143,21 +143,28 @@ def add_gig():
 @jwt_required()
 def update_gig(gig_id):
     # FETCH USER FROM THEIR JWT TOKEN
-    user = User.query.get(int(get_jwt_identity()))
-    # FETCH GIG WITH gig_id FROM PATH ARGUMENT
-    gig = Gig.query.filter(Gig.id==gig_id).first()
-    if not gig:
-        return abort(404, description=Markup(f"Invalid gig ID. Please try again"))
+    user = User.query.get(get_jwt_identity())
     if not user or not user.logged_in:
         return abort(401, description="Unauthorised - user must be logged in")
-    if user.id != gig.user_id:
-        return abort(401, description="Unauthorised - user did not post the gig")
-
+    # IF USER IS NOT AN ADMIN, ATTEMPT TO FETCH GIG WITH MATCHING gig_id FROM PATH ARGUMENT AND user_id FROM JWT TOKEN
+    if not user.admin:
+        gig = Gig.query.filter(Gig.id==gig_id, Gig.user_id==user.id).first()
+        if not gig:
+            return abort(404, description=Markup(f"User must have created gig to update it"))
+    # IF USER IS AN ADMIN, SIMPLY FETCH GIG WITH gig_id
+    else:
+        # GET GIG 
+        gig = Gig.query.get(gig_id)
+        if not gig:
+            return abort(404, description=Markup(f"No gigs found with ID: {gig.id}"))
+    
+    # TRY TO LOAD REQUEST DATA THROUGH THE SCHEMA
     try: 
         gig_fields = gig_schema.load(request.json, partial=True)
+    # IF INVALID, RETURN A DESCRIPTIVE ERROR
     except ValidationError as err:
         return jsonify(err.messages)
-    
+    # GET GIG 
     gig = Gig.query.get(gig_id)
     if not gig:
         return abort(404, description=Markup(f"No gigs found with ID: {gig.id}"))
@@ -214,7 +221,7 @@ def update_gig(gig_id):
 
     db.session.commit()
 
-    return jsonify(message=Markup(f"Gig {gig.id}'s {', '.join(str(field) for field in fields)} successfully updated to {', '.join(str(value) for value in new_values)}"))
+    return jsonify(message=Markup(f"{gig.title}'s {', '.join(str(field) for field in fields)} successfully updated"))
         
 
 @gigs.route("/<int:gig_id>", methods=["DELETE"])

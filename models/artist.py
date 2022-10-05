@@ -16,5 +16,6 @@ class Artist(db.Model):
 
     performances = db.relationship(
         "Performance",
-        backref="a_gig"
+        backref="a_gig",
+        cascade="all, delete"
     )

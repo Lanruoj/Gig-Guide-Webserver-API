@@ -8,6 +8,12 @@ class Artist(db.Model):
     name = db.Column(db.String(), nullable=False)
     genre = db.Column(db.String())
 
+    artist_wa = db.relationship(
+        "WatchArtist",
+        back_populates="artist",
+        cascade="all, delete"
+    )
+
     performances = db.relationship(
         "Performance",
         backref="a_gig"

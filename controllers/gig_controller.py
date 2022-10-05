@@ -83,16 +83,20 @@ def add_gig():
     # FETCH USER WITH user_id AS RETURNED BY get_jwt_identity() FROM JWT TOKEN
     user = User.query.get(get_jwt_identity())
     if not user or not user.logged_in:
-        return abort(401, description="User not logged in")       
-    
+        return abort(401, description="User not logged in")    
+
     gig_fields = gig_schema.load(request.json, partial=True)
+    # CHECK IF VENUE WITH venue_id IN REQUEST EXISTS IN VENUE TABLE 
+    venue = Venue.query.get(gig_fields["venue_id"])
+    if not venue:
+        return abort(400, description=f"Invalid venue (ID={gig_fields['venue_id']})")
     # GET A LIST OF ALL ACTIVE GIGS WITH THE SAME venue_id
     active_gigs_at_this_venue = Gig.query.filter(Gig.venue_id==gig_fields["venue_id"], Gig.is_expired==False).all()
     # FOR EACH ACTIVE GIG, IF GIG EXISTS WITH A start_time WITHIN 2 HOURS OF THE REQUEST'S start_time, RETURN DESCRIPTIVE ERROR
     for g in active_gigs_at_this_venue:
         delta = g.start_time - gig_fields["start_time"]
         if (g.start_time.date()==gig_fields["start_time"].date()) and (delta.total_seconds() <= 7200) and (delta.total_seconds() >= -7200):
-            return abort(409, description=Markup(f"{g.artists} has a gig within 2 hours of this at {g.venue.name} (http://localhost:5000/gigs/{g.id})"))
+            return abort(409, description=Markup(f"{g.artists} has a gig within 2 hours of this at {g.gig_venue.name} (http://localhost:5000/gigs/{g.id})"))
     # CHECK IF REQUEST start_time IS IN FUTURE
     if gig_fields["start_time"] < datetime.now():
         return abort(409, description=Markup(f"Invalid input - start time must be in the future"))

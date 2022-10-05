@@ -10,5 +10,5 @@ class WatchArtist(db.Model):
 
     artist = db.relationship(
         "Artist",
-        backref="wa_artist"
+        back_populates="artist_wa"
     )

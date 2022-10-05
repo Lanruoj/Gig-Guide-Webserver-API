@@ -62,6 +62,8 @@ def add_artist():
 def get_artist(artist_id):
     # FETCH ARTIST WITH id MATCHING artist_id FROM PATH PARAMETER
     artist = Artist.query.get(artist_id)
+    if not artist:
+        return abort(404, description="Artist does not exist")
 
     return jsonify(artist_schema.dump(artist))
 

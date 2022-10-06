@@ -21,19 +21,6 @@ from schemas.watch_venue_schema import watch_venue_schema
 venues = Blueprint("venues", __name__, url_prefix="/venues")
 
 
-# @venues.route("/template", methods=["GET"])
-# def get_venue_template():
-#     venue_template = {
-#         "name": "...",
-#         "street_address": "...",
-#         "city": "...",
-#         "state": "...",
-#         "country": "...",
-#         "type": "... [e.g Music venue, Pub, Restaurant, Bar, Nightclub etc.]"
-#     }
-#     return venue_template
-
-
 @venues.route("/", methods=["GET"])
 def get_venues():
     # SEARCH VENUES TABLE - BY DEFAULT RETURN ALL VENUES BUT TAKES OPTIONAL QUERY STRING ARGUMENTS FOR FILTERING AND SORTING
@@ -142,6 +129,15 @@ def delete_venue(venue_id):
     db.session.commit()
 
     return jsonify(message=Markup(f"{venue.name} has been deleted"))
+
+
+@venues.route("/watch", methods=["GET"])
+def watch_venue_form():
+    wv_template = {
+        "venue_id": "[integer]"
+    }
+    
+    return wv_template
 
 
 @venues.route("/watch", methods=["POST"])

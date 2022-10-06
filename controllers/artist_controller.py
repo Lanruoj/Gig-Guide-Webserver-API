@@ -18,16 +18,6 @@ from schemas.user_schema import user_schema
 
 artists = Blueprint("artists", __name__, url_prefix="/artists")
 
-# @artists.route("/template", methods=["GET"])
-# def get_artist_template():
-#     # RETURN AN EMPTY ARTIST JSON ARRAY TEMPLATE
-#     artist_template = {
-#         "name": "...",
-#         "genre": "..."
-#     }
-
-#     return artist_template
-
 
 @artists.route("/", methods=["GET"])
 def get_artists():
@@ -111,6 +101,14 @@ def delete_artist(artist_id):
 
     return jsonify(message=f"{artist.name} has been deleted")
 
+
+@artists.route("/watch", methods=["GET"])
+def watch_artist_form():
+    wa_template = {
+        "artist_id": "[integer]"
+    }
+
+    return wa_template
 
 
 @artists.route("/watch", methods=["POST"])

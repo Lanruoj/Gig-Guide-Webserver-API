@@ -34,21 +34,6 @@ def gigs_before_request():
         db.session.commit()
 
 
-# @gigs.route("/template", methods=["GET"])
-# def get_gig_template():
-#     # RETURN AN EMPTY GIG JSON ARRAY TEMPLATE FOR THE USER TO USE
-#     gig_template = {
-#     "title": "...",
-#     "artists": "Artist 1, Artist 2, Artist 3",
-#     "venue_id": None,
-#     "start_time": "YYYY-MM-DD HH:MM:SS",
-#     "description": "[string: optional]",
-#     "price": "[integer: optional]",
-#     "tickets_url": "https://...[string: optional]"
-#     }
-#     return gig_template
-
-
 @gigs.route("/", methods=["GET"])
 def get_gigs():
     # SEARCH GIGS TABLE - BY DEFAULT RETURN ALL NON-EXPIRED GIGS BUT TAKES OPTIONAL QUERY STRING ARGUMENTS FOR FILTERING AND SORTING
@@ -284,16 +269,3 @@ def delete_gig(gig_id):
     db.session.commit()
 
     return jsonify(message=Markup(f"{gig.title} has been deleted"))
-
-
-@gigs.route("/watchlist", methods=["GET"])
-@jwt_required()
-def show_watchlist():
-    # FETCH USER WITH user_id AS RETURNED BY get_jwt_identity() FROM JWT TOKEN
-    user = User.query.get(get_jwt_identity())
-    if not user or not user.logged_in:
-        return abort(401, description="User not logged in")
-
-    watchlist_schema = UserSchema(only=("username", "watched_venues", "watched_artists"))
-
-    return jsonify(watchlist_schema.dump(user))

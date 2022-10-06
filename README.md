@@ -86,7 +86,28 @@ I will be employing a loose *kanban* framework to my Trello board and distinctly
 ### **Document all endpoints for the API**
 ***
 
-**Authorisation controller** `/auth`
+### **Authorisation controller** `/auth`
 
-<!-- * `[GET] localhost:5000/auth/template` will return an empty `User` object as a JSON array for the user to use to register/create a new `User` -->
-* `[GET] localhost:5000/auth/`
+***Register a new user***
+
+* `[GET] localhost:5000/auth/register` will return an empty `User` object as a JSON array for the user to use to register/create a new `User`
+
+* `[POST] localhost:5000/auth/register` will create a new `User` object to store in the database - the `password` will be hashed upon creation. An JSON web token will be returned to authenticate the user which has an expiry of 24 hours.
+
+***User login/logout***
+
+* `[GET] localhost:5000/auth/login` will return a login form as a JSON array for the user to fill out.
+* `[POST] localhost:5000/auth/login` will take that data from the login form and verify if the information is correct. If verified, it will return a JSON web token.
+* `[POST] localhost:5000/auth/logout` will log the current user out.
+
+### **User controller** `/users`
+
+***User profiles***
+
+* `[GET] localhost:5000/users/<user_id>` will return the specified user from the URL argument. 
+* `[PUT] localhost:5000/users/<field>` will update a user's information via the field as specified from the URL argument
+* `[DELETE] localhost:5000/users/<user_id>` will delete a user (provided that they're the owner of the profile or an administrator)
+* `[GET] localhost:5000/users/watchlist` will return the current user's watchlist including their watched venues and artists.
+
+### **Gig controller** `/gigs`
+

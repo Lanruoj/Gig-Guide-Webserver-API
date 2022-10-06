@@ -9,17 +9,17 @@ from schemas.user_schema import user_schema
 auth = Blueprint("auth", __name__, url_prefix="/auth")
 
 
-# @auth.route("/register", methods=["GET"])
-# def get_register_form():
-#     # RETURN AN EMPTY USER JSON ARRAY TEMPLATE FOR THE USER TO USE TO REGISTER
-#     user_template = {
-#         "email": "...",
-#         "username": "...",
-#         "password": "... [minimum 8 characters]",
-#         "first_name": "...",
-#         "last_name": "..."
-#     }
-#     return user_template
+@auth.route("/register", methods=["GET"])
+def get_register_form():
+    # RETURN AN EMPTY USER JSON ARRAY TEMPLATE FOR THE USER TO USE TO REGISTER
+    user_template = {
+        "email": "[string: must be a valid email address]",
+        "username": "[string: alphanumeric or _ only]",
+        "password": "[minimum 8 characters]",
+        "first_name": "[string]",
+        "last_name": "[string]"
+    }
+    return user_template
 
 
 @auth.route("/register", methods=["POST"])
@@ -63,15 +63,16 @@ def get_login_form():
 
 @auth.route("/login", methods=["POST"])
 def auth_login():
-    # username NOT REQUIRED FOR LOGIN
-    user_fields = user_schema.load(request.json, partial=True)
+    # username, first_name & last_name NOT REQUIRED FOR LOGIN
+    user_fields = user_schema.load(request.json, partial=( "username","first_name", "last_name"))
     # SEARCH users FOR RECORD MATCHING THE INPUT email, ABORT IF NO EXISTING USER OR WRONG PASSWORD
     user = User.query.filter_by(email=user_fields["email"]).first()
     if not user or not bcrypt.check_password_hash(user.password, user_fields["password"]):
         return abort(401, description="Invalid email or password, please try again")
-    if user.logged_in:
-        return abort(400, description="User already logged in")
+
     token = create_access_token(identity=str(user.id), expires_delta=timedelta(days=1))
+    if user.logged_in:
+        return jsonify(message=f"User already logged in", token=token)
     # UPDATE USER'S logged_in ATTRIBUTE TO TRUE
     user.logged_in = True
     # COMMIT CHANGES TO DATABASE

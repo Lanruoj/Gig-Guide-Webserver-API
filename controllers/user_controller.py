@@ -1,25 +1,28 @@
-from flask import Blueprint, jsonify, request, abort, Markup
+from re import S
 from main import db, bcrypt, jwt
-from datetime import timedelta
-from flask_jwt_extended import create_access_token, get_jwt_identity,jwt_required
+from utils import search_table
+from flask import Blueprint, jsonify, request, abort, Markup
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from marshmallow.exceptions import ValidationError
+from sqlalchemy import func, desc, and_
+from datetime import datetime, date, time, timedelta
+from models.gig import Gig
+from schemas.gig_schema import gig_schema, gigs_schema, GigSchema
+from models.performance import Performance
+from schemas.performance_schema import performance_schema
+from models.artist import Artist
+from schemas.artist_schema import artist_schema, artists_schema
 from models.user import User
-from schemas.user_schema import user_schema
+from schemas.user_schema import user_schema, UserSchema
+from models.venue import Venue
+from schemas.venue_schema import venue_schema, venues_schema
+from models.watch_venue import WatchVenue
+from schemas.watch_venue_schema import watch_venue_schema, watch_venues_schema
+from models.watch_artist import WatchArtist
+from schemas.watch_artist_schema import watch_artist_schema, watch_artists_schema
 
 
 users = Blueprint("users", __name__, url_prefix="/users")
-
-
-@users.route("/template", methods=["GET"])
-def get_user_template():
-    # RETURN AN EMPTY USER JSON ARRAY TEMPLATE FOR THE USER TO USE TO UPDATE
-    user_template = {
-        "email": "...",
-        "username": "...",
-        "password": "... [minimum 8 characters]",
-        "first_name": "...",
-        "last_name": "..."
-    }
-    return user_template
 
 
 @users.route("/<int:user_id>", methods=["GET"])
@@ -32,9 +35,9 @@ def get_user(user_id):
     return jsonify(user_schema.dump(user))
 
 
-@users.route("/<value>", methods=["PUT"])
+@users.route("/<field>", methods=["PUT"])
 @jwt_required()
-def update_user(value):
+def update_user(field):
     # GET THE id OF THE JWT ACCESS TOKEN FROM @jwt_required()
     user_id = int(get_jwt_identity())
     # RETRIEVE THE User OBJECT WITH THE id FROM get_jwt_identity() SO IT CAN BE UPDATED
@@ -45,15 +48,15 @@ def update_user(value):
     # IF USER EXISTS, USE AS THE RECORD TO UPDATE    
     user_fields = user_schema.load(request.json, partial=True)
     # CHECK IF ARGUMENT FROM PATH PARAMETER MATCHES THE FOLLOWING ATTRIBUTES, AND IF SO THEN UPDATE THE CORRESPONDING COLUMN WITH THE VALUE FROM REQUEST FIELDS
-    if value=="username":
+    if field=="username":
         user.username = user_fields["username"]
-    elif value=="password":
+    elif field=="password":
         user.password = bcrypt.generate_password_hash(user_fields["password"]).decode("utf-8")
-    elif value=="email":
+    elif field=="email":
         user.email = user_fields["email"]
-    elif value=="first_name":
+    elif field=="first_name":
         user.first_name = user_fields["first_name"]
-    elif value=="last_name":
+    elif field=="last_name":
         user.last_name = user_fields["last_name"]
     # COMMIT CHANGES TO DATABASE
     db.session.commit()
@@ -78,3 +81,16 @@ def delete_user(user_id):
     db.session.commit()
 
     return jsonify(message=f"{user.username} has been deleted")
+
+
+@users.route("/watchlist", methods=["GET"])
+@jwt_required()
+def get_watchlist():
+    # FETCH USER WITH user_id AS RETURNED BY get_jwt_identity() FROM JWT TOKEN
+    user = User.query.get(get_jwt_identity())
+    if not user or not user.logged_in:
+        return abort(401, description="User not logged in")
+    # CREATE WATCHLIST SCHEMA WHICH USES UserSchema BUT ONLY DISPLAYS username, watched_venues & watched_artists
+    watchlist_schema = UserSchema(only=("username", "watched_venues", "watched_artists"))
+
+    return jsonify(watchlist_schema.dump(user))

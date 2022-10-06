@@ -72,37 +72,7 @@ def get_user_form():
     return jsonify(update_form.dump(user))
     
 
-# @users.route("/<field>", methods=["PUT"])
-# @jwt_required()
-# def update_user(field):
-#     # GET THE id OF THE JWT ACCESS TOKEN FROM @jwt_required()
-#     user_id = int(get_jwt_identity())
-#     # RETRIEVE THE User OBJECT WITH THE id FROM get_jwt_identity() SO IT CAN BE UPDATED
-#     user = User.query.get(user_id)
-#     if not user or not user.logged_in:
-#         return abort(401, description="User not logged in")
-    
-#     # IF USER EXISTS, USE AS THE RECORD TO UPDATE    
-#     user_fields = user_schema.load(request.json, partial=True)
-#     # CHECK IF ARGUMENT FROM PATH PARAMETER MATCHES THE FOLLOWING ATTRIBUTES, AND IF SO THEN UPDATE THE CORRESPONDING COLUMN WITH THE VALUE FROM REQUEST FIELDS
-#     if field=="username":
-#         user.username = user_fields["username"]
-#     elif field=="password":
-#         user.password = bcrypt.generate_password_hash(user_fields["password"]).decode("utf-8")
-#     elif field=="email":
-#         user.email = user_fields["email"]
-#     elif field=="first_name":
-#         user.first_name = user_fields["first_name"]
-#     elif field=="last_name":
-#         user.last_name = user_fields["last_name"]
-#     # COMMIT CHANGES TO DATABASE
-#     db.session.commit()
-
-#     return jsonify(user_schema.dump(user))
-
-
-
-@users.route("/form", methods=["PUT"])
+@users.route("/", methods=["PUT"])
 @jwt_required()
 def update_user():
     try: 

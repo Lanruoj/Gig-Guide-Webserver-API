@@ -19,7 +19,7 @@ def get_register_form():
         "first_name": "[string]",
         "last_name": "[string]"
     }
-    
+
     return user_template
 
 
@@ -65,7 +65,7 @@ def get_login_form():
 @auth.route("/login", methods=["POST"])
 def auth_login():
     # username, first_name & last_name NOT REQUIRED FOR LOGIN
-    user_fields = user_schema.load(request.json, partial=( "username","first_name", "last_name"))
+    user_fields = user_schema.load(request.json, partial=("username","first_name", "last_name"))
     # SEARCH users FOR RECORD MATCHING THE INPUT email, ABORT IF NO EXISTING USER OR WRONG PASSWORD
     user = User.query.filter_by(email=user_fields["email"]).first()
     if not user or not bcrypt.check_password_hash(user.password, user_fields["password"]):

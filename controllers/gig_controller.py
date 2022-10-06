@@ -154,7 +154,7 @@ def update_gig(gig_id):
     # COMMIT ALL CHANGES TO THE DATABASE
     db.session.commit()
 
-    return jsonify(message=Markup(f"{gig.title}'s {', '.join(str(field) for field in fields)} successfully updated"))
+    return jsonify(message=Markup(f"Gig's {', '.join(str(field) for field in fields)} successfully updated"), gig=gig_schema.dump(gig))
         
 
 @gigs.route("/<int:gig_id>", methods=["DELETE"])

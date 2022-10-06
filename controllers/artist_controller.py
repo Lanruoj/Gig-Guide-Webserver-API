@@ -37,7 +37,18 @@ def get_artists():
     return jsonify(artists_schema.dump(artists))
 
 
-@artists.route("/", methods=["POST"])
+@artists.route("/new", methods=["GET"])
+def get_artist_template():
+    # RETURN AN EMPTY ARTIST JSON ARRAY TEMPLATE
+    artist_template = {
+        "name": "...",
+        "genre": "..."
+    }
+
+    return artist_template
+    
+
+@artists.route("/new", methods=["POST"])
 @jwt_required()
 def add_artist():
     # FETCH USER WITH user_id AS RETURNED BY get_jwt_identity() FROM JWT TOKEN

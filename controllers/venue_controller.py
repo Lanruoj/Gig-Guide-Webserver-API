@@ -84,6 +84,18 @@ def venues_add():
     return jsonify(venue_schema.dump(venue))
 
 
+@venues.route("/<int:venue_id>/form", methods=["GET"])
+def get_artist_form(venue_id):
+    # FETCH ARTIST WITH id MATCHING artist_id FROM PATH PARAMETER
+    venue = Venue.query.get(venue_id)
+    if not venue:
+        return abort(404, description="Venue does not exist")
+    # CREATE FORM FOR USER TO UPDATE ARTIST WITH
+    update_form = VenueSchema(exclude=("id", "venue_gigs"))
+
+    return jsonify(update_form.dump(venue))
+
+
 @venues.route("/<int:venue_id>/<attr>", methods=["PUT"])
 @jwt_required()
 def update_venue(venue_id, attr):
@@ -110,7 +122,7 @@ def update_venue(venue_id, attr):
     if attr == "type":
         venue.type = venue_fields["type"]
     
-    return jsonify(venue_schema.dump(venue))
+    return jsonify(message="Venue successfully updated", venue=venue_schema.dump(venue))
 
 
 @venues.route("/<int:venue_id>", methods=["DELETE"])

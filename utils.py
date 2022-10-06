@@ -5,35 +5,42 @@ from marshmallow.exceptions import ValidationError
 
 
 def search_table(table, filters=None, sort=None, asc=True, no_results="No results found"):
+    # IF NO FILTERS GIVEN/PASSED WHEN FUNCTION IS CALLED, ASSIGN THEM WITHIN THE FUNCTION
     if not filters:
         filters = []
+    # CHECK IF THERE ARE ARGUMENTS IN THE QUERY STRING
     if request.query_string:
         no_results = "No results matching that criteria"
+        # ITERATE THROUGH ARGUMENTS IN QUERY STRING
         for arg in request.args:
-            if arg not in vars(table) and arg != "sort:asc" and arg != "sort:desc":
+            # VALIDATE WHETHER ARGUMENT IN QUERY STRING IS VALID
+            if (arg not in vars(table)) and (arg != "sort:asc") and (arg != "sort:desc"):
                 return abort(400, description=Markup(f"The keyword '{arg}' is not valid search criteria"))
-
-            if arg == "sort:asc":
+            # CHECK FOR A SORT ARGUMENT
+            elif arg == "sort:asc":
+                # IF sort:asc IS FOUND THEN LEAVE asc=True & desc=False (DEFAULTS)
                 sort = getattr(table, request.args[arg])
                 asc = True
 
             elif arg == "sort:desc":
+                # IF sort:desc IS FOUND THEN SET asc=False & desc=True
                 sort = getattr(table, request.args[arg])
                 asc = False
-
-            elif arg != "sort":
-                # IF SEARCHING FOR A NUMERIC VALUE
+            # IF NOT A SORTING ARGUMENT, THEN IT IS AN ATTRIBUTE QUERY
+            else:
+                # IF SEARCHING FOR A NUMERIC VALUE, MATCH VALUE EXACTLY
                 if "id" in arg or request.args[arg].isdigit():
                     _filter = getattr(table, arg) == request.args[arg]
                     filters.append(_filter)
-                # IF SEARCHING FOR A STRING VALUE
+                # IF SEARCHING FOR A STRING VALUE, PERFORM A CASE INSENSITIVE STRING MATCH QUERY
                 else:
                     _filter = getattr(table, arg).ilike(f"%{request.args[arg]}%")
                     filters.append(_filter)
-
+    # SORT BY DESCENDING ORDER
     if not asc:
         results = table.query.filter(*(filters)).order_by(desc(sort)).all()
-    else:
+    # SORT BY ASCENDING ORDER
+    elif asc:
         results = table.query.filter(*(filters)).order_by(sort).all()
 
     if not results:

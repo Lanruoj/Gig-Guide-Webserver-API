@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import desc
 from marshmallow.exceptions import ValidationError
 
-
+# FILTER AND SORT TABLE FROM QUERY STRING ARGUMENTS (RETURN ALL IF NONE)
 def search_table(table, filters=None, sort=None, asc=True, no_results="No results found"):
     # IF NO FILTERS GIVEN/PASSED WHEN FUNCTION IS CALLED, ASSIGN THEM WITHIN THE FUNCTION
     if not filters:
@@ -48,20 +48,23 @@ def search_table(table, filters=None, sort=None, asc=True, no_results="No result
 
     return results
 
-
+# BASIC UPDATE RECORD FUNCTION 
 def update_record(record_id, table, schema):
+    # ATTEMPT TO COMPARED THE SCHEMA'S FIELDS WITH THE REQUEST BODY FIELDS
     try: 
         schema_fields = schema.load(request.json, partial=True)
     except ValidationError as err:
         return jsonify(err.messages)
-    
+    # FETCH THE RECORD WITH THE SPECIFIED record_id
     record = table.query.get(record_id)
     if not record:
         return abort(404, description=Markup(f"{table.__name__} does not exist"))
-    
+    # PARSE JSON DATA FROM REQUEST BODY
     request_data = request.get_json()
     fields, new_values = [], []
+    # LOOP THROUGH EACH ATTRIBUTE IN REQUEST DATA
     for attribute in request_data.keys():
+        # IF A VALID ATTRIBUTE IN THE SPECIFIED TABLE, SET THE RECORD'S ATTRIBTUE AS THE VALUE FROM THE REQUEST
         if attribute in vars(table):
             setattr(record, attribute, schema_fields[attribute])
             new_values.append(schema_fields[attribute])

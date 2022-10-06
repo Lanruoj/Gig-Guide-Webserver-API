@@ -102,7 +102,9 @@ def update_user():
     
     db.session.commit()
 
-    return jsonify(message="Successfully updated profile", profile=user_schema.dump(user))
+    updated_user = UserSchema(exclude=("watched_venues", "watched_artists"))
+
+    return jsonify(message="Successfully updated profile", profile=updated_user.dump(user))
 
 
 

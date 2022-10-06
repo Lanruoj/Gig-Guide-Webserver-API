@@ -5,6 +5,7 @@ class Config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_SECRET_KEY = os.environ.get("SECRET_KEY")
     ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
+    USER_PASSWORD = os.environ.get("USER_PASSWORD")
     JSON_SORT_KEYS = False
     @property
     def SQLALCHEMY_DATABASE_URI(self):

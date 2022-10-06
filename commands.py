@@ -37,6 +37,15 @@ def seed_db():
         admin = True
     )
     db.session.add(admin)
+    user = User(
+        username = "user",
+        password = bcrypt.generate_password_hash(current_app.config["USER_PASSWORD"]).decode("utf-8"),
+        email = "user@email.com",
+        first_name = "User",
+        last_name = "Test",
+        admin = False
+    )
+    db.session.add(user)
 
     test_artist = Artist(
         name = "Gregor",

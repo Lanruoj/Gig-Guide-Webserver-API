@@ -73,13 +73,13 @@ def auth_login():
 
     token = create_access_token(identity=str(user.id), expires_delta=timedelta(days=1))
     if user.logged_in:
-        return jsonify(message=f"User already logged in", token=token)
+        return jsonify(message=f"User already logged in", user=user.username, token=token)
     # UPDATE USER'S logged_in ATTRIBUTE TO TRUE
     user.logged_in = True
     # COMMIT CHANGES TO DATABASE
     db.session.commit()
 
-    return jsonify(token=token, user=user.username)
+    return jsonify(message=Markup(f"{user.first_name} successfully logged in"), user=user.username, id=user.id, token=token)
 
 
 @auth.route("/logout", methods=["POST"])

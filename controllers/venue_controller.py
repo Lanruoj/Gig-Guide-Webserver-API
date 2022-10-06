@@ -21,17 +21,17 @@ from schemas.watch_venue_schema import watch_venue_schema
 venues = Blueprint("venues", __name__, url_prefix="/venues")
 
 
-@venues.route("/template", methods=["GET"])
-def get_venue_template():
-    venue_template = {
-        "name": "...",
-        "street_address": "...",
-        "city": "...",
-        "state": "...",
-        "country": "...",
-        "type": "... [e.g Music venue, Pub, Restaurant, Bar, Nightclub etc.]"
-    }
-    return venue_template
+# @venues.route("/template", methods=["GET"])
+# def get_venue_template():
+#     venue_template = {
+#         "name": "...",
+#         "street_address": "...",
+#         "city": "...",
+#         "state": "...",
+#         "country": "...",
+#         "type": "... [e.g Music venue, Pub, Restaurant, Bar, Nightclub etc.]"
+#     }
+#     return venue_template
 
 
 @venues.route("/", methods=["GET"])
@@ -50,6 +50,19 @@ def get_venue(venue_id):
         return abort(404, description=f"No venues exist with ID={venue_id}")
     
     return jsonify(venue_schema.dump(venue))
+
+
+@venues.route("/new", methods=["GET"])
+def get_new_venue_form():
+    venue_template = {
+        "name": "...",
+        "street_address": "...",
+        "city": "...",
+        "state": "...",
+        "country": "...",
+        "type": "... [e.g Music venue, Pub, Restaurant, Bar, Nightclub etc.]"
+    }
+    return venue_template
 
 
 @venues.route("/", methods=["POST"])

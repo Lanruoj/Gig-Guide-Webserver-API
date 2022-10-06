@@ -34,19 +34,19 @@ def gigs_before_request():
         db.session.commit()
 
 
-@gigs.route("/template", methods=["GET"])
-def get_gig_template():
-    # RETURN AN EMPTY GIG JSON ARRAY TEMPLATE FOR THE USER TO USE
-    gig_template = {
-    "title": "...",
-    "artists": "Artist 1, Artist 2, Artist 3",
-    "venue_id": None,
-    "start_time": "YYYY-MM-DD HH:MM:SS",
-    "description": "[string: optional]",
-    "price": "[integer: optional]",
-    "tickets_url": "https://...[string: optional]"
-    }
-    return gig_template
+# @gigs.route("/template", methods=["GET"])
+# def get_gig_template():
+#     # RETURN AN EMPTY GIG JSON ARRAY TEMPLATE FOR THE USER TO USE
+#     gig_template = {
+#     "title": "...",
+#     "artists": "Artist 1, Artist 2, Artist 3",
+#     "venue_id": None,
+#     "start_time": "YYYY-MM-DD HH:MM:SS",
+#     "description": "[string: optional]",
+#     "price": "[integer: optional]",
+#     "tickets_url": "https://...[string: optional]"
+#     }
+#     return gig_template
 
 
 @gigs.route("/", methods=["GET"])
@@ -77,7 +77,22 @@ def show_expired_gigs():
     return jsonify(gigs_schema.dump(expired_gigs))
 
 
-@gigs.route("/", methods=["POST"])
+@gigs.route("/new", methods=["GET"])
+def get_new_gig_form():
+    # RETURN AN EMPTY GIG JSON ARRAY TEMPLATE FOR THE USER TO USE
+    gig_template = {
+    "title": "[string]",
+    "artists": "[string: e.g  e.g Artist 1, Artist 2, Artist 3]",
+    "venue_id": "[integer]",
+    "start_time": "YYYY-MM-DD HH:MM:SS",
+    "description": "[string: optional]",
+    "price": "[integer: optional]",
+    "tickets_url": "https://...[string: optional]"
+    }
+    return gig_template
+
+
+@gigs.route("/new", methods=["POST"])
 @jwt_required()
 def add_gig():
     # FETCH USER WITH user_id AS RETURNED BY get_jwt_identity() FROM JWT TOKEN

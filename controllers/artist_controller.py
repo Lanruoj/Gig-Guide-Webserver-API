@@ -18,15 +18,15 @@ from schemas.user_schema import user_schema
 
 artists = Blueprint("artists", __name__, url_prefix="/artists")
 
-@artists.route("/template", methods=["GET"])
-def get_artist_template():
-    # RETURN AN EMPTY ARTIST JSON ARRAY TEMPLATE
-    artist_template = {
-        "name": "...",
-        "genre": "..."
-    }
+# @artists.route("/template", methods=["GET"])
+# def get_artist_template():
+#     # RETURN AN EMPTY ARTIST JSON ARRAY TEMPLATE
+#     artist_template = {
+#         "name": "...",
+#         "genre": "..."
+#     }
 
-    return artist_template
+#     return artist_template
 
 
 @artists.route("/", methods=["GET"])
@@ -38,7 +38,7 @@ def get_artists():
 
 
 @artists.route("/new", methods=["GET"])
-def get_artist_template():
+def get_new_artist_form():
     # RETURN AN EMPTY ARTIST JSON ARRAY TEMPLATE
     artist_template = {
         "name": "...",

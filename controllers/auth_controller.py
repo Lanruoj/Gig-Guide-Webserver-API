@@ -9,17 +9,17 @@ from schemas.user_schema import user_schema
 auth = Blueprint("auth", __name__, url_prefix="/auth")
 
 
-@auth.route("/register", methods=["GET"])
-def get_register_form():
-    # RETURN AN EMPTY USER JSON ARRAY TEMPLATE FOR THE USER TO USE TO REGISTER
-    user_template = {
-        "email": "...",
-        "username": "...",
-        "password": "... [minimum 8 characters]",
-        "first_name": "...",
-        "last_name": "..."
-    }
-    return user_template
+# @auth.route("/register", methods=["GET"])
+# def get_register_form():
+#     # RETURN AN EMPTY USER JSON ARRAY TEMPLATE FOR THE USER TO USE TO REGISTER
+#     user_template = {
+#         "email": "...",
+#         "username": "...",
+#         "password": "... [minimum 8 characters]",
+#         "first_name": "...",
+#         "last_name": "..."
+#     }
+#     return user_template
 
 
 @auth.route("/register", methods=["POST"])
@@ -52,7 +52,7 @@ def auth_register():
 
 
 @auth.route("/login", methods=["GET"])
-def get_register_form():
+def get_login_form():
     # RETURN AN EMPTY USER JSON ARRAY TEMPLATE FOR THE USER TO LOGIN
     user_template = {
         "email": "...",

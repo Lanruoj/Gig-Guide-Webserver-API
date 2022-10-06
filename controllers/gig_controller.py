@@ -190,7 +190,7 @@ def show_expired_gigs():
     return jsonify(gigs_schema.dump(expired_gigs))
 
 
-@gigs.route("/new", methods=["GET"])
+@gigs.route("/form", methods=["GET"])
 def get_new_gig_form():
     # RETURN AN EMPTY GIG JSON ARRAY TEMPLATE FOR THE USER TO USE
     gig_template = {

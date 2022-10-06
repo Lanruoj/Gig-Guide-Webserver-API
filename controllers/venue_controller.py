@@ -39,8 +39,9 @@ def get_venue(venue_id):
     return jsonify(venue_schema.dump(venue))
 
 
-@venues.route("/new", methods=["GET"])
+@venues.route("/form", methods=["GET"])
 def get_new_venue_form():
+    # RETURN AN EMPTY VENUE JSON ARRAY FOR USER TO ADD NEW VENUE WITH
     venue_template = {
         "name": "...",
         "street_address": "...",

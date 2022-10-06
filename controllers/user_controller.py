@@ -121,7 +121,7 @@ def delete_own_profile():
     return jsonify(message=f"{user.username} has been deleted")
 
 
-@users.route("/<int:user_id>", methods=["DELETE"])
+@users.route("/profile/<int:user_id>", methods=["DELETE"])
 @jwt_required()
 def admin_delete_user(user_id):
     # FETCH USER FROM JWT TOKEN IDENTITY

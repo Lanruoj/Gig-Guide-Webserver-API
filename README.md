@@ -83,27 +83,28 @@ I will be employing a loose *kanban* framework to my Trello board and distinctly
 
 
 ***
-### **Document all endpoints for the API**
-***
-
 ### **Authorisation controller** `/auth`
+***
 
 ***Register a new user***
 
-* `[GET] localhost:5000/auth/register`: return an empty `User` object as a JSON array for the user to use to register/create a new `User`
+* `[GET] localhost:5000/auth/register`: return an empty `User` object for the user to use to register/create a new `User`
 
-* `[POST] localhost:5000/auth/register`: create a new `User` object to store in the database - the `password` will be hashed upon creation. An JSON web token will be returned to authenticate the user which has an expiry of 24 hours.
+* `[POST] localhost:5000/auth/register`: create a new `User` object to store in the database - the `password` will be hashed upon creation. A JSON web token will be returned to authenticate the user which has an expiry of 24 hours
 
 ***User login***
 
-* `[GET] localhost:5000/auth/login`: return a login form as a JSON array for the user to fill out.
-* `[POST] localhost:5000/auth/login`: take that data from the login form and verify if the information is correct. If verified, it will return a JSON web token.
+* `[GET] localhost:5000/auth/login`: return a login form for the user to fill out and `POST`
+
+* `[POST] localhost:5000/auth/login`: take that data from the login form and verify if the information is correct. If verified, it will return a JSON web token
 
 ***User logout***
 
-* `[POST] localhost:5000/auth/logout`: log the current user out.
+* `[POST] localhost:5000/auth/logout`: log the current user out
 
+***
 ### **User controller** `/users`
+***
 
 ***User profiles***
 
@@ -111,24 +112,82 @@ I will be employing a loose *kanban* framework to my Trello board and distinctly
 
 * `[GET] localhost:5000/users/profile`: return the current user's profile (parsed from JWT)
 
-* `[GET] localhost:5000/users/<user_id>`: return the specified user from the URL argument. 
+* `[GET] localhost:5000/users/profile/<user_id>`: return the specified user from the URL argument
 
-* `[GET] localhost:5000/users/form`: return the current user's editable profile as a JSON array to be used to update profile at `[PUT] /users`
+* `[GET] localhost:5000/users/profile/form`: return the current user's editable profile to be used to update profile at `[PUT] /users`
 
-* `[PUT] localhost:5000/users`: update the current user's profile with the request's JSON array 
+* `[PUT] localhost:5000/users/profile`: update the current user's profile with the request's data
 
-* `[DELETE] localhost:5000/users/<user_id>`: delete a user (provided that they're the owner of the profile or an administrator)
+* `[DELETE] localhost:5000/users/profile`: delete current user's profile
+
+* `[DELETE] localhost:5000/users/profile/<user_id>`: *Administrator only* - delete specified user's profile
 
 ***View user's watchlist***
 
 * `[GET] localhost:5000/users/watchlist`: return the current user's watchlist including their watched venues and artists.
 
+***
 ### **Gig controller** `/gigs`
+***
 
 *Before each request is processed for all the `/gigs` routes all `Gigs` expiries will be checked and updated.*
 
 * `[GET] localhost:5000/gigs`: return gigs - by default all upcoming gigs, but takes query string arguments for filtering and sorting (e.g `[GET] localhost:5000/gigs?venue_id=3&sort:asc=price` returns gigs with the `venue_id` of `3` and sorts the results by price in ascending order)
 
-* `[GET] localhost:5000/gigs/<gig_id>`: returns gig with `id` specified in URL
+* `[GET] localhost:5000/gigs/<gig_id>`: returns gig with `id` as specified in URL argument
 
-* `[PUT] localhost:5000/gigs/<gig_id>`: updates gig using 
+* `[GET] localhost:5000/gigs/<gig_id>/form`: returns specified gig's editable data for updating in `[PUT] /gigs/<gig_id>`
+
+* `[PUT] localhost:5000/gigs/<gig_id>`: updates gig with `id` as specified in URL argument using the values from the request body's data
+
+* `[DELETE] localhost:5000/gigs/<gig_id>`: deletes gig with `id` as specified in URL argument
+
+* `[GET] localhost:5000/gigs/bin`: returns expired gigs from the past
+
+* `[GET] localhost:5000/gigs/form`: returns an empty `Gig` form to be used to add a new gig in `[POST] /gigs`
+
+* `[POST] localhost:5000/gigs`: creates a new `Gig` object and stores in the database. A gig's `start_time` must be in the future and cannot be added within 2 hours of an existing gig at the same venue. The `artists` entered will create new performances and if an artist doesn't already exist in the database it will be created. 
+
+***
+### **Venue controller** `/venues`
+***
+
+* `[GET] localhost:5000/venues`: by default returns all venues but takes optional query string arguments for filtering and sorting (e.g `[GET] localhost:5000/venues?name=The+Jazzlab&sort:asc=city`)
+
+* `[GET] localhost:5000/venues/<venue_id>`: returns venue with `id` as specified in URL argument
+
+* `[GET] localhost:5000/venues/form`: returns empty `Venue` form to user to add a new venue
+
+* `[POST] localhost:5000/venues`: creates a new `Venue` record and stores it in the database. Checks if a venue already exists with that name in the same city. 
+
+* `[GET] localhost:5000/venues/<venue_id>/form`: returns venue with `id` as specified in URL argument as an editable form to be used to update venue in `[PUT] /venues/<venue_id>`
+
+* `[PUT] localhost:5000/venues/<venue_id>`: updates venue with `id` as specified in URL argument using the values from the request body's data
+
+* `[DELETE] localhost:5000/venues/<venue_id>`: deletes venue with `id` as specified in URL argument
+
+* `[GET] localhost:5000/venues/watch`: returns an empty form for a user to watch a venue with `POST`
+
+* `[POST] localhost:5000/venues/watch`: creates a `WatchVenue` object - the user is now watching the venue and it will appear in their `watchlist`
+
+***
+### **Artist controller** `/artists`
+***
+
+* `[GET] localhost:5000/artists`: by default returns all artists but takes optional query string arguments for filtering and sorting (e.g `[GET] localhost:5000/artists?genre=Folk&sort:asc=name`)
+
+* `[GET] localhost:5000/artists/form`: returns empty `Artist` form to user to add a new artist
+
+* `[POST] localhost:5000/artists`: creates a new `Artist` record and stores it in the database. Checks if an artist already exists with that name in the same city. 
+
+* `[GET] localhost:5000/artists/<artist_id>`: returns artist with `id` as specified in URL argument
+
+* `[GET] localhost:5000/artists/<artist_id>/form`: returns artist with `id` as specified in URL argument as an editable form to be used to update artist in `[PUT] /artists/<artist_id>`
+
+* `[PUT] localhost:5000/artists/<artist_id>`: updates artist with `id` as specified in URL argument using the values from the request body's data
+
+* `[DELETE] localhost:5000/artists/<artist_id>`: deletes artist with `id` as specified in URL argument
+
+* `[GET] localhost:5000/artists/watch`: returns an empty form for a user to watch an artist with `POST`
+
+* `[POST] localhost:5000/venues/watch`: creates a `WatchArtist` object - the user is now watching the artist and it will appear in their `watchlist`

@@ -27,7 +27,7 @@ def get_artists():
     return jsonify(artists_schema.dump(artists))
 
 
-@artists.route("/new", methods=["GET"])
+@artists.route("/form", methods=["GET"])
 def get_new_artist_form():
     # RETURN AN EMPTY ARTIST JSON ARRAY TEMPLATE
     artist_template = {
@@ -38,7 +38,7 @@ def get_new_artist_form():
     return artist_template
     
 
-@artists.route("/new", methods=["POST"])
+@artists.route("/", methods=["POST"])
 @jwt_required()
 def add_artist():
     # FETCH USER WITH user_id AS RETURNED BY get_jwt_identity() FROM JWT TOKEN
@@ -47,6 +47,11 @@ def add_artist():
         return abort(401, description="User must be logged in")
     
     artist_fields = artist_schema.load(request.json)
+    # QUERY DATABASE TO CHECK IF ARTIST ALREADY EXISTS WITH THE REQUEST'S name
+    artist_exists = Artist.query.filter(Artist.name.ilike(f"%{artist_fields['name']}%")).first()
+    if artist_exists:
+        return abort(409, description=f"An artist already exists called {artist_fields['name']}")
+
     # CREATE NEW ARTIST FROM REQUEST FIELDS
     artist = Artist(
         name = artist_fields["name"],

@@ -9,8 +9,9 @@ from schemas.user_schema import user_schema
 auth = Blueprint("auth", __name__, url_prefix="/auth")
 
 
-@auth.route("/template", methods=["GET"])
-def get_auth_template():
+@auth.route("/register", methods=["GET"])
+def get_register_form():
+    # RETURN AN EMPTY USER JSON ARRAY TEMPLATE FOR THE USER TO USE TO REGISTER
     user_template = {
         "email": "...",
         "username": "...",
@@ -48,6 +49,16 @@ def auth_register():
     token = create_access_token(identity=str(user.id), expires_delta=timedelta(days=1))
 
     return jsonify(message=Markup(f"{user.first_name} successfully logged in"), user=user.username, id=user.id, token=token)
+
+
+@auth.route("/login", methods=["GET"])
+def get_register_form():
+    # RETURN AN EMPTY USER JSON ARRAY TEMPLATE FOR THE USER TO LOGIN
+    user_template = {
+        "email": "...",
+        "password": "..."
+    }
+    return user_template
 
 
 @auth.route("/login", methods=["POST"])

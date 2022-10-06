@@ -53,7 +53,6 @@ def update_record(record_id, table, schema):
         return abort(404, description=Markup(f"{table.__name__} does not exist"))
     
     request_data = request.get_json()
-
     fields, new_values = [], []
     for attribute in request_data.keys():
         if attribute in vars(table):

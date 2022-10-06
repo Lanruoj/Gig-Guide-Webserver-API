@@ -11,6 +11,7 @@ users = Blueprint("users", __name__, url_prefix="/users")
 
 @users.route("/template", methods=["GET"])
 def get_user_template():
+    # RETURN AN EMPTY USER JSON ARRAY TEMPLATE FOR THE USER TO USE TO UPDATE
     user_template = {
         "email": "...",
         "username": "...",
@@ -23,6 +24,7 @@ def get_user_template():
 
 @users.route("/<int:user_id>", methods=["GET"])
 def get_user(user_id):
+    # FETCH USER WITH user_id FROM USER TABLE
     user = User.query.get(user_id)
     if not user:
         return abort(404, description="User does not exist")

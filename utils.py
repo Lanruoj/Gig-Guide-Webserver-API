@@ -60,4 +60,4 @@ def update_record(record_id, table, schema):
             new_values.append(schema_fields[attribute])
             fields.append(attribute)
 
-    return jsonify(message=Markup(f"{table.__name__}'s {', '.join(str(field) for field in fields)} successfully updated to {', '.join(str(value) for value in new_values)}"))
+    return record

@@ -1,5 +1,5 @@
 from main import db, bcrypt, jwt
-from utils import search_table
+from utils import search_table, update_record
 from flask import Blueprint, jsonify, request, abort, Markup
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from sqlalchemy import func
@@ -85,44 +85,32 @@ def venues_add():
 
 
 @venues.route("/<int:venue_id>/form", methods=["GET"])
-def get_artist_form(venue_id):
-    # FETCH ARTIST WITH id MATCHING artist_id FROM PATH PARAMETER
+def get_venue_form(venue_id):
+    # FETCH VENUE WITH id MATCHING venue_id FROM PATH PARAMETER
     venue = Venue.query.get(venue_id)
     if not venue:
         return abort(404, description="Venue does not exist")
-    # CREATE FORM FOR USER TO UPDATE ARTIST WITH
+    # CREATE FORM FOR USER TO UPDATE VENUE WITH
     update_form = VenueSchema(exclude=("id", "venue_gigs"))
 
     return jsonify(update_form.dump(venue))
 
 
-@venues.route("/<int:venue_id>/<attr>", methods=["PUT"])
+@venues.route("/<int:venue_id>", methods=["PUT"])
 @jwt_required()
-def update_venue(venue_id, attr):
+def update_venue(venue_id):
     # FETCH USER WITH user_id AS RETURNED BY get_jwt_identity() FROM JWT TOKEN
-    user = User.query.get(get_jwt_identity())
-    if not user.admin or not user.logged_in:
-        return abort(401, description="Must be an administrator to perform this action")
-    # FETCH VENUE FROM VENUES TABLE WITH MATCHING venue_id FROM PATH PARAMETERS
-    venue = Venue.query.get(venue_id)
-    if not venue:
-        return abort(401, description=Markup(f"No venue with that ID exists"))
-    # CHECK IF ARGUMENT FROM PATH PARAMETER MATCHES THE FOLLOWING ATTRIBUTES, AND IF SO THEN UPDATE THE CORRESPONDING COLUMN WITH THE VALUE FROM REQUEST FIELDS
-    venue_fields = venue_schema.load(request.json, partial=True)
-    if attr == "name":
-        venue.name = venue_fields["name"]
-    if attr == "street_address":
-        venue.street_address = venue_fields["street_address"]
-    if attr == "city":
-        venue.city = venue_fields["city"]
-    if attr == "state":
-        venue.state = venue_fields["state"]
-    if attr == "country":
-        venue.country = venue_fields["country"]
-    if attr == "type":
-        venue.type = venue_fields["type"]
-    
-    return jsonify(message="Venue successfully updated", venue=venue_schema.dump(venue))
+    user = User.query.get(int(get_jwt_identity()))
+    if not user or not user.logged_in:
+        return abort(401, description="User must be logged in")
+    # UPDATE VENUE FROM REQUEST BODY
+    update = update_record(venue_id, Venue, venue_schema)
+    # COMMIT CHANGES TO DATABASE
+    db.session.commit()
+
+    updated_schema = VenueSchema(exclude=("venue_gigs",))
+
+    return jsonify(message="Venue successfully updated", venue=updated_schema.dump(update))
 
 
 @venues.route("/<int:venue_id>", methods=["DELETE"])

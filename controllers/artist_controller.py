@@ -93,7 +93,7 @@ def update_artist(artist_id):
     # COMMIT CHANGES TO DATABASE
     db.session.commit()
 
-    return update
+    return jsonify(message="Artist successfully updated", artist=artist_schema.dump(update))
 
 
 @artists.route("/<int:artist_id>", methods=["DELETE"])

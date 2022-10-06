@@ -94,18 +94,29 @@ I will be employing a loose *kanban* framework to my Trello board and distinctly
 
 * `[POST] localhost:5000/auth/register`: create a new `User` object to store in the database - the `password` will be hashed upon creation. An JSON web token will be returned to authenticate the user which has an expiry of 24 hours.
 
-***User login/logout***
+***User login***
 
 * `[GET] localhost:5000/auth/login`: return a login form as a JSON array for the user to fill out.
 * `[POST] localhost:5000/auth/login`: take that data from the login form and verify if the information is correct. If verified, it will return a JSON web token.
+
+***User logout***
+
 * `[POST] localhost:5000/auth/logout`: log the current user out.
 
 ### **User controller** `/users`
 
 ***User profiles***
 
+* `[GET] localhost:5000/users`: return users - by default all non-admin users, but takes query string arguments for filtering and sorting (e.g `[GET] localhost:5000/users?first_name=User&sort:desc=id` returns users with the `first_name` of `"User"` and sorts the results by `id` in descending order)
+
+* `[GET] localhost:5000/users/profile`: return the current user's profile (parsed from JWT)
+
 * `[GET] localhost:5000/users/<user_id>`: return the specified user from the URL argument. 
-* `[PUT] localhost:5000/users/<field>`: update a user's information via the field as specified from the URL argument
+
+* `[GET] localhost:5000/users/form`: return the current user's editable profile as a JSON array to be used to update profile at `[PUT] /users`
+
+* `[PUT] localhost:5000/users`: update the current user's profile with the request's JSON array 
+
 * `[DELETE] localhost:5000/users/<user_id>`: delete a user (provided that they're the owner of the profile or an administrator)
 
 ***View user's watchlist***

@@ -25,17 +25,6 @@ from schemas.watch_artist_schema import watch_artist_schema, watch_artists_schem
 users = Blueprint("users", __name__, url_prefix="/users")
 
 
-@users.route("/me", methods=["GET"])
-@jwt_required()
-def get_own_profile():
-    # FETCH USER WITH user_id FROM USER TABLE
-    user = User.query.get(get_jwt_identity())
-    if not user:
-        return abort(404, description="User does not exist")
-    
-    return jsonify(user_schema.dump(user))
-
-
 @users.route("/", methods=["GET"])
 @jwt_required()
 def get_users():
@@ -49,7 +38,18 @@ def get_users():
     return jsonify(users_schema.dump(users))
 
 
-@users.route("/<int:user_id>", methods=["GET"])
+@users.route("/profile", methods=["GET"])
+@jwt_required()
+def get_own_profile():
+    # FETCH USER WITH user_id FROM USER TABLE
+    user = User.query.get(get_jwt_identity())
+    if not user:
+        return abort(404, description="User not logged in")
+    
+    return jsonify(user_schema.dump(user))
+
+
+@users.route("/profile/<int:user_id>", methods=["GET"])
 def get_specific_user(user_id):
     # FETCH USER WITH user_id FROM USER TABLE
     user = User.query.get(user_id)
@@ -59,7 +59,7 @@ def get_specific_user(user_id):
     return jsonify(user_schema.dump(user))
 
 
-@users.route("/form", methods=["GET"])
+@users.route("/profile/form", methods=["GET"])
 @jwt_required()
 def get_user_form():
     # FETCH USER WITH user_id FROM USER TABLE
@@ -72,7 +72,7 @@ def get_user_form():
     return jsonify(update_form.dump(user))
     
 
-@users.route("/", methods=["PUT"])
+@users.route("/profile", methods=["PUT"])
 @jwt_required()
 def update_user():
     try: 
@@ -107,25 +107,35 @@ def update_user():
     return jsonify(message="Successfully updated profile", profile=updated_user.dump(user))
 
 
-
-
-@users.route("/<int:user_id>", methods=["DELETE"])
+@users.route("/profile", methods=["DELETE"])
 @jwt_required()
-def delete_user(user_id):
-    token_id = int(get_jwt_identity())
-    # FETCH USER FROM USER TABLE USING PATH PAREMETER user_id
-    user = User.query.get(user_id)
+def delete_own_profile():
+    # FETCH USER WITH user_id AS RETURNED BY get_jwt_identity() FROM JWT TOKEN
+    user = User.query.get(get_jwt_identity())
     if not user:
         return abort(401, description="Must be logged in to perform this action")
-    if not user.admin:
-        # IF token_id RETURNED FROM JWT TOKEN VIA get_jwt_identity() DOESN'T MATCH THE TARGET USER TO DELETE THEN ABORT
-        if token_id != user_id:
-            return abort(401, description="Must be an administrator to delete other profiles")
-    # OTHERWISE, IF USER IS ADMIN OR OWNER OF PROFILE THEN DELETE USER AND COMMIT TO DATABASE
+    # OTHERWISE, IF JWT TOKEN IS VALID AND USER IS FOUND THEN DELETE USER FROM DATABASE AND COMMIT
     db.session.delete(user)
     db.session.commit()
 
     return jsonify(message=f"{user.username} has been deleted")
+
+
+@users.route("/<int:user_id>", methods=["DELETE"])
+@jwt_required()
+def admin_delete_user(user_id):
+    # FETCH USER FROM JWT TOKEN IDENTITY
+    user = User.query.get(get_jwt_identity())
+    # IF USER IS NOT AN ADMINISTRATOR ABORT
+    if not user.admin:
+        return abort(401, description="Must be an administrator to delete other profiles")
+    # FETCH USER TO DELETE FROM USER TABLE USING PATH PAREMETER user_id
+    user_to_delete = User.query.get(user_id)
+    # OTHERWISE, IF USER IS ADMIN OR OWNER OF PROFILE THEN DELETE USER AND COMMIT TO DATABASE
+    db.session.delete(user_to_delete)
+    db.session.commit()
+
+    return jsonify(message=f"{user_to_delete.username} has been deleted")
 
 
 @users.route("/watchlist", methods=["GET"])

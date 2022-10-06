@@ -11,7 +11,7 @@ class UserSchema(ma.Schema):
     class Meta:
         ordered = True
         fields = ("id", "username", "email", "password", "first_name", "last_name", "logged_in", "watched_venues", "watched_artists")
-        load_only = ["password"]
+        load_only = ["password", "logged_in"]
 
     username = ma.String(required=True, validate=[Length(min=1, max=32), ContainsOnly(alphanumeric + "_")])
     password = ma.String(required=True, validate=[Length(min=8), ContainsOnly(alphanumeric + "!@#$%^&*()-_+=")])

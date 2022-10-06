@@ -19,6 +19,7 @@ def get_register_form():
         "first_name": "[string]",
         "last_name": "[string]"
     }
+    
     return user_template
 
 

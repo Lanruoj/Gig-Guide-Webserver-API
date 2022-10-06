@@ -25,20 +25,7 @@ from schemas.watch_artist_schema import watch_artist_schema, watch_artists_schem
 users = Blueprint("users", __name__, url_prefix="/users")
 
 
-@users.route("/", methods=["GET"])
-@jwt_required()
-def get_users():
-    # FETCH USER WITH user_id FROM USER TABLE
-    user = User.query.get(get_jwt_identity())
-    if not user:
-        return abort(404, description="User does not exist")
-    
-    users = search_table(User, filters=[User.admin==False])
-    
-    return jsonify(users_schema.dump(users))
-
-
-@users.route("/profile", methods=["GET"])
+@users.route("/me", methods=["GET"])
 @jwt_required()
 def get_own_profile():
     # FETCH USER WITH user_id FROM USER TABLE
@@ -49,7 +36,20 @@ def get_own_profile():
     return jsonify(user_schema.dump(user))
 
 
-@users.route("/profile/<int:user_id>", methods=["GET"])
+@users.route("/", methods=["GET"])
+@jwt_required()
+def get_users():
+    # FETCH USER WITH user_id FROM USER TABLE
+    user = User.query.get(get_jwt_identity())
+    if not user:
+        return abort(404, description="User does not exist")
+    # SEARCH USERS TABLE - BY DEFAULT RETURN ALL NON-ADMIN USERS BUT TAKES OPTIONAL QUERY STRING ARGUMENTS FOR FILTERING AND SORTING
+    users = search_table(User, filters=[User.admin==False])
+    
+    return jsonify(users_schema.dump(users))
+
+
+@users.route("/<int:user_id>", methods=["GET"])
 def get_specific_user(user_id):
     # FETCH USER WITH user_id FROM USER TABLE
     user = User.query.get(user_id)
@@ -59,7 +59,7 @@ def get_specific_user(user_id):
     return jsonify(user_schema.dump(user))
 
 
-@users.route("/profile/form", methods=["GET"])
+@users.route("/form", methods=["GET"])
 @jwt_required()
 def get_user_form():
     # FETCH USER WITH user_id FROM USER TABLE
@@ -102,7 +102,7 @@ def get_user_form():
 
 
 
-@users.route("/profile", methods=["PUT"])
+@users.route("/form", methods=["PUT"])
 @jwt_required()
 def update_user():
     try: 
@@ -111,7 +111,7 @@ def update_user():
     except ValidationError as err:
         return jsonify(err.messages)
     # GET USER
-    user = Gig.query.get(get_jwt_identity())
+    user = User.query.get(get_jwt_identity())
     if not user:
         return abort(401, description=Markup(f"User must be logged in"))
     # PARSE JSON DATA FROM REQUEST
@@ -125,7 +125,6 @@ def update_user():
                 setattr(user, attribute, bcrypt.generate_password_hash(user_fields["password"]).decode("utf-8"))
 
             else:
-                old_input = getattr(user, attribute)
                 # SET THE ATTRIBUTE TO THE RELEVANT INPUT DATA
                 setattr(user, attribute, user_fields[attribute])
                 new_values.append(user_fields[attribute])
@@ -133,12 +132,12 @@ def update_user():
     
     db.session.commit()
 
-    return jsonify(user_schema.dump(user))
+    return jsonify(message="Successfully updated profile", profile=user_schema.dump(user))
 
 
 
 
-@users.route("/profile/<int:user_id>", methods=["DELETE"])
+@users.route("/<int:user_id>", methods=["DELETE"])
 @jwt_required()
 def delete_user(user_id):
     token_id = int(get_jwt_identity())
@@ -157,7 +156,7 @@ def delete_user(user_id):
     return jsonify(message=f"{user.username} has been deleted")
 
 
-@users.route("/profile/watchlist", methods=["GET"])
+@users.route("/watchlist", methods=["GET"])
 @jwt_required()
 def get_watchlist():
     # FETCH USER WITH user_id AS RETURNED BY get_jwt_identity() FROM JWT TOKEN

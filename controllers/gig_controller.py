@@ -43,13 +43,25 @@ def get_gigs():
 
 
 @gigs.route("/<int:gig_id>", methods=["GET"])
-def show_specific_gig(gig_id):
+def get_specific_gig(gig_id):
     # QUERY GIGS FOR GIG WITH ID OF gig_id
     gig = Gig.query.get(gig_id)
     if not gig:
         return abort(404, description=Markup(f"Gig not found with the ID of {gig_id}. Please try again"))
 
     return jsonify(gig_schema.dump(gig))
+
+
+@gigs.route("/<int:gig_id>/form", methods=["GET"])
+def get_gig_update_form(gig_id):
+    # QUERY GIGS FOR GIG WITH ID OF gig_id
+    gig = Gig.query.get(gig_id)
+    if not gig:
+        return abort(404, description=Markup(f"Gig not found with the ID of {gig_id}. Please try again"))
+    # CREATE FORM FOR USER TO UPDATE GIG WITH
+    update_form = GigSchema(only=("title", "venue_id", "artists", "description", "start_time", "price", "tickets_url"))
+
+    return jsonify(update_form.dump(gig))
 
 
 @gigs.route("/<int:gig_id>", methods=["PUT"])

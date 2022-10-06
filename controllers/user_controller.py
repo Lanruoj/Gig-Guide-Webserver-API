@@ -13,7 +13,7 @@ from schemas.performance_schema import performance_schema
 from models.artist import Artist
 from schemas.artist_schema import artist_schema, artists_schema
 from models.user import User
-from schemas.user_schema import user_schema, UserSchema
+from schemas.user_schema import user_schema, users_schema, UserSchema
 from models.venue import Venue
 from schemas.venue_schema import venue_schema, venues_schema
 from models.watch_venue import WatchVenue
@@ -25,8 +25,32 @@ from schemas.watch_artist_schema import watch_artist_schema, watch_artists_schem
 users = Blueprint("users", __name__, url_prefix="/users")
 
 
-@users.route("/<int:user_id>", methods=["GET"])
-def get_user(user_id):
+@users.route("/", methods=["GET"])
+@jwt_required()
+def get_users():
+    # FETCH USER WITH user_id FROM USER TABLE
+    user = User.query.get(get_jwt_identity())
+    if not user:
+        return abort(404, description="User does not exist")
+    
+    users = search_table(User, filters=[User.admin==False])
+    
+    return jsonify(users_schema.dump(users))
+
+
+@users.route("/profile", methods=["GET"])
+@jwt_required()
+def get_own_profile():
+    # FETCH USER WITH user_id FROM USER TABLE
+    user = User.query.get(get_jwt_identity())
+    if not user:
+        return abort(404, description="User does not exist")
+    
+    return jsonify(user_schema.dump(user))
+
+
+@users.route("/profile/<int:user_id>", methods=["GET"])
+def get_specific_user(user_id):
     # FETCH USER WITH user_id FROM USER TABLE
     user = User.query.get(user_id)
     if not user:
@@ -35,36 +59,86 @@ def get_user(user_id):
     return jsonify(user_schema.dump(user))
 
 
-@users.route("/<field>", methods=["PUT"])
+@users.route("/profile/form", methods=["GET"])
 @jwt_required()
-def update_user(field):
-    # GET THE id OF THE JWT ACCESS TOKEN FROM @jwt_required()
-    user_id = int(get_jwt_identity())
-    # RETRIEVE THE User OBJECT WITH THE id FROM get_jwt_identity() SO IT CAN BE UPDATED
-    user = User.query.get(user_id)
-    if not user or not user.logged_in:
-        return abort(401, description="User not logged in")
+def get_user_form():
+    # FETCH USER WITH user_id FROM USER TABLE
+    user = User.query.get(get_jwt_identity())
+    if not user:
+        return abort(404, description="User does not exist")
     
-    # IF USER EXISTS, USE AS THE RECORD TO UPDATE    
-    user_fields = user_schema.load(request.json, partial=True)
-    # CHECK IF ARGUMENT FROM PATH PARAMETER MATCHES THE FOLLOWING ATTRIBUTES, AND IF SO THEN UPDATE THE CORRESPONDING COLUMN WITH THE VALUE FROM REQUEST FIELDS
-    if field=="username":
-        user.username = user_fields["username"]
-    elif field=="password":
-        user.password = bcrypt.generate_password_hash(user_fields["password"]).decode("utf-8")
-    elif field=="email":
-        user.email = user_fields["email"]
-    elif field=="first_name":
-        user.first_name = user_fields["first_name"]
-    elif field=="last_name":
-        user.last_name = user_fields["last_name"]
-    # COMMIT CHANGES TO DATABASE
+    update_form = UserSchema(exclude=("id", "logged_in", "watched_venues", "watched_artists"))
+
+    return jsonify(update_form.dump(user))
+    
+
+# @users.route("/<field>", methods=["PUT"])
+# @jwt_required()
+# def update_user(field):
+#     # GET THE id OF THE JWT ACCESS TOKEN FROM @jwt_required()
+#     user_id = int(get_jwt_identity())
+#     # RETRIEVE THE User OBJECT WITH THE id FROM get_jwt_identity() SO IT CAN BE UPDATED
+#     user = User.query.get(user_id)
+#     if not user or not user.logged_in:
+#         return abort(401, description="User not logged in")
+    
+#     # IF USER EXISTS, USE AS THE RECORD TO UPDATE    
+#     user_fields = user_schema.load(request.json, partial=True)
+#     # CHECK IF ARGUMENT FROM PATH PARAMETER MATCHES THE FOLLOWING ATTRIBUTES, AND IF SO THEN UPDATE THE CORRESPONDING COLUMN WITH THE VALUE FROM REQUEST FIELDS
+#     if field=="username":
+#         user.username = user_fields["username"]
+#     elif field=="password":
+#         user.password = bcrypt.generate_password_hash(user_fields["password"]).decode("utf-8")
+#     elif field=="email":
+#         user.email = user_fields["email"]
+#     elif field=="first_name":
+#         user.first_name = user_fields["first_name"]
+#     elif field=="last_name":
+#         user.last_name = user_fields["last_name"]
+#     # COMMIT CHANGES TO DATABASE
+#     db.session.commit()
+
+#     return jsonify(user_schema.dump(user))
+
+
+
+@users.route("/profile", methods=["PUT"])
+@jwt_required()
+def update_user():
+    try: 
+        user_fields = user_schema.load(request.json, partial=True)
+    # IF INVALID, RETURN A DESCRIPTIVE ERROR
+    except ValidationError as err:
+        return jsonify(err.messages)
+    # GET USER
+    user = Gig.query.get(get_jwt_identity())
+    if not user:
+        return abort(401, description=Markup(f"User must be logged in"))
+    # PARSE JSON DATA FROM REQUEST
+    request_data = request.get_json()
+    fields, new_values = [], []
+    # PARSE COLUMNS TO UPDATE FROM THE REQUEST DATA
+    for attribute in request_data.keys():
+        # IF VALUE IS A VALID ATTRIBUTE OF USER
+        if attribute in vars(User):
+            if attribute == "password":
+                setattr(user, attribute, bcrypt.generate_password_hash(user_fields["password"]).decode("utf-8"))
+
+            else:
+                old_input = getattr(user, attribute)
+                # SET THE ATTRIBUTE TO THE RELEVANT INPUT DATA
+                setattr(user, attribute, user_fields[attribute])
+                new_values.append(user_fields[attribute])
+                fields.append(attribute)
+    
     db.session.commit()
 
     return jsonify(user_schema.dump(user))
 
 
-@users.route("/<int:user_id>", methods=["DELETE"])
+
+
+@users.route("/profile/<int:user_id>", methods=["DELETE"])
 @jwt_required()
 def delete_user(user_id):
     token_id = int(get_jwt_identity())
@@ -83,7 +157,7 @@ def delete_user(user_id):
     return jsonify(message=f"{user.username} has been deleted")
 
 
-@users.route("/watchlist", methods=["GET"])
+@users.route("/profile/watchlist", methods=["GET"])
 @jwt_required()
 def get_watchlist():
     # FETCH USER WITH user_id AS RETURNED BY get_jwt_identity() FROM JWT TOKEN

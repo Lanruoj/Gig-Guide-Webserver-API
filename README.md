@@ -120,4 +120,4 @@ I will be employing a loose *kanban* framework to my Trello board and distinctly
 
 * `[GET] localhost:5000/gigs/<gig_id>`: returns gig with `id` specified in URL
 
-* `[PUT] localhost:5000/gigs/<gig_id>`: updates gig 
+* `[PUT] localhost:5000/gigs/<gig_id>`: updates gig using 

@@ -14,8 +14,8 @@ def get_register_form():
     # RETURN AN EMPTY USER JSON ARRAY TEMPLATE FOR THE USER TO USE TO REGISTER
     user_template = {
         "email": "[string: must be a valid email address]",
-        "username": "[string: alphanumeric or _ only]",
-        "password": "[minimum 8 characters]",
+        "username": "[string: alphanumeric + '_']",
+        "password": "[string: alphanumeric + '!@#$%^&*()-_+=']",
         "first_name": "[string]",
         "last_name": "[string]"
     }

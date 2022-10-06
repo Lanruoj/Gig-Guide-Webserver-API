@@ -69,6 +69,18 @@ def get_artist(artist_id):
     return jsonify(artist_schema.dump(artist))
 
 
+@artists.route("/<int:artist_id>/form", methods=["GET"])
+def get_artist_form(artist_id):
+    # FETCH ARTIST WITH id MATCHING artist_id FROM PATH PARAMETER
+    artist = Artist.query.get(artist_id)
+    if not artist:
+        return abort(404, description="Artist does not exist")
+    # CREATE FORM FOR USER TO UPDATE ARTIST WITH
+    update_form = ArtistSchema(exclude=("id", "performances"))
+
+    return jsonify(update_form.dump(artist))
+
+
 @artists.route("/<int:artist_id>", methods=["PUT"])
 @jwt_required()
 def update_artist(artist_id):

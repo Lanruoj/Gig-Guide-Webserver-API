@@ -40,7 +40,7 @@ def get_users():
     return jsonify(users_schema.dump(users)), 200
 
 
-@users.route("/", methods=["GET"])
+@users.route("/profile/all", methods=["GET"])
 @jwt_required()
 def get_own_user_details():
     # FETCH USER WITH user_id FROM USER TABLE
@@ -170,3 +170,120 @@ def get_watchlist():
     watchlist_schema = UserSchema(only=("username", "watched_venues", "watched_artists"))
 
     return jsonify(watchlist_schema.dump(user)), 200
+
+
+@users.route("/watchlist/form", methods=["GET"])
+def watch_form():
+    watch_template = {
+        "artist_id / venue_id": "[integer]"
+    }
+
+    return watch_template, 200
+
+
+@users.route("/watchlist", methods=["POST"])
+@jwt_required()
+def add_to_watchlist():
+    request_data = request.get_json()
+    if "venue_id" in request_data.keys():
+        watch_venue_fields = watch_venue_schema.load(request.json, partial=True)
+        # FETCH USER WITH user_id AS RETURNED BY get_jwt_identity() FROM JWT TOKEN
+        user = User.query.get(int(get_jwt_identity()))
+        if not user or not user.logged_in:
+            return abort(401, description="Unauthorised - user must be logged in")
+        # FETCH USERS WATCHVENUE RECORDS FILTERED BY user_id FROM FETCHED USER
+        users_watched_venues = WatchVenue.query.filter_by(user_id=user.id).all()
+        # CHECK IF VENUE WITH REQUEST'S venue_id EXISTS IN VENUE TABLE
+        venue_exists = Venue.query.get(watch_venue_fields["venue_id"])
+        if not venue_exists:
+            return abort(404, description="Venue does not exist")
+        # LOOK THROUGH ALL OF USER'S WATCHED VENUES TO CHECK IF USER IS ALREADY WATCHING THE VENUE FROM THE REQUEST (CHECK FOR DUPLICATE)
+        for wa in users_watched_venues:
+            if wa.venue_id ==  watch_venue_fields["venue_id"]:
+                # IF venue_id ALREADY IN USER'S WATCHED VENUE, FETCH VENUE'S NAME FOR DESCRIPTIVE MESSAGE
+                venue = Venue.query.get(watch_venue_fields["venue_id"])
+                return abort(400, description=f"{user.username} already watching {venue.name}")
+        # IF VALID REQUEST, CREATE NEW WATCHVENUE RECORD
+        watch_venue = WatchVenue(
+            user_id = user.id,
+            venue_id = watch_venue_fields["venue_id"]
+        )
+        # ADD NEW RECORD TO DATABASE AND COMMIT
+        db.session.add(watch_venue)
+        db.session.commit()
+
+        return jsonify(watch_venue_schema.dump(watch_venue)), 201
+    
+    elif "artist_id" in request_data.keys():
+        watch_artist_fields = watch_artist_schema.load(request.json, partial=True)
+        # FETCH USER WITH user_id AS RETURNED BY get_jwt_identity() FROM JWT TOKEN
+        user = User.query.get(int(get_jwt_identity()))
+        if not user or not user.logged_in:
+            return abort(401, description="User must be logged in")
+        # FETCH USER'S WATCHED ARTISTS FROM THE WATCHARTISTS TABLE
+        users_watched_artists = WatchArtist.query.filter_by(user_id=user.id).all()
+        # FETCH ARTIST FROM THE REQUEST BODY'S artist_id
+        artist = Artist.query.get(watch_artist_fields["artist_id"])
+        if not artist:
+            return abort(404, description="Artist does not exist")
+        # LOOK THROUGH ALL OF USER'S WATCHED ARTISTS TO CHECK IF USER IS ALREADY WATCHING THE ARTIST FROM THE REQUEST (CHECK FOR DUPLICATE)
+        for wa in users_watched_artists:
+            if wa.artist_id == watch_artist_fields["artist_id"]:
+                # IF artist_id ALREADY IN USER'S WATCHED ARTISTS, FETCH ARTIST'S NAME FOR DESCRIPTIVE MESSAGE
+                artist = Artist.query.get(watch_artist_fields["artist_id"])
+
+                return abort(409, description=f"{user.first_name} already watching {artist.name}")
+        
+        # IF VALID REQUEST CREATE NEW WATCHARTIST RECORD
+        new_watched_artist = WatchArtist(
+            user_id = user.id,
+            artist_id = watch_artist_fields["artist_id"]
+        )
+        # ADD NEW RECORD TO SESSION AND COMMIT TO DATABASE
+        db.session.add(new_watched_artist)
+        db.session.commit()
+
+        return jsonify(watch_artist_schema.dump(new_watched_artist)), 201
+    
+    else:
+        return abort(404, description="Invalid field name/s")
+
+
+@users.route("/watchlist", methods=["DELETE"])
+@jwt_required()
+def delete_watched_item():
+    # FETCH USER WITH user_id AS RETURNED BY get_jwt_identity() FROM JWT TOKEN
+    user = User.query.get(int(get_jwt_identity()))
+    if not user:
+        return abort(401, description="User must be logged in")
+
+    request_data = request.get_json()
+    if "venue_id" in request_data.keys():
+        # FETCH VENUE FROM PATH PARAMETER WITH MATCHING id
+        venue = Venue.query.get(request_data["venue_id"])
+        if not venue:
+            return abort(404, description="Venue not found")
+        # CHECK IF THERE EXISTS A WATCHVENUE RECORD WITH THE CURRENT USER'S ID AND THE VENUE'S ID
+        watched_venue = WatchVenue.query.filter(WatchVenue.venue_id==request_data["venue_id"], WatchVenue.user_id==user.id).first()
+        if not watched_venue:
+            return abort(404, description=f"User is not following {venue.name}")
+        # DELETE WATCHARTIST RECORD FROM SESSION AND COMMIT TO DATABASE
+        db.session.delete(watched_venue)
+        db.session.commit()
+
+        return jsonify(message=f"{venue.name} has been successfully removed from your watchlist"), 200
+        
+    elif "artist_id" in request_data.keys():
+        # FETCH ARTIST FROM PATH PARAMETER WITH MATCHING id
+        artist = Artist.query.get(request_data["artist_id"])
+        if not artist:
+            return abort(404, description="Artist not found")
+        # CHECK IF THERE EXISTS A WATCHARTIST RECORD WITH THE CURRENT USER'S ID AND THE ARTIST'S ID
+        watched_artist = WatchArtist.query.filter(WatchArtist.artist_id==request_data["artist_id"], WatchArtist.user_id==user.id).first()
+        if not watched_artist:
+            return abort(404, description=f"User is not following {artist.name}")
+        # DELETE WATCHARTIST RECORD FROM SESSION AND COMMIT TO DATABASE
+        db.session.delete(watched_artist)
+        db.session.commit()
+
+        return jsonify(message=f"{artist.name} has been successfully removed from your watchlist"), 200

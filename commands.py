@@ -10,6 +10,7 @@ from models.performance import Performance
 from datetime import datetime
 from models.watch_venue import WatchVenue
 from schemas.watch_venue_schema import watch_venue_schema, watch_venues_schema
+from models.watch_artist import WatchArtist
 
 
 
@@ -28,6 +29,7 @@ def drop_db():
 
 @db_commands.cli.command("seed")
 def seed_db():
+    # USER SEEDS
     admin = User(
         username = "admin",
         password = bcrypt.generate_password_hash(current_app.config["ADMIN_PASSWORD"]).decode("utf-8"),
@@ -37,7 +39,7 @@ def seed_db():
         admin = True
     )
     db.session.add(admin)
-    user = User(
+    user1 = User(
         username = "user",
         password = bcrypt.generate_password_hash(current_app.config["USER_PASSWORD"]).decode("utf-8"),
         email = "user@email.com",
@@ -45,60 +47,103 @@ def seed_db():
         last_name = "Test",
         admin = False
     )
-    db.session.add(user)
-
-    test_artist = Artist(
-        name = "Gregor",
-        genre = "Alt. pop"
+    db.session.add(user1)
+    user2 = User(
+        username = "punter",
+        password = bcrypt.generate_password_hash(current_app.config["PUNTER_PASSWORD"]).decode("utf-8"),
+        email = "punter@email.com",
+        first_name = "Punter",
+        last_name = "Smith",
+        admin = False
     )
-    db.session.add(test_artist)
+    db.session.add(user2)
+    db.session.commit()
+
+    # ARTIST SEEDS
     test_artist1 = Artist(
-        name = "Sweet Whirl",
-        genre = "Alt. pop"
+        name = "Gregor",
+        genre = "Alternative Pop"
     )
     db.session.add(test_artist1)
     test_artist2 = Artist(
+        name = "Sweet Whirl",
+        genre = "Alternative Pop"
+    )
+    db.session.add(test_artist2)
+    test_artist3 = Artist(
         name = "Jordan Ireland",
         genre = "Folk"
     )
-    db.session.add(test_artist2)
+    db.session.add(test_artist3)
+    test_artist4 = Artist(
+        name = "King Krule",
+        genre = "Punk"
+    )
+    db.session.add(test_artist4)
+    test_artist5 = Artist(
+        name = "Arthur Russell",
+        genre = "Experimental"
+    )
+    db.session.add(test_artist5)
+    test_artist6 = Artist(
+        name = "Connan Mockasin",
+        genre = "Alternative Rock"
+    )
+    db.session.add(test_artist6)
+    test_artist7 = Artist(
+        name = "Blake Mills",
+        genre = "Alternative Rock"
+    )
+    db.session.add(test_artist7)
+    test_artist8 = Artist(
+        name = "Julian Lage",
+        genre = "Jazz"
+    )
+    db.session.add(test_artist8)
+    test_artist9 = Artist(
+        name = "Mulatu Astatke",
+        genre = "World"
+    )
+    db.session.add(test_artist9)
     db.session.commit()
 
-    test_venue = Venue(
+    # VENUE SEEDS
+    test_venue1 = Venue(
         name = "The Gasometer Hotel",
         street_address = "484 Smith St",
         city = "Collingwood",
         state = "Victoria",
         country = "Australia"
     )
-    db.session.add(test_venue)
-    test_venue1 = Venue(
+    db.session.add(test_venue1)
+    test_venue2 = Venue(
         name = "The Forum",
         street_address = "154 Flinders St",
         city = "Melbourne",
         state = "Victoria",
         country = "Australia"
     )
-    db.session.add(test_venue1)
-    test_venue2 = Venue(
+    db.session.add(test_venue2)
+    test_venue3 = Venue(
         name = "The Jazzlab",
         street_address = "27 Leslie street",
         city = "Brunswick",
         state = "Victoria",
         country = "Australia"
     )
-    db.session.add(test_venue2)
+    db.session.add(test_venue3)
     db.session.commit()
 
+    # GIG SEEDS
     test_gig1 = Gig(
         title = "Gregor [EXPIRED]",
         description = "Gregor plays Destiny at the Forum!",
         start_time = datetime(year=2022, month=9, day=17, hour=18),
-        price = 20,
+        price = 50,
         date_added = datetime.now(),
         artists = "Gregor",
         venue_id = 2,
-        user_id = 1
+        user_id = 2
     )
     db.session.add(test_gig1)
     test_gig2 = Gig(
@@ -110,34 +155,74 @@ def seed_db():
         date_added = datetime.now(),
         artists = "Jordan Ireland",
         venue_id = 3,
-        user_id = 1
+        user_id = 3
     )
     db.session.add(test_gig2)
-    db.session.commit()
     test_gig3 = Gig(
         title = "Sweet Whirl at the Forum [ACTIVE]",
         description = "...",
         start_time = datetime(year=2023, month=5, day=17, hour=18),
-        price = 13,
+        price = 55,
         tickets_url = "https://tickets.gig.com",
         date_added = datetime.now(),
         artists = "Sweet Whirl",
         venue_id = 2,
-        user_id = 1
+        user_id = 3
     )
     db.session.add(test_gig3)
+    test_gig4 = Gig(
+        title = "Gregor at the Gasometer [ACTIVE]",
+        description = "...",
+        start_time = datetime(year=2022, month=12, day=13, hour=18),
+        price = 15,
+        tickets_url = "https://tickets.gig.com",
+        date_added = datetime.now(),
+        artists = "Gregor",
+        venue_id = 1,
+        user_id = 2
+    )
+    db.session.add(test_gig4)
     db.session.commit()
 
-    wv = WatchVenue(
-        user_id = 1,
+    # WATCHVENUE SEEDS
+    wv1 = WatchVenue(
+        user_id = 2,
         venue_id = 1
     )
-    db.session.add(wv)
+    db.session.add(wv1)
     wv2 = WatchVenue(
-        user_id = 1,
-        venue_id = 2
+        user_id = 2,
+        venue_id = 3
     )
     db.session.add(wv2)
+    wv3 = WatchVenue(
+        user_id = 3,
+        venue_id = 1
+    )
+    db.session.add(wv2)
+    wv4 = WatchVenue(
+        user_id = 3,
+        venue_id = 2
+    )
+    db.session.add(wv4)
+    db.session.commit()
+
+    # WATCHARTIST SEEDS
+    wa1 = WatchArtist(
+        user_id = 2,
+        artist_id = 2
+    )
+    db.session.add(wa1)
+    wa2 = WatchArtist(
+        user_id = 3,
+        artist_id = 3
+    )
+    db.session.add(wa2)
+    wa3 = WatchArtist(
+        user_id = 3,
+        artist_id = 1
+    )
+    db.session.add(wa3)
     db.session.commit()
 
     print("Tables seeded")

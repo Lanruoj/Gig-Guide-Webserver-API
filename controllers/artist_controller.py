@@ -16,6 +16,7 @@ from models.user import User
 from schemas.user_schema import user_schema
 from models.genre import Genre
 from schemas.genre_schema import genres_schema
+from models.artist_genre import ArtistGenre
 
 
 artists = Blueprint("artists", __name__, url_prefix="/artists")
@@ -33,7 +34,8 @@ def get_artists():
 def get_new_artist_form():
     # RETURN AN EMPTY ARTIST JSON ARRAY TEMPLATE
     artist_template = {
-        "name": "[string]"
+        "name": "[string]",
+        "genres": "[[list of strings: optional]]"
     }
 
     return artist_template, 200
@@ -60,6 +62,23 @@ def add_artist():
     # ADD ARTIST TO SESSION AND COMMIT TO DATABASE
     db.session.add(artist)
     db.session.commit()
+    # PARSE JSON ARRAY FROM REQUEST DATA
+    request_data = request.get_json()
+    if "genres" in request_data.keys():
+        # IF "genres" IN REQUEST BODY, SPLIT STRING INTO LIST
+        input_genres = request_data["genres"].split(", ")
+        for g in input_genres:
+            # CHECK IF GENRE EXISTS WITH NAMES IN LIST (CASE INSENSITIVE)
+            genre_exists = Genre.query.filter(Genre.name.ilike(f"%{g}%")).first()
+            if genre_exists:
+                # IF GENRE EXISTS, CREATE NEW ARTISTGENRE RECORD
+                artist_genre = ArtistGenre(
+                    artist_id = artist.id,
+                    genre_id = genre_exists.id
+                )
+                # ADD RECORD TO DATABASE AND COMMIT
+                db.session.add(artist_genre)
+                db.session.commit()
 
     return jsonify(result=artist_schema.dump(artist), location=f"http://localhost:5000/artists/{artist.id}"), 201
 

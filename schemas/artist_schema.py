@@ -7,12 +7,12 @@ from schemas.artist_genre_schema import ArtistGenreSchema
 class ArtistSchema(ma.Schema):
     class Meta:
         ordered = True
-        fields = ("id", "name", "country_id", "country", "genres", "performances")
+        fields = ("id", "name", "country_id", "country", "genres", "artist_genres", "performances")
         load_only = ["country_id"]
 
     name = ma.String(required=True, validate=Length(min=1))
 
-    genres = fields.List(fields.Nested("ArtistGenreSchema"))
+    artist_genres = fields.List(fields.Nested("ArtistGenreSchema"))
 
     country = fields.Nested("CountrySchema")
     performances = fields.List(fields.Nested("PerformanceSchema"))

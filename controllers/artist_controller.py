@@ -17,6 +17,7 @@ from schemas.user_schema import user_schema
 from models.genre import Genre
 from schemas.genre_schema import genres_schema
 from models.artist_genre import ArtistGenre
+from models.country import Country
 
 
 artists = Blueprint("artists", __name__, url_prefix="/artists")
@@ -35,7 +36,8 @@ def get_new_artist_form():
     # RETURN AN EMPTY ARTIST JSON ARRAY TEMPLATE
     artist_template = {
         "name": "[string]",
-        "genres": "[[list of strings: optional]]"
+        "genres": "[string: e.g: Rock, Pop, Jazz]",
+        "country_id": "[integer: optional]"
     }
 
     return artist_template, 200
@@ -56,31 +58,40 @@ def add_artist():
         return abort(409, description=f"An artist already exists called {artist_fields['name']}")
 
     # CREATE NEW ARTIST FROM REQUEST FIELDS
-    artist = Artist(
-        name = artist_fields["name"]
+    new_artist = Artist(
+        name = artist_fields["name"],
+        genres = artist_fields["genres"]
     )
     # ADD ARTIST TO SESSION AND COMMIT TO DATABASE
-    db.session.add(artist)
+    db.session.add(new_artist)
     db.session.commit()
     # PARSE JSON ARRAY FROM REQUEST DATA
     request_data = request.get_json()
     if "genres" in request_data.keys():
         # IF "genres" IN REQUEST BODY, SPLIT STRING INTO LIST
-        input_genres = request_data["genres"].split(", ")
+        input_genres = artist_fields["genres"].split(", ")
         for g in input_genres:
             # CHECK IF GENRE EXISTS WITH NAMES IN LIST (CASE INSENSITIVE)
             genre_exists = Genre.query.filter(Genre.name.ilike(f"%{g}%")).first()
             if genre_exists:
                 # IF GENRE EXISTS, CREATE NEW ARTISTGENRE RECORD
                 artist_genre = ArtistGenre(
-                    artist_id = artist.id,
+                    artist_id = new_artist.id,
                     genre_id = genre_exists.id
                 )
-                # ADD RECORD TO DATABASE AND COMMIT
-                db.session.add(artist_genre)
-                db.session.commit()
 
-    return jsonify(result=artist_schema.dump(artist), location=f"http://localhost:5000/artists/{artist.id}"), 201
+    if "country_id" in request_data.keys():
+        country_exists = Country.query.get(artist_fields["country_id"])
+        if country_exists:
+            new_artist.country_id = artist_fields["country_id"]
+        else:
+            return jsonify(result=artist_schema.dump(new_artist), message=f"Invalid country - update the artist with a valid country_id", location=f"http://localhost:5000/artists/{new_artist.id}"), 201
+    
+    # ADD ARTIST TO DATABASE AND COMMIT
+    db.session.add(artist_genre)
+    db.session.commit()
+
+    return jsonify(result=artist_schema.dump(new_artist), location=f"http://localhost:5000/artists/{new_artist.id}"), 201
 
 
 @artists.route("/<int:artist_id>", methods=["GET"])
@@ -100,7 +111,8 @@ def get_artist_form(artist_id):
     if not artist:
         return abort(404, description="Artist does not exist")
     # CREATE FORM FOR USER TO UPDATE ARTIST WITH
-    update_form = ArtistSchema(exclude=("id", "performances"))
+    update_form = ArtistSchema(only=("name", "country_id", "genres"))
+    print(update_form)
 
     return jsonify(update_form.dump(artist)), 200
 

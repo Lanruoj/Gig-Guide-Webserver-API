@@ -8,7 +8,7 @@ class ArtistSchema(ma.Schema):
     class Meta:
         ordered = True
         fields = ("id", "name", "country_id", "country", "genres", "artist_genres", "performances")
-        load_only = ["country_id"]
+        # load_only = ["country_id"]
 
     name = ma.String(required=True, validate=Length(min=1))
 

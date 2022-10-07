@@ -14,6 +14,8 @@ from models.watch_artist import WatchArtist
 from models.country import Country
 from models.state import State
 from models.city import City
+from models.genre import Genre
+from models.artist_genre import ArtistGenre
 
 
 db_commands = Blueprint("db", __name__)
@@ -178,50 +180,41 @@ def seed_db():
     # ARTIST SEEDS
     test_artist1 = Artist(
         name = "Gregor",
-        genre = "Alternative Pop",
         country_id = 1
     )
     db.session.add(test_artist1)
     test_artist2 = Artist(
         name = "Sweet Whirl",
-        genre = "Alternative Pop",
         country_id = 1
     )
     db.session.add(test_artist2)
     test_artist3 = Artist(
         name = "Jordan Ireland",
-        genre = "Folk",
         country_id = 1
     )
     db.session.add(test_artist3)
     test_artist4 = Artist(
-        name = "King Krule",
-        genre = "Punk"
+        name = "King Krule"
     )
     db.session.add(test_artist4)
     test_artist5 = Artist(
-        name = "Arthur Russell",
-        genre = "Experimental"
+        name = "Arthur Russell"
     )
     db.session.add(test_artist5)
     test_artist6 = Artist(
-        name = "Connan Mockasin",
-        genre = "Alternative Rock"
+        name = "Connan Mockasin"
     )
     db.session.add(test_artist6)
     test_artist7 = Artist(
-        name = "Blake Mills",
-        genre = "Alternative Rock"
+        name = "Blake Mills"
     )
     db.session.add(test_artist7)
     test_artist8 = Artist(
-        name = "Julian Lage",
-        genre = "Jazz"
+        name = "Julian Lage"
     )
     db.session.add(test_artist8)
     test_artist9 = Artist(
-        name = "Mulatu Astatke",
-        genre = "World"
+        name = "Mulatu Astatke"
     )
     db.session.add(test_artist9)
     db.session.commit()
@@ -315,7 +308,7 @@ def seed_db():
         user_id = 3,
         venue_id = 1
     )
-    db.session.add(wv2)
+    db.session.add(wv3)
     wv4 = WatchVenue(
         user_id = 3,
         venue_id = 2
@@ -339,6 +332,106 @@ def seed_db():
         artist_id = 1
     )
     db.session.add(wa3)
+    db.session.commit()
+
+    # GENRE SEEDS
+    genre1 = Genre(
+        name = "Pop"
+    )
+    db.session.add(genre1)
+    genre2 = Genre(
+        name = "Rock"
+    )
+    db.session.add(genre2)
+    genre3 = Genre(
+        name = "Jazz"
+    )
+    db.session.add(genre3)
+    genre4 = Genre(
+        name = "Metal"
+    )
+    db.session.add(genre4)
+    genre5 = Genre(
+        name = "Psychedelic"
+    )
+    db.session.add(genre5)
+    genre6 = Genre(
+        name = "Punk"
+    )
+    db.session.add(genre6)
+    genre7 = Genre(
+        name = "Folk"
+    )
+    db.session.add(genre7)
+    genre8 = Genre(
+        name = "World"
+    )
+    db.session.add(genre8)
+    genre9 = Genre(
+        name = "Blues"
+    )
+    db.session.add(genre9)
+    genre10 = Genre(
+        name = "Funk"
+    )
+    db.session.add(genre10)
+    genre11 = Genre(
+        name = "Hip-hop"
+    )
+    db.session.add(genre11)
+    genre12 = Genre(
+        name = "Soul"
+    )
+    db.session.add(genre12)
+    genre13 = Genre(
+        name = "RnB"
+    )
+    db.session.add(genre13)
+    genre14 = Genre(
+        name = "House"
+    )
+    db.session.add(genre14)
+    genre15 = Genre(
+        name = "Electronica"
+    )
+    db.session.add(genre15)
+    genre16 = Genre(
+        name = "Disco"
+    )
+    db.session.add(genre16)
+    genre17 = Genre(
+        name = "Techno"
+    )
+    db.session.add(genre17)
+    genre18 = Genre(
+        name = "Classical"
+    )
+    db.session.add(genre18)
+    genre19 = Genre(
+        name = "Ambient"
+    )
+    db.session.add(genre19)
+    genre20 = Genre(
+        name = "Country"
+    )
+    db.session.add(genre20)
+    genre21 = Genre(
+        name = "Reggae"
+    )
+    db.session.add(genre21)
+    db.session.commit()
+
+    # ARTIST_GENRE SEEDS
+    ag1 = ArtistGenre(
+        artist_id = 1,
+        genre_id = 1
+    )
+    db.session.add(ag1)
+    ag1 = ArtistGenre(
+        artist_id = 1,
+        genre_id = 2
+    )
+    db.session.add(ag1)
     db.session.commit()
 
     print("Tables seeded")

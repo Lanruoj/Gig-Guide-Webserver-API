@@ -8,3 +8,12 @@ class ArtistGenre(db.Model):
     artist_id = db.Column(db.Integer, db.ForeignKey("artists.id"), nullable=False)
     genre_id = db.Column(db.Integer, db.ForeignKey("genres.id"), nullable=False)
 
+    ag_artist = db.relationship(
+        "Artist",
+        back_populates="artist_ag"
+    )
+
+    ag_genre = db.relationship(
+        "Genre",
+        back_populates="genre_ag"
+    )

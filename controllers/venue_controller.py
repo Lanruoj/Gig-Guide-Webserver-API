@@ -43,12 +43,10 @@ def get_venue(venue_id):
 def get_new_venue_form():
     # RETURN AN EMPTY VENUE JSON ARRAY FOR USER TO ADD NEW VENUE WITH
     venue_template = {
-        "name": "...",
-        "street_address": "...",
-        "city": "...",
-        "state": "...",
-        "country": "...",
-        "type": "... [e.g Music venue, Pub, Restaurant, Bar, Nightclub etc.]"
+        "name": "[string]",
+        "type": "[string: optional e.g: Music venue, Pub, Nightclub etc.]",
+        "street_address": "[string]",
+        "city_id": "[integer]"
     }
     return venue_template, 200
 
@@ -61,18 +59,18 @@ def venues_add():
     if not user or not user.logged_in:
         return abort(401, description="User not logged in")
 
-    venue_fields = venue_schema.load(request.json)
+    venue_fields = venue_schema.load(request.json, partial=True)
     # QUERY VENUE TABLE FOR A CASE INSENSITIVE MATCH FOR name IN REQUEST WITH MATCHING city (CHECK FOR DUPLICATE)
-    venue_exists = Venue.query.filter(func.lower(Venue.name) == func.lower(venue_fields["name"]), func.lower(Venue.city) == func.lower(venue_fields["city"])).first()
+    input_venue_name = venue_fields["name"]
+    input_city_id = venue_fields["city_id"]
+    venue_exists = Venue.query.filter(Venue.name.ilike(f"%{input_venue_name}%"), Venue.city_id==input_city_id).first()
     if venue_exists:
-        return abort(409, description=Markup(f"A venue called {venue_exists.name} already exists in {venue_exists.city}. Venue ID: {venue_exists.id}"))
+        return abort(409, description=Markup(f"A venue called {venue_exists.name} already exists in {venue_exists.city.name}. Location: http://localhost:5000/venues/{venue_exists.id}"))
     # IF VALID REQUEST, CREATE NEW VENUE RECORD
     venue = Venue(
         name = venue_fields["name"],
         street_address = venue_fields["street_address"],
-        city = venue_fields["city"],
-        state = venue_fields["state"],
-        country = venue_fields["country"]
+        city_id = venue_fields["city_id"]
     )
     # OPTIONAL FIELDS
     request_data = request.get_json()

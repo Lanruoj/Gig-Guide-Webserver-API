@@ -11,8 +11,8 @@ alphanumeric = ascii_uppercase + ascii_lowercase + digits
 class VenueSchema(ma.Schema):
     class Meta:
         ordered = True
-        fields = ("id", "name", "street_address", "city_id", "city", "type", "venue_gigs")
-        load_only = ["city_id"]
+        fields = ("id", "name", "type", "street_address", "city_id", "city", "venue_gigs")
+        # load_only = ["city_id"]
     
     name = ma.String(required=True)
     street_address = ma.String(required=True, validate=ContainsOnly(alphanumeric + " /-,()&."))

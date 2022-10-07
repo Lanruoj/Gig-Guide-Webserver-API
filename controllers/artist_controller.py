@@ -14,6 +14,8 @@ from models.watch_artist import WatchArtist
 from schemas.watch_artist_schema import watch_artist_schema
 from models.user import User
 from schemas.user_schema import user_schema
+from models.genre import Genre
+from schemas.genre_schema import genres_schema
 
 
 artists = Blueprint("artists", __name__, url_prefix="/artists")
@@ -119,66 +121,10 @@ def delete_artist(artist_id):
     return jsonify(message=f"{artist.name} has been successfully deleted"), 200
 
 
-# @artists.route("/watch/form", methods=["GET"])
-# def watch_artist_form():
-#     wa_template = {
-#         "artist_id": "[integer]"
-#     }
+@artists.route("/genres", methods=["GET"])
+def get_genres():
+    # SEARCH GENRES TABLE - BY DEFAULT RETURN ALL GENRES BUT TAKES OPTIONAL QUERY STRING ARGUMENTS FOR FILTERING AND SORTING
+    genres = search_table(Genre)
 
-#     return wa_template, 200
+    return jsonify(genres_schema.dump(genres))
 
-
-# @artists.route("/watch", methods=["POST"])
-# @jwt_required()
-# def watch_artist():
-#     watch_artist_fields = watch_artist_schema.load(request.json, partial=True)
-#     # FETCH USER WITH user_id AS RETURNED BY get_jwt_identity() FROM JWT TOKEN
-#     user = User.query.get(int(get_jwt_identity()))
-#     if not user or not user.logged_in:
-#         return abort(401, description="User must be logged in")
-#     # FETCH USER'S WATCHED ARTISTS FROM THE WATCHARTISTS TABLE
-#     users_watched_artists = WatchArtist.query.filter_by(user_id=user.id).all()
-#     # FETCH ARTIST FROM THE REQUEST BODY'S artist_id
-#     artist = Artist.query.get(watch_artist_fields["artist_id"])
-#     if not artist:
-#         return abort(404, description="Artist does not exist")
-#     # LOOK THROUGH ALL OF USER'S WATCHED ARTISTS TO CHECK IF USER IS ALREADY WATCHING THE ARTIST FROM THE REQUEST (CHECK FOR DUPLICATE)
-#     for wa in users_watched_artists:
-#         if wa.artist_id == watch_artist_fields["artist_id"]:
-#             # IF artist_id ALREADY IN USER'S WATCHED ARTISTS, FETCH ARTIST'S NAME FOR DESCRIPTIVE MESSAGE
-#             artist = Artist.query.get(watch_artist_fields["artist_id"])
-
-#             return abort(409, description=f"{user.first_name} already watching {artist.name}")
-    
-#     # IF VALID REQUEST CREATE NEW WATCHARTIST RECORD
-#     new_watched_artist = WatchArtist(
-#         user_id = user.id,
-#         artist_id = watch_artist_fields["artist_id"]
-#     )
-#     # ADD NEW RECORD TO SESSION AND COMMIT TO DATABASE
-#     db.session.add(new_watched_artist)
-#     db.session.commit()
-
-#     return jsonify(watch_artist_schema.dump(new_watched_artist)), 201
-
-
-# @artists.route("/watch/<int:artist_id>", methods=["DELETE"])
-# @jwt_required()
-# def delete_wa(artist_id):
-#     # FETCH USER WITH user_id AS RETURNED BY get_jwt_identity() FROM JWT TOKEN
-#     user = User.query.get(int(get_jwt_identity()))
-#     if not user:
-#         return abort(401, description="User must be logged in")
-#     # FETCH ARTIST FROM PATH PARAMETER WITH MATCHING id
-#     artist = Artist.query.get(artist_id)
-#     if not artist:
-#         return abort(404, description="Artist not found")
-#     # CHECK IF THERE EXISTS A WATCHARTIST RECORD WITH THE CURRENT USER'S ID AND THE ARTIST'S ID
-#     watched_artist = WatchArtist.query.filter(WatchArtist.artist_id==artist_id, WatchArtist.user_id==user.id).first()
-#     if not watched_artist:
-#         return abort(404, description=f"User is not following {artist.name}")
-#     # DELETE WATCHARTIST RECORD FROM SESSION AND COMMIT TO DATABASE
-#     db.session.delete(watched_artist)
-#     db.session.commit()
-
-#     return jsonify(message=f"{artist.name} has been successfully removed from your watchlist"), 200

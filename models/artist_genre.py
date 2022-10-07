@@ -10,7 +10,7 @@ class ArtistGenre(db.Model):
 
     ag_artist = db.relationship(
         "Artist",
-        back_populates="artist_ag"
+        back_populates="genres"
     )
 
     ag_genre = db.relationship(

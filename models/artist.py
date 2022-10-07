@@ -9,7 +9,7 @@ class Artist(db.Model):
 
     country_id = db.Column(db.Integer, db.ForeignKey("countries.id"))
 
-    artist_ag = db.relationship(
+    genres = db.relationship(
         "ArtistGenre",
         back_populates="ag_artist"
     )

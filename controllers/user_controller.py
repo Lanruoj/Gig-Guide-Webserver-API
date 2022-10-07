@@ -23,6 +23,7 @@ from schemas.watch_artist_schema import watch_artist_schema, watch_artists_schem
 
 
 users = Blueprint("users", __name__, url_prefix="/users")
+
 profile_schema = UserSchema(only=("username", "first_name", "last_name", "watched_venues", "watched_artists"))
 
 

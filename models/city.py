@@ -13,3 +13,8 @@ class City(db.Model):
         back_populates="city"
     )
 
+    venue_city = db.relationship(
+        "Venue",
+        back_populates="city"
+    )
+

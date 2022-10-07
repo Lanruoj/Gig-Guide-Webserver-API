@@ -7,10 +7,14 @@ class Venue(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), nullable=False)
     street_address = db.Column(db.String(), nullable=False)
-    city = db.Column(db.String(), nullable=False)
-    state = db.Column(db.String(), nullable=False)
-    country = db.Column(db.String(), nullable=False)
     type = db.Column(db.String())
+    
+    city_id = db.Column(db.Integer, db.ForeignKey("cities.id"), nullable=False)
+
+    city = db.relationship(
+        "City",
+        back_populates="venue_city"
+    )
 
     venue_gigs = db.relationship(
         "Gig",

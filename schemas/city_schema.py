@@ -1,12 +1,15 @@
 from main import ma
 from marshmallow import fields
 from marshmallow.validate import Length
+from schemas.state_schema import StateSchema
 
 
 class CitySchema(ma.Schema):
     class Meta:
         ordered = True
-        fields = ("id", "name", "state_id")
+        fields = ("id", "name", "state_id", "state")
+
+    state = fields.Nested(StateSchema)
 
 
 city_schema = CitySchema()

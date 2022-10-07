@@ -12,7 +12,7 @@ class Country(db.Model):
         back_populates="country"
     )
     ###
-    artist = db.relationship(
+    artist_country = db.relationship(
         "Artist",
         back_populates="country"
     )

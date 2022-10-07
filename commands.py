@@ -230,25 +230,22 @@ def seed_db():
     test_venue1 = Venue(
         name = "The Gasometer Hotel",
         street_address = "484 Smith St",
-        city = "Collingwood",
-        state = "Victoria",
-        country = "Australia"
+        city_id = 1,
+        type = "Music venue"
     )
     db.session.add(test_venue1)
     test_venue2 = Venue(
         name = "The Forum",
         street_address = "154 Flinders St",
-        city = "Melbourne",
-        state = "Victoria",
-        country = "Australia"
+        city_id = 1,
+        type = "Music venue"
     )
     db.session.add(test_venue2)
     test_venue3 = Venue(
         name = "The Jazzlab",
         street_address = "27 Leslie street",
-        city = "Brunswick",
-        state = "Victoria",
-        country = "Australia"
+        city_id = 1,
+        type = "Music venue"
     )
     db.session.add(test_venue3)
     db.session.commit()

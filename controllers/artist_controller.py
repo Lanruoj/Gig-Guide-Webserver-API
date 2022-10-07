@@ -33,8 +33,7 @@ def get_artists():
 def get_new_artist_form():
     # RETURN AN EMPTY ARTIST JSON ARRAY TEMPLATE
     artist_template = {
-        "name": "...",
-        "genre": "..."
+        "name": "[string]"
     }
 
     return artist_template, 200
@@ -56,8 +55,7 @@ def add_artist():
 
     # CREATE NEW ARTIST FROM REQUEST FIELDS
     artist = Artist(
-        name = artist_fields["name"],
-        genre = artist_fields["genre"]
+        name = artist_fields["name"]
     )
     # ADD ARTIST TO SESSION AND COMMIT TO DATABASE
     db.session.add(artist)

@@ -39,7 +39,7 @@ def get_gigs():
     # SEARCH GIGS TABLE - BY DEFAULT RETURN ALL NON-EXPIRED GIGS BUT TAKES OPTIONAL QUERY STRING ARGUMENTS FOR FILTERING AND SORTING
     gigs = search_table(Gig, filters=[Gig.is_expired==False], sort=Gig.date_added)
 
-    return jsonify(gigs_schema.dump(gigs))
+    return jsonify(gigs_schema.dump(gigs)), 200
 
 
 @gigs.route("/<int:gig_id>", methods=["GET"])
@@ -49,7 +49,7 @@ def get_specific_gig(gig_id):
     if not gig:
         return abort(404, description=Markup(f"Gig not found with the ID of {gig_id}. Please try again"))
 
-    return jsonify(gig_schema.dump(gig))
+    return jsonify(gig_schema.dump(gig)), 200
 
 
 @gigs.route("/<int:gig_id>/form", methods=["GET"])
@@ -61,7 +61,7 @@ def get_gig_update_form(gig_id):
     # CREATE FORM FOR USER TO UPDATE GIG WITH
     update_form = GigSchema(only=("title", "venue_id", "artists", "description", "start_time", "price", "tickets_url"))
 
-    return jsonify(update_form.dump(gig))
+    return jsonify(update_form.dump(gig)), 200
 
 
 @gigs.route("/<int:gig_id>", methods=["PUT"])
@@ -154,7 +154,7 @@ def update_gig(gig_id):
     # COMMIT ALL CHANGES TO THE DATABASE
     db.session.commit()
 
-    return jsonify(message=Markup(f"Gig's {', '.join(str(field) for field in fields)} successfully updated"), gig=gig_schema.dump(gig))
+    return jsonify(message=Markup(f"Gig's {', '.join(str(field) for field in fields)} successfully updated"), gig=gig_schema.dump(gig)), 200
         
 
 @gigs.route("/<int:gig_id>", methods=["DELETE"])
@@ -177,7 +177,7 @@ def delete_gig(gig_id):
     db.session.delete(gig)
     db.session.commit()
 
-    return jsonify(message=Markup(f"{gig.title} has been deleted"))
+    return jsonify(message=Markup(f"{gig.title} has been successfully deleted")), 200
 
 
 @gigs.route("/bin", methods=["GET"])
@@ -187,10 +187,10 @@ def show_expired_gigs():
     if not expired_gigs:
         return jsonify(message="There are currently no expired gigs")
 
-    return jsonify(gigs_schema.dump(expired_gigs))
+    return jsonify(gigs_schema.dump(expired_gigs)), 200
 
 
-@gigs.route("/form", methods=["GET"])
+@gigs.route("/new/form", methods=["GET"])
 def get_new_gig_form():
     # RETURN AN EMPTY GIG JSON ARRAY TEMPLATE FOR THE USER TO USE
     gig_template = {
@@ -202,7 +202,7 @@ def get_new_gig_form():
     "price": "[integer: optional]",
     "tickets_url": "https://...[string: optional]"
     }
-    return gig_template
+    return gig_template, 200
 
 
 @gigs.route("/new", methods=["POST"])
@@ -280,6 +280,6 @@ def add_gig():
             db.session.add(performance)
             db.session.commit()  
 
-    return jsonify(gig_schema.dump(gig))
+    return jsonify(result=gig_schema.dump(gig), location=f"http://localhost:5000/gigs/{gig.id}"), 201
 
 

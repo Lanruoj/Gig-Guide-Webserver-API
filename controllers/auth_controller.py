@@ -20,7 +20,7 @@ def get_register_form():
         "last_name": "[string]"
     }
 
-    return user_template
+    return user_template, 200
 
 
 @auth.route("/register", methods=["POST"])
@@ -49,7 +49,7 @@ def auth_register():
 
     token = create_access_token(identity=str(user.id), expires_delta=timedelta(days=1))
 
-    return jsonify(message=Markup(f"{user.first_name} successfully logged in"), user=user.username, id=user.id, token=token)
+    return jsonify(message=Markup(f"{user.first_name} successfully logged in"), user=user.username, id=user.id, token=token), 201
 
 
 @auth.route("/login", methods=["GET"])
@@ -59,7 +59,7 @@ def get_login_form():
         "email": "...",
         "password": "..."
     }
-    return user_template
+    return user_template, 200
 
 
 @auth.route("/login", methods=["POST"])
@@ -79,7 +79,7 @@ def auth_login():
     # COMMIT CHANGES TO DATABASE
     db.session.commit()
 
-    return jsonify(message=Markup(f"{user.first_name} successfully logged in"), user=user.username, id=user.id, token=token)
+    return jsonify(message=Markup(f"{user.first_name} successfully logged in"), user=user.username, id=user.id, token=token), 200
 
 
 @auth.route("/logout", methods=["POST"])
@@ -94,4 +94,4 @@ def auth_logout():
     # COMMIT CHANGES TO DATABASE
     db.session.commit()
 
-    return jsonify(message=Markup(f"{user.username} successfully logged out"))
+    return jsonify(message=Markup(f"{user.username} successfully logged out")), 200

@@ -1,6 +1,6 @@
 from main import db, bcrypt, jwt
 from utils import search_table, update_record
-from flask import Blueprint, jsonify, request, abort, Markup
+from flask import Blueprint, jsonify, request, abort, Markup, Response
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from marshmallow.exceptions import ValidationError
 from datetime import datetime
@@ -24,10 +24,10 @@ def get_artists():
     # SEARCH ARTISTS TABLE - BY DEFAULT RETURN ALL BUT TAKES OPTIONAL QUERY STRING ARGUMENTS FOR FILTERING AND SORTING
     artists = search_table(Artist)
     
-    return jsonify(artists_schema.dump(artists))
+    return jsonify(artists_schema.dump(artists)), 200
 
 
-@artists.route("/form", methods=["GET"])
+@artists.route("/new/form", methods=["GET"])
 def get_new_artist_form():
     # RETURN AN EMPTY ARTIST JSON ARRAY TEMPLATE
     artist_template = {
@@ -35,10 +35,10 @@ def get_new_artist_form():
         "genre": "..."
     }
 
-    return artist_template
+    return artist_template, 200
     
 
-@artists.route("/", methods=["POST"])
+@artists.route("/new", methods=["POST"])
 @jwt_required()
 def add_artist():
     # FETCH USER WITH user_id AS RETURNED BY get_jwt_identity() FROM JWT TOKEN
@@ -61,7 +61,7 @@ def add_artist():
     db.session.add(artist)
     db.session.commit()
 
-    return jsonify(artist_schema.dump(artist))
+    return jsonify(result=artist_schema.dump(artist), location=f"http://localhost:5000/artists/{artist.id}"), 201
 
 
 @artists.route("/<int:artist_id>", methods=["GET"])
@@ -71,7 +71,7 @@ def get_artist(artist_id):
     if not artist:
         return abort(404, description="Artist does not exist")
 
-    return jsonify(artist_schema.dump(artist))
+    return jsonify(artist_schema.dump(artist)), 200
 
 
 @artists.route("/<int:artist_id>/form", methods=["GET"])
@@ -83,7 +83,7 @@ def get_artist_form(artist_id):
     # CREATE FORM FOR USER TO UPDATE ARTIST WITH
     update_form = ArtistSchema(exclude=("id", "performances"))
 
-    return jsonify(update_form.dump(artist))
+    return jsonify(update_form.dump(artist)), 200
 
 
 @artists.route("/<int:artist_id>", methods=["PUT"])
@@ -94,11 +94,11 @@ def update_artist(artist_id):
     if not user or not user.logged_in:
         return abort(401, description="User must be logged in")
     # UPDATE ARTIST FROM REQUEST BODY
-    update = update_record(artist_id, Artist, artist_schema)
+    artist = update_record(artist_id, Artist, artist_schema)
     # COMMIT CHANGES TO DATABASE
     db.session.commit()
 
-    return jsonify(message="Artist successfully updated", artist=artist_schema.dump(update))
+    return jsonify(result=artist_schema.dump(artist), location=f"http://localhost:5000/artists/{artist.id}"), 200
 
 
 @artists.route("/<int:artist_id>", methods=["DELETE"])
@@ -116,16 +116,16 @@ def delete_artist(artist_id):
     db.session.delete(artist)
     db.session.commit()
 
-    return jsonify(message=f"{artist.name} has been deleted")
+    return jsonify(message=f"{artist.name} has been successfully deleted"), 200
 
 
-@artists.route("/watch", methods=["GET"])
+@artists.route("/watch/form", methods=["GET"])
 def watch_artist_form():
     wa_template = {
         "artist_id": "[integer]"
     }
 
-    return wa_template
+    return wa_template, 200
 
 
 @artists.route("/watch", methods=["POST"])
@@ -148,7 +148,7 @@ def watch_artist():
             # IF artist_id ALREADY IN USER'S WATCHED ARTISTS, FETCH ARTIST'S NAME FOR DESCRIPTIVE MESSAGE
             artist = Artist.query.get(watch_artist_fields["artist_id"])
 
-            return abort(400, description=f"{user.first_name} already watching {artist.name}")
+            return abort(409, description=f"{user.first_name} already watching {artist.name}")
     
     # IF VALID REQUEST CREATE NEW WATCHARTIST RECORD
     new_watched_artist = WatchArtist(
@@ -159,5 +159,5 @@ def watch_artist():
     db.session.add(new_watched_artist)
     db.session.commit()
 
-    return jsonify(watch_artist_schema.dump(new_watched_artist))
+    return jsonify(watch_artist_schema.dump(new_watched_artist)), 201
 

@@ -26,7 +26,7 @@ def get_venues():
     # SEARCH VENUES TABLE - BY DEFAULT RETURN ALL VENUES BUT TAKES OPTIONAL QUERY STRING ARGUMENTS FOR FILTERING AND SORTING
     venues = search_table(Venue)
     
-    return jsonify(venues_schema.dump(venues))
+    return jsonify(venues_schema.dump(venues)), 200
 
 
 @venues.route("/<int:venue_id>", methods=["GET"])
@@ -36,10 +36,10 @@ def get_venue(venue_id):
     if not venue:
         return abort(404, description=f"No venues exist with ID={venue_id}")
     
-    return jsonify(venue_schema.dump(venue))
+    return jsonify(venue_schema.dump(venue)), 200
 
 
-@venues.route("/form", methods=["GET"])
+@venues.route("/new/form", methods=["GET"])
 def get_new_venue_form():
     # RETURN AN EMPTY VENUE JSON ARRAY FOR USER TO ADD NEW VENUE WITH
     venue_template = {
@@ -50,10 +50,10 @@ def get_new_venue_form():
         "country": "...",
         "type": "... [e.g Music venue, Pub, Restaurant, Bar, Nightclub etc.]"
     }
-    return venue_template
+    return venue_template, 200
 
 
-@venues.route("/", methods=["POST"])
+@venues.route("/new", methods=["POST"])
 @jwt_required()
 def venues_add():
     # FETCH USER WITH user_id AS RETURNED BY get_jwt_identity() FROM JWT TOKEN
@@ -82,7 +82,7 @@ def venues_add():
     db.session.add(venue)
     db.session.commit()
     
-    return jsonify(venue_schema.dump(venue))
+    return jsonify(result=venue_schema.dump(venue), location=f"http://localhost:5000/venues/{venue.id}"), 201
 
 
 @venues.route("/<int:venue_id>/form", methods=["GET"])
@@ -94,7 +94,7 @@ def get_venue_form(venue_id):
     # CREATE FORM FOR USER TO UPDATE VENUE WITH
     update_form = VenueSchema(exclude=("id", "venue_gigs"))
 
-    return jsonify(update_form.dump(venue))
+    return jsonify(update_form.dump(venue)), 200
 
 
 @venues.route("/<int:venue_id>", methods=["PUT"])
@@ -111,7 +111,7 @@ def update_venue(venue_id):
 
     updated_schema = VenueSchema(exclude=("venue_gigs",))
 
-    return jsonify(message="Venue successfully updated", venue=updated_schema.dump(update))
+    return jsonify(message="Venue successfully updated", venue=updated_schema.dump(update)), 200
 
 
 @venues.route("/<int:venue_id>", methods=["DELETE"])
@@ -129,16 +129,16 @@ def delete_venue(venue_id):
     db.session.delete(venue)
     db.session.commit()
 
-    return jsonify(message=Markup(f"{venue.name} has been deleted"))
+    return jsonify(message=Markup(f"{venue.name} has been deleted")), 200
 
 
-@venues.route("/watch", methods=["GET"])
+@venues.route("/watch/form", methods=["GET"])
 def watch_venue_form():
     wv_template = {
         "venue_id": "[integer]"
     }
     
-    return wv_template
+    return wv_template, 200
 
 
 @venues.route("/watch", methods=["POST"])
@@ -170,4 +170,4 @@ def add_watched_venue():
     db.session.add(watch_venue)
     db.session.commit()
 
-    return jsonify(watch_venue_schema.dump(watch_venue))
+    return jsonify(watch_venue_schema.dump(watch_venue)), 201

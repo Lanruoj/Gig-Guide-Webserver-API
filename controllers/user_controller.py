@@ -35,7 +35,7 @@ def get_users():
     # SEARCH USERS TABLE - BY DEFAULT RETURN ALL NON-ADMIN USERS BUT TAKES OPTIONAL QUERY STRING ARGUMENTS FOR FILTERING AND SORTING
     users = search_table(User, filters=[User.admin==False])
     
-    return jsonify(users_schema.dump(users))
+    return jsonify(users_schema.dump(users)), 200
 
 
 @users.route("/profile", methods=["GET"])
@@ -46,7 +46,7 @@ def get_own_profile():
     if not user:
         return abort(404, description="User not logged in")
     
-    return jsonify(user_schema.dump(user))
+    return jsonify(user_schema.dump(user)), 200
 
 
 @users.route("/profile/<int:user_id>", methods=["GET"])
@@ -56,7 +56,7 @@ def get_specific_user(user_id):
     if not user:
         return abort(404, description="User does not exist")
     
-    return jsonify(user_schema.dump(user))
+    return jsonify(user_schema.dump(user)), 200
 
 
 @users.route("/profile/form", methods=["GET"])
@@ -69,7 +69,7 @@ def get_user_form():
     
     update_form = UserSchema(exclude=("id", "logged_in", "watched_venues", "watched_artists"))
 
-    return jsonify(update_form.dump(user))
+    return jsonify(update_form.dump(user)), 200
     
 
 @users.route("/profile", methods=["PUT"])
@@ -104,7 +104,7 @@ def update_user():
 
     updated_user = UserSchema(exclude=("watched_venues", "watched_artists"))
 
-    return jsonify(message="Successfully updated profile", profile=updated_user.dump(user))
+    return jsonify(message="Successfully updated profile", profile=updated_user.dump(user)), 200
 
 
 @users.route("/profile", methods=["DELETE"])
@@ -118,7 +118,7 @@ def delete_own_profile():
     db.session.delete(user)
     db.session.commit()
 
-    return jsonify(message=f"{user.username} has been deleted")
+    return jsonify(message=f"{user.username} has been deleted"), 200
 
 
 @users.route("/profile/<int:user_id>", methods=["DELETE"])
@@ -135,7 +135,7 @@ def admin_delete_user(user_id):
     db.session.delete(user_to_delete)
     db.session.commit()
 
-    return jsonify(message=f"{user_to_delete.username} has been deleted")
+    return jsonify(message=f"{user_to_delete.username} has been deleted"), 200
 
 
 @users.route("/watchlist", methods=["GET"])
@@ -148,4 +148,4 @@ def get_watchlist():
     # CREATE WATCHLIST SCHEMA WHICH USES UserSchema BUT ONLY DISPLAYS username, watched_venues & watched_artists
     watchlist_schema = UserSchema(only=("username", "watched_venues", "watched_artists"))
 
-    return jsonify(watchlist_schema.dump(user))
+    return jsonify(watchlist_schema.dump(user)), 200

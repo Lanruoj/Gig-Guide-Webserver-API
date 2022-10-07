@@ -11,3 +11,9 @@ class Country(db.Model):
         "State",
         back_populates="country"
     )
+    ###
+    artist = db.relationship(
+        "Artist",
+        back_populates="country"
+    )
+    ###

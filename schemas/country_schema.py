@@ -8,11 +8,7 @@ class CountrySchema(ma.Schema):
         ordered = True
         fields = ("id", "name")
 
-    name = ma.String(required=True, validate=Length(min=1))
-    genre = ma.String()
+    # states... ?
 
-    performances = fields.List(fields.Nested("PerformanceSchema"))
-
-
-artist_schema = ArtistSchema()
-artists_schema = ArtistSchema(many=True)
+country_schema = CountrySchema()
+countries_schema = CountrySchema(many=True)

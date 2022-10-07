@@ -123,9 +123,9 @@ def update_user():
     
     db.session.commit()
 
-    updated_user = UserSchema(exclude=("watched_venues", "watched_artists"))
+    updated_user_schema = UserSchema(exclude=("watched_venues", "watched_artists"))
 
-    return jsonify(message="Successfully updated profile", profile=updated_user.dump(user)), 200
+    return jsonify(message="Profile successfully updated", profile=updated_user_schema.dump(user), location=f"[GET] http://localhost:5000/users/profile/{user.id}"), 200
 
 
 @users.route("/profile", methods=["DELETE"])
@@ -213,7 +213,7 @@ def add_to_watchlist():
         db.session.add(watch_venue)
         db.session.commit()
 
-        return jsonify(watch_venue_schema.dump(watch_venue)), 201
+        return jsonify(message=f"You are now watching {venue_exists.name}", result=watch_venue_schema.dump(watch_venue)), 201
     
     elif "artist_id" in request_data.keys():
         watch_artist_fields = watch_artist_schema.load(request.json, partial=True)
@@ -244,7 +244,7 @@ def add_to_watchlist():
         db.session.add(new_watched_artist)
         db.session.commit()
 
-        return jsonify(watch_artist_schema.dump(new_watched_artist)), 201
+        return jsonify(message=f"You are now watching {artist.name}", result=watch_artist_schema.dump(new_watched_artist)), 201
     
     else:
         return abort(404, description="Invalid field name/s")

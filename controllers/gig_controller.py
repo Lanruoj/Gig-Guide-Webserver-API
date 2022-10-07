@@ -154,7 +154,7 @@ def update_gig(gig_id):
     # COMMIT ALL CHANGES TO THE DATABASE
     db.session.commit()
 
-    return jsonify(message=Markup(f"Gig's {', '.join(str(field) for field in fields)} successfully updated"), gig=gig_schema.dump(gig)), 200
+    return jsonify(message=Markup(f"Gig successfully updated"), gig=gig_schema.dump(gig), location=f"[GET] http://localhost:5000/gigs/{gig.id}"), 200
         
 
 @gigs.route("/<int:gig_id>", methods=["DELETE"])
@@ -280,6 +280,6 @@ def add_gig():
             db.session.add(performance)
             db.session.commit()  
 
-    return jsonify(result=gig_schema.dump(gig), location=f"http://localhost:5000/gigs/{gig.id}"), 201
+    return jsonify(message="Gig successfully added", result=gig_schema.dump(gig), location=f"http://localhost:5000/gigs/{gig.id}"), 201
 
 

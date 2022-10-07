@@ -16,6 +16,8 @@ from models.user import User
 from schemas.user_schema import user_schema
 from models.watch_venue import WatchVenue
 from schemas.watch_venue_schema import watch_venue_schema
+from models.city import City
+from schemas.city_schema import cities_schema, city_schema
 
 
 venues = Blueprint("venues", __name__, url_prefix="/venues")
@@ -63,6 +65,11 @@ def venues_add():
     # QUERY VENUE TABLE FOR A CASE INSENSITIVE MATCH FOR name IN REQUEST WITH MATCHING city (CHECK FOR DUPLICATE)
     input_venue_name = venue_fields["name"]
     input_city_id = venue_fields["city_id"]
+    # QUERY CITY TABLE TO CHECK IF CITY EXISTS
+    city_exists = City.query.filter(City.id==input_city_id).first()
+    if not city_exists:
+        return abort(422, description="Invalid city, search for cities at [GET] http://localhost:5000/venues/cities")
+
     venue_exists = Venue.query.filter(Venue.name.ilike(f"%{input_venue_name}%"), Venue.city_id==input_city_id).first()
     if venue_exists:
         return abort(409, description=Markup(f"A venue called {venue_exists.name} already exists in {venue_exists.city.name}. Location: http://localhost:5000/venues/{venue_exists.id}"))
@@ -80,7 +87,7 @@ def venues_add():
     db.session.add(venue)
     db.session.commit()
     
-    return jsonify(result=venue_schema.dump(venue), location=f"http://localhost:5000/venues/{venue.id}"), 201
+    return jsonify(message="Venue successfully added", result=venue_schema.dump(venue), location=f"http://localhost:5000/venues/{venue.id}"), 201
 
 
 @venues.route("/<int:venue_id>/form", methods=["GET"])
@@ -109,7 +116,7 @@ def update_venue(venue_id):
 
     updated_schema = VenueSchema(exclude=("venue_gigs",))
 
-    return jsonify(message="Venue successfully updated", venue=updated_schema.dump(update)), 200
+    return jsonify(message="Venue successfully updated", venue=updated_schema.dump(update), location=f"[GET] http://localhost:5000/venues/{update.id}"), 200
 
 
 @venues.route("/<int:venue_id>", methods=["DELETE"])
@@ -128,3 +135,11 @@ def delete_venue(venue_id):
     db.session.commit()
 
     return jsonify(message=Markup(f"{venue.name} has been deleted")), 200
+
+
+@venues.route("/cities", methods=["GET"])
+def get_cities():
+    # FETCH ALL CITIES BY DEFAULT OR TAKE QUERY STRING ARGUMENTS AS SEARCH/SORTING CRITERIA
+    cities = search_table(City)
+
+    return jsonify(cities_schema.dump(cities))

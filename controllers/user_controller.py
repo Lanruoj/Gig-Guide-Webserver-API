@@ -184,6 +184,7 @@ def watch_form():
 @users.route("/watchlist", methods=["POST"])
 @jwt_required()
 def add_to_watchlist():
+    # SEARCH THROUGH REQUEST BODY FOR ID FOR ARTIST/VENUE TO WATCH
     request_data = request.get_json()
     if "venue_id" in request_data.keys():
         watch_venue_fields = watch_venue_schema.load(request.json, partial=True)
@@ -256,7 +257,7 @@ def delete_watched_item():
     user = User.query.get(int(get_jwt_identity()))
     if not user:
         return abort(401, description="User must be logged in")
-
+    # SEARCH THROUGH REQUEST BODY FOR ID OF ARTIST/VENUE TO BE DELETED
     request_data = request.get_json()
     if "venue_id" in request_data.keys():
         # FETCH VENUE FROM PATH PARAMETER WITH MATCHING id
@@ -287,3 +288,6 @@ def delete_watched_item():
         db.session.commit()
 
         return jsonify(message=f"{artist.name} has been successfully removed from your watchlist"), 200
+    
+    else:
+        return abort(404, description="Invalid field name/s")

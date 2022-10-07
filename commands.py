@@ -11,6 +11,9 @@ from datetime import datetime
 from models.watch_venue import WatchVenue
 from schemas.watch_venue_schema import watch_venue_schema, watch_venues_schema
 from models.watch_artist import WatchArtist
+from models.country import Country
+from models.state import State
+from models.city import City
 
 
 
@@ -29,6 +32,27 @@ def drop_db():
 
 @db_commands.cli.command("seed")
 def seed_db():
+    # COUNTRY SEEDS
+    country1 = Country(
+        name = "Australia"
+    )
+    db.session.add(country1)
+    db.session.commit()
+    # STATE SEEDS
+    state1 = State(
+        name = "Victoria",
+        country_id = 1
+    )
+    db.session.add(state1)
+    db.session.commit()
+    # CITY SEEDS
+    city1 = City(
+        name = "Melbourne",
+        state_id = 1
+    )
+    db.session.add(city1)
+    db.session.commit()
+
     # USER SEEDS
     admin = User(
         username = "admin",

@@ -90,7 +90,7 @@ def get_venue_form(venue_id):
     if not venue:
         return abort(404, description="Venue does not exist")
     # CREATE FORM FOR USER TO UPDATE VENUE WITH
-    update_form = VenueSchema(exclude=("id", "venue_gigs"))
+    update_form = VenueSchema(only=("name", "type", "street_address", "city_id"))
 
     return jsonify(update_form.dump(venue)), 200
 

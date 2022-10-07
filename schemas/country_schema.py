@@ -3,10 +3,10 @@ from marshmallow import fields
 from marshmallow.validate import Length
 
 
-class ArtistSchema(ma.Schema):
+class CountrySchema(ma.Schema):
     class Meta:
         ordered = True
-        fields = ("id", "name", "genre", "performances", "country_id")
+        fields = ("id", "name")
 
     name = ma.String(required=True, validate=Length(min=1))
     genre = ma.String()

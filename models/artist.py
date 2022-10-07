@@ -7,6 +7,8 @@ class Artist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), nullable=False)
     genre = db.Column(db.String())
+    
+    country_id = db.Column(db.Integer, db.ForeignKey("countries.id"))
 
     artist_wa = db.relationship(
         "WatchArtist",

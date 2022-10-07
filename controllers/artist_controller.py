@@ -22,13 +22,16 @@ from models.country import Country
 
 artists = Blueprint("artists", __name__, url_prefix="/artists")
 
+result_schema = ArtistSchema(exclude=("genres",))
+results_schema = ArtistSchema(exclude=("genres",), many=True)
+
 
 @artists.route("/", methods=["GET"])
 def get_artists():
     # SEARCH ARTISTS TABLE - BY DEFAULT RETURN ALL BUT TAKES OPTIONAL QUERY STRING ARGUMENTS FOR FILTERING AND SORTING
     artists = search_table(Artist)
     
-    return jsonify(artists_schema.dump(artists)), 200
+    return jsonify(results_schema.dump(artists)), 200
 
 
 @artists.route("/new/form", methods=["GET"])
@@ -62,11 +65,21 @@ def add_artist():
         name = artist_fields["name"],
         genres = artist_fields["genres"]
     )
+    # OPTIONAL FIELDS
+    # PARSE JSON ARRAY FROM REQUEST DATA
+    request_data = request.get_json()
+    if "country_id" in request_data.keys():
+        country_exists = Country.query.get(artist_fields["country_id"])
+        if country_exists:
+            new_artist.country_id = artist_fields["country_id"]
+        else:
+            return abort(422, description="Invalid country ID, please try again")
     # ADD ARTIST TO SESSION AND COMMIT TO DATABASE
     db.session.add(new_artist)
     db.session.commit()
-    # PARSE JSON ARRAY FROM REQUEST DATA
-    request_data = request.get_json()
+
+    message = "Artist successfully added"
+
     if "genres" in request_data.keys():
         # IF "genres" IN REQUEST BODY, SPLIT STRING INTO LIST
         input_genres = artist_fields["genres"].split(", ")
@@ -79,19 +92,15 @@ def add_artist():
                     artist_id = new_artist.id,
                     genre_id = genre_exists.id
                 )
+                # ADD ARTISTGENRE TO DATABASE AND COMMIT
+                db.session.add(artist_genre)
+            else:
+                message = f"Artist successfully added, however '{g}' is not a valid genre. For a list of genres please go to [GET] http://localhost:5000/artists/genres"
 
-    if "country_id" in request_data.keys():
-        country_exists = Country.query.get(artist_fields["country_id"])
-        if country_exists:
-            new_artist.country_id = artist_fields["country_id"]
-        else:
-            return jsonify(result=artist_schema.dump(new_artist), message=f"Invalid country - update the artist with a valid country_id", location=f"http://localhost:5000/artists/{new_artist.id}"), 201
-    
-    # ADD ARTIST TO DATABASE AND COMMIT
-    db.session.add(artist_genre)
+    # COMMIT ALL CHANGES TO DATABASE
     db.session.commit()
 
-    return jsonify(result=artist_schema.dump(new_artist), location=f"http://localhost:5000/artists/{new_artist.id}"), 201
+    return jsonify(message=message, result=result_schema.dump(new_artist), location=f"[GET] http://localhost:5000/artists/{new_artist.id}"), 201
 
 
 @artists.route("/<int:artist_id>", methods=["GET"])
@@ -101,7 +110,7 @@ def get_artist(artist_id):
     if not artist:
         return abort(404, description="Artist does not exist")
 
-    return jsonify(artist_schema.dump(artist)), 200
+    return jsonify(result_schema.dump(artist)), 200
 
 
 @artists.route("/<int:artist_id>/form", methods=["GET"])
@@ -129,7 +138,7 @@ def update_artist(artist_id):
     # COMMIT CHANGES TO DATABASE
     db.session.commit()
 
-    return jsonify(result=artist_schema.dump(artist), location=f"http://localhost:5000/artists/{artist.id}"), 200
+    return jsonify(result=result_schema.dump(artist), location=f"http://localhost:5000/artists/{artist.id}"), 200
 
 
 @artists.route("/<int:artist_id>", methods=["DELETE"])

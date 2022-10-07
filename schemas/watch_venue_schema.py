@@ -1,6 +1,7 @@
 from main import ma
 from marshmallow import fields
 
+
 class WatchVenueSchema(ma.Schema):
     class Meta:
         ordered = True

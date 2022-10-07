@@ -18,9 +18,9 @@ class Venue(db.Model):
         cascade="all, delete"
     )
 
-    wv_venue = db.relationship(
+    venue_wv = db.relationship(
         "WatchVenue",
-        backref="venue_wv",
+        back_populates="venue",
         cascade="all, delete"
     )
     

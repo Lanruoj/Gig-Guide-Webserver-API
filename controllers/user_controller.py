@@ -23,6 +23,7 @@ from schemas.watch_artist_schema import watch_artist_schema, watch_artists_schem
 
 
 users = Blueprint("users", __name__, url_prefix="/users")
+profile_schema = UserSchema(only=("username", "first_name", "last_name", "watched_venues", "watched_artists"))
 
 
 @users.route("/", methods=["GET"])
@@ -38,6 +39,16 @@ def get_users():
     return jsonify(users_schema.dump(users)), 200
 
 
+@users.route("/", methods=["GET"])
+@jwt_required()
+def get_own_user_details():
+    # FETCH USER WITH user_id FROM USER TABLE
+    user = User.query.get(get_jwt_identity())
+    if not user:
+        return abort(404, description="User not logged in")
+    
+    return jsonify(user_schema.dump(user)), 200
+
 @users.route("/profile", methods=["GET"])
 @jwt_required()
 def get_own_profile():
@@ -46,10 +57,10 @@ def get_own_profile():
     if not user:
         return abort(404, description="User not logged in")
     
-    return jsonify(user_schema.dump(user)), 200
+    return jsonify(profile_schema.dump(user)), 200
 
 
-@users.route("/profile/<int:user_id>", methods=["GET"])
+@users.route("/<int:user_id>", methods=["GET"])
 def get_specific_user(user_id):
     # FETCH USER WITH user_id FROM USER TABLE
     user = User.query.get(user_id)
@@ -57,6 +68,15 @@ def get_specific_user(user_id):
         return abort(404, description="User does not exist")
     
     return jsonify(user_schema.dump(user)), 200
+
+@users.route("/profile/<int:user_id>", methods=["GET"])
+def get_specific_users_profile(user_id):
+    # FETCH USER WITH user_id FROM USER TABLE
+    user = User.query.get(user_id)
+    if not user:
+        return abort(404, description="User does not exist")
+    
+    return jsonify(profile_schema.dump(user)), 200
 
 
 @users.route("/profile/form", methods=["GET"])

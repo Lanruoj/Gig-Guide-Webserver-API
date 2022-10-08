@@ -23,7 +23,7 @@ from schemas.city_schema import cities_schema, city_schema
 venues = Blueprint("venues", __name__, url_prefix="/venues")
 
 
-@venues.route("/", methods=["GET"])
+@venues.route("/search", methods=["GET"])
 def get_venues():
     # SEARCH VENUES TABLE - BY DEFAULT RETURN ALL VENUES BUT TAKES OPTIONAL QUERY STRING ARGUMENTS FOR FILTERING AND SORTING
     venues = search_table(Venue)
@@ -36,7 +36,7 @@ def get_venue(venue_id):
     # FETCH VENUE FROM PATH PARAMETER'S venue_id
     venue = Venue.query.get(venue_id)
     if not venue:
-        return abort(404, description=f"No venues exist with ID={venue_id}")
+        return abort(404, description=f"Venue does not exist")
     
     return jsonify(venue_schema.dump(venue)), 200
 
@@ -72,7 +72,7 @@ def venues_add():
 
     venue_exists = Venue.query.filter(Venue.name.ilike(f"%{input_venue_name}%"), Venue.city_id==input_city_id).first()
     if venue_exists:
-        return abort(409, description=Markup(f"A venue called {venue_exists.name} already exists in {venue_exists.city.name}. Location: http://localhost:5000/venues/{venue_exists.id}"))
+        return abort(409, description=Markup(f"A venue called {venue_exists.name} already exists in {venue_exists.city.name}. Location: [GET] http://localhost:5000/venues/{venue_exists.id}"))
     # IF VALID REQUEST, CREATE NEW VENUE RECORD
     venue = Venue(
         name = venue_fields["name"],
@@ -87,7 +87,7 @@ def venues_add():
     db.session.add(venue)
     db.session.commit()
     
-    return jsonify(message="Venue successfully added", result=venue_schema.dump(venue), location=f"http://localhost:5000/venues/{venue.id}"), 201
+    return jsonify(message="Venue successfully added", result=venue_schema.dump(venue), location=f"[GET] http://localhost:5000/venues/{venue.id}"), 201
 
 
 @venues.route("/<int:venue_id>/form", methods=["GET"])

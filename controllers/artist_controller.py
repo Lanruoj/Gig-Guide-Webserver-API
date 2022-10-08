@@ -26,7 +26,7 @@ result_schema = ArtistSchema(exclude=("genres",))
 results_schema = ArtistSchema(exclude=("genres",), many=True)
 
 
-@artists.route("/", methods=["GET"])
+@artists.route("/search", methods=["GET"])
 def get_artists():
     # SEARCH ARTISTS TABLE - BY DEFAULT RETURN ALL BUT TAKES OPTIONAL QUERY STRING ARGUMENTS FOR FILTERING AND SORTING
     artists = search_table(Artist)

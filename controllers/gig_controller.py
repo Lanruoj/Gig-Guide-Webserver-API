@@ -34,7 +34,7 @@ def gigs_before_request():
         db.session.commit()
 
 
-@gigs.route("/", methods=["GET"])
+@gigs.route("/search", methods=["GET"])
 def get_gigs():
     # SEARCH GIGS TABLE - BY DEFAULT RETURN ALL NON-EXPIRED GIGS BUT TAKES OPTIONAL QUERY STRING ARGUMENTS FOR FILTERING AND SORTING
     gigs = search_table(Gig, filters=[Gig.is_expired==False], sort=Gig.date_added)
@@ -52,155 +52,17 @@ def get_specific_gig(gig_id):
     return jsonify(gig_schema.dump(gig)), 200
 
 
-@gigs.route("/<int:gig_id>/form", methods=["GET"])
-def get_gig_update_form(gig_id):
-    # QUERY GIGS FOR GIG WITH ID OF gig_id
-    gig = Gig.query.get(gig_id)
-    if not gig:
-        return abort(404, description=Markup(f"Gig not found with the ID of {gig_id}. Please try again"))
-    # CREATE FORM FOR USER TO UPDATE GIG WITH
-    update_form = GigSchema(only=("title", "venue_id", "artists", "description", "start_time", "price", "tickets_url"))
-
-    return jsonify(update_form.dump(gig)), 200
-
-
-@gigs.route("/<int:gig_id>", methods=["PUT"])
-@jwt_required()
-def update_gig(gig_id):
-    # FETCH USER WITH user_id AS RETURNED BY get_jwt_identity() FROM JWT TOKEN
-    user = User.query.get(get_jwt_identity())
-    if not user or not user.logged_in:
-        return abort(401, description="Unauthorised - user must be logged in")
-    # IF USER IS NOT AN ADMIN, ATTEMPT TO FETCH GIG WITH MATCHING gig_id FROM PATH ARGUMENT AND user_id FROM JWT TOKEN
-    if not user.admin:
-        gig = Gig.query.filter(Gig.id==gig_id, Gig.user_id==user.id).first()
-        if not gig:
-            return abort(404, description=Markup(f"User must have created gig to update it"))
-    # IF USER IS AN ADMIN, SIMPLY FETCH GIG WITH gig_id
-    else:
-        # GET GIG 
-        gig = Gig.query.get(gig_id)
-        if not gig:
-            return abort(404, description=Markup(f"No gigs found with ID: {gig.id}"))
-    
-    # TRY TO LOAD REQUEST DATA THROUGH THE SCHEMA
-    try: 
-        gig_fields = gig_schema.load(request.json, partial=True)
-    # IF INVALID, RETURN A DESCRIPTIVE ERROR
-    except ValidationError as err:
-        return jsonify(err.messages)
-    # GET GIG 
-    gig = Gig.query.get(gig_id)
-    if not gig:
-        return abort(404, description=Markup(f"No gigs found with ID: {gig.id}"))
-    # PARSE JSON DATA FROM REQUEST
-    request_data = request.get_json()
-    fields, new_values = [], []
-    # PARSE COLUMNS TO UPDATE FROM THE REQUEST DATA
-    for attribute in request_data.keys():
-        # IF VALUE IS A VALID ATTRIBUTE OF Gig
-        if attribute in vars(Gig):
-            old_input = getattr(gig, attribute)
-            # SET THE ATTRIBUTE TO THE RELEVANT INPUT DATA
-            setattr(gig, attribute, gig_fields[attribute])
-            new_values.append(gig_fields[attribute])
-            fields.append(attribute)
-            if attribute == "artists":
-                # CREATE ITERABLE LISTS FROM artists STRING
-                old_artists = old_input.split(", ")
-                new_artists = gig.artists.split(", ")
-                for artist in old_artists:
-                    # FETCH ARTISTS THAT WERE ORIGINALLY IN THE "artists" COLUMN FROM DATABASE
-                    old_artist = Artist.query.filter_by(name=artist).first()
-                    # IF ARTIST HAS BEEN REMOVED FROM GIG, DELETE THE RELATED PERFORMANCE
-                    if not artist in new_artists:
-                        # FETCH PERFORMANCE WITH MATCHING gig_id & artist_id
-                        performance = Performance.query.filter(Performance.artist_id==old_artist.id, Performance.gig_id==gig.id).first()
-                        # DELETE RECORD
-                        db.session.delete(performance)
-                
-                for artist in new_artists:
-                    # QUERY ARTISTS TABLE TO CHECK IF EACH ARTIST IN REQUEST ALREADY EXISTS (CASE INSENSITIVE)
-                    artist_exists = Artist.query.filter(func.lower(Artist.name)==(func.lower(artist))).first()
-                    if artist_exists:
-                        # IF ARTIST EXISTS, QUERY PERFORMANCE TABLE TO CHECK IF THE ARTIST WAS ALREADY PLAYING AT GIG (IF THERE EXISTS A PERFORMANCE OBJECT ALREADY RELATING THE GIG WITH THE ARTIST)
-                        duplicate = Performance.query.filter(Performance.artist_id==artist_exists.id, Performance.gig_id==gig.id).first()
-                        if not duplicate:
-                            # IF THERE'S NO EXISTING PERFORMANCE, CREATE A NEW ONE
-                            performance = Performance(
-                            gig_id = gig.id,
-                            artist_id = artist_exists.id
-                            )
-                            # ADD PERFORMANCE TO SESSION AND COMMIT
-                            db.session.add(performance)
-                            db.session.commit()
-
-                    if not artist_exists:
-                        # IF ARTIST DOES NOT ALREADY EXIST IN DATABASE (NEW ARTIST), CREATE NEW ARTIST
-                        artist = Artist(
-                            name = artist
-                        )
-                        # ADD ARTIST TO SESSION AND COMMIT
-                        db.session.add(artist)
-                        db.session.commit()
-                        # CREATE PERFORMANCE WITH artist_id AND gig_id
-                        performance = Performance(
-                            gig_id = gig.id,
-                            artist_id = artist.id
-                        )
-                        # ADD PERFORMANCE TO SESSION AND COMMIT
-                        db.session.add(performance)
-                        db.session.commit()
-    # COMMIT ALL CHANGES TO THE DATABASE
-    db.session.commit()
-
-    return jsonify(message=Markup(f"Gig successfully updated"), gig=gig_schema.dump(gig), location=f"[GET] http://localhost:5000/gigs/{gig.id}"), 200
-        
-
-@gigs.route("/<int:gig_id>", methods=["DELETE"])
-@jwt_required()
-def delete_gig(gig_id):
-    # FETCH USER WITH user_id AS RETURNED BY get_jwt_identity() FROM JWT TOKEN
-    user = User.query.get(int(get_jwt_identity()))
-    # FETCH GIG WITH gig_id FROM PATH PARAMETER
-    gig = Gig.query.get(gig_id)
-    if not user or not user.logged_in:
-        return abort(401, description="User not logged in")
-
-    if not gig:
-        return abort(404, description=Markup(f"Gig doesn't exist with that ID"))
-    # QUERY GIG TABLE TO CHECK IF GIG WAS CREATED BY CURRENT USER FROM ABOVE QUERY
-    user_created_gig = Gig.query.filter(Gig.user_id==user.id, Gig.id==gig_id).first()
-    if not user_created_gig:
-        return abort(401, description=Markup(f"User didn't create gig"))
-    # IF REQUEST IS VALID THEN DELETE GIG FROM DATABASE AND COMMIT
-    db.session.delete(gig)
-    db.session.commit()
-
-    return jsonify(message=Markup(f"{gig.title} has been successfully deleted")), 200
-
-
-@gigs.route("/bin", methods=["GET"])
-def show_expired_gigs():
-    # SELECT ALL RECORDS FROM THE GIGS TABLE WITH is_expired=True
-    expired_gigs = search_table(Gig, filters=[Gig.is_expired==True])
-    if not expired_gigs:
-        return jsonify(message="There are currently no expired gigs")
-
-    return jsonify(gigs_schema.dump(expired_gigs)), 200
-
-
 @gigs.route("/new/form", methods=["GET"])
 def get_new_gig_form():
     # RETURN AN EMPTY GIG JSON ARRAY TEMPLATE FOR THE USER TO USE
     gig_template = {
     "title": "[string]",
-    "artists": "[string: e.g  e.g Artist 1, Artist 2, Artist 3]",
+    "artists": "[string: e.g Artist 1, Artist 2, Artist 3]",
     "venue_id": "[integer]",
     "start_time": "YYYY-MM-DD HH:MM:SS",
     "description": "[string: optional]",
     "price": "[integer: optional]",
-    "tickets_url": "https://...[string: optional]"
+    "tickets_url": "https://[string: optional]"
     }
     return gig_template, 200
 
@@ -281,5 +143,151 @@ def add_gig():
             db.session.commit()  
 
     return jsonify(message="Gig successfully added", result=gig_schema.dump(gig), location=f"http://localhost:5000/gigs/{gig.id}"), 201
+
+
+@gigs.route("/<int:gig_id>/form", methods=["GET"])
+def get_gig_update_form(gig_id):
+    # QUERY GIGS FOR GIG WITH ID OF gig_id
+    gig = Gig.query.get(gig_id)
+    if not gig:
+        return abort(404, description=Markup(f"Gig not found with the ID of {gig_id}. Please try again"))
+    # CREATE FORM FOR USER TO UPDATE GIG WITH
+    update_form = GigSchema(only=("title", "artists", "description", "start_time", "price", "tickets_url"))
+
+    return jsonify(update_form.dump(gig)), 200
+
+
+@gigs.route("/<int:gig_id>", methods=["PUT"])
+@jwt_required()
+def update_gig(gig_id):
+    # FETCH USER WITH user_id AS RETURNED BY get_jwt_identity() FROM JWT TOKEN
+    user = User.query.get(get_jwt_identity())
+    if not user or not user.logged_in:
+        return abort(401, description="Unauthorised - user must be logged in")
+    # IF USER IS NOT AN ADMIN, ATTEMPT TO FETCH GIG WITH MATCHING gig_id FROM PATH ARGUMENT AND user_id FROM JWT TOKEN
+    if not user.admin:
+        gig = Gig.query.filter(Gig.id==gig_id, Gig.user_id==user.id).first()
+        if not gig:
+            return abort(404, description=Markup(f"User must have created gig to update it"))
+    # IF USER IS AN ADMIN, SIMPLY FETCH GIG WITH gig_id
+    else:
+        # GET GIG 
+        gig = Gig.query.get(gig_id)
+        if not gig:
+            return abort(404, description=Markup(f"No gigs found with ID: {gig.id}"))
+    
+    # TRY TO LOAD REQUEST DATA THROUGH THE SCHEMA
+    try: 
+        gig_fields = gig_schema.load(request.json, partial=True)
+    # IF INVALID, RETURN A DESCRIPTIVE ERROR
+    except ValidationError as err:
+        return jsonify(err.messages)
+    # GET GIG 
+    gig = Gig.query.get(gig_id)
+    if not gig:
+        return abort(404, description=Markup(f"No gigs found with ID: {gig.id}"))
+    # PARSE JSON DATA FROM REQUEST
+    request_data = request.get_json()
+    fields, new_values = [], []
+    # PARSE COLUMNS TO UPDATE FROM THE REQUEST DATA
+    for attribute in request_data.keys():
+        # IF VALUE IS A VALID ATTRIBUTE OF Gig
+        if attribute in vars(Gig):
+            old_input = getattr(gig, attribute)
+            # SET THE ATTRIBUTE TO THE RELEVANT INPUT DATA
+            setattr(gig, attribute, gig_fields[attribute])
+            new_values.append(gig_fields[attribute])
+            fields.append(attribute)
+            if attribute == "artists":
+                # CREATE ITERABLE LISTS FROM artists STRING
+                old_artists = old_input.split(", ")
+                new_artists = gig.artists.split(", ")
+                for artist in old_artists:
+                    # FETCH ARTISTS THAT WERE ORIGINALLY IN THE "artists" COLUMN FROM DATABASE
+                    old_artist = Artist.query.filter_by(name=artist).first()
+                    # IF ARTIST HAS BEEN REMOVED FROM GIG, DELETE THE RELATED PERFORMANCE
+                    if not artist in new_artists:
+                        # FETCH PERFORMANCE WITH MATCHING gig_id & artist_id
+                        performance = Performance.query.filter(Performance.artist_id==old_artist.id, Performance.gig_id==gig.id).first()
+                        # DELETE RECORD
+                        db.session.delete(performance)
+                        db.session.commit()
+                
+                for artist in new_artists:
+                    # QUERY ARTISTS TABLE TO CHECK IF EACH ARTIST IN REQUEST ALREADY EXISTS (CASE INSENSITIVE)
+                    artist_exists = Artist.query.filter(func.lower(Artist.name)==(func.lower(artist))).first()
+                    if artist_exists:
+                        # IF ARTIST EXISTS, QUERY PERFORMANCE TABLE TO CHECK IF THE ARTIST WAS ALREADY PLAYING AT GIG (IF THERE EXISTS A PERFORMANCE OBJECT ALREADY RELATING THE GIG WITH THE ARTIST)
+                        duplicate = Performance.query.filter(Performance.artist_id==artist_exists.id, Performance.gig_id==gig.id).first()
+                        if not duplicate:
+                            # IF THERE'S NO EXISTING PERFORMANCE, CREATE A NEW ONE
+                            performance = Performance(
+                            gig_id = gig.id,
+                            artist_id = artist_exists.id
+                            )
+                            # ADD PERFORMANCE TO SESSION AND COMMIT
+                            db.session.add(performance)
+                            db.session.commit()
+
+                    if not artist_exists:
+                        # IF ARTIST DOES NOT ALREADY EXIST IN DATABASE (NEW ARTIST), CREATE NEW ARTIST
+                        artist = Artist(
+                            name = artist
+                        )
+                        # ADD ARTIST TO SESSION AND COMMIT
+                        db.session.add(artist)
+                        db.session.commit()
+                        # CREATE PERFORMANCE WITH artist_id AND gig_id
+                        performance = Performance(
+                            gig_id = gig.id,
+                            artist_id = artist.id
+                        )
+                        # ADD PERFORMANCE TO SESSION AND COMMIT
+                        db.session.add(performance)
+                        db.session.commit()
+    # COMMIT ALL CHANGES TO THE DATABASE
+    db.session.commit()
+
+    return jsonify(message=Markup(f"Gig successfully updated"), gig=gig_schema.dump(gig), location=f"[GET] http://localhost:5000/gigs/{gig.id}"), 200
+        
+
+@gigs.route("/<int:gig_id>", methods=["DELETE"])
+@jwt_required()
+def delete_gig(gig_id):
+    # FETCH USER WITH user_id AS RETURNED BY get_jwt_identity() FROM JWT TOKEN
+    user = User.query.get(int(get_jwt_identity()))
+    # FETCH GIG WITH gig_id FROM PATH PARAMETER
+    gig = Gig.query.get(gig_id)
+    if not user or not user.logged_in:
+        return abort(401, description="User not logged in")
+
+    if not gig:
+        return abort(404, description=Markup(f"Gig doesn't exist with that ID"))
+    
+    if not user.admin:
+        # QUERY GIG TABLE TO CHECK IF GIG WAS CREATED BY CURRENT USER FROM ABOVE QUERY
+        user_created_gig = Gig.query.filter(Gig.user_id==user.id, Gig.id==gig_id).first()
+        if not user_created_gig:
+            return abort(401, description=Markup(f"User didn't create gig"))
+        else:
+            # IF REQUEST IS VALID THEN DELETE GIG FROM DATABASE AND COMMIT
+            db.session.delete(gig)
+            db.session.commit()
+    
+    else:
+        db.session.delete(gig)
+        db.session.commit()
+
+    return jsonify(message=Markup(f"{gig.title} has been successfully deleted")), 200
+
+
+@gigs.route("/bin", methods=["GET"])
+def show_expired_gigs():
+    # SELECT ALL RECORDS FROM THE GIGS TABLE WITH is_expired=True
+    expired_gigs = search_table(Gig, filters=[Gig.is_expired==True])
+    if not expired_gigs:
+        return jsonify(message="There are currently no expired gigs")
+
+    return jsonify(gigs_schema.dump(expired_gigs)), 200
 
 

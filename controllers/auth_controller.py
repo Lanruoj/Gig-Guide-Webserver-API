@@ -49,7 +49,7 @@ def auth_register():
 
     token = create_access_token(identity=str(user.id), expires_delta=timedelta(days=1))
 
-    return jsonify(message=Markup(f"{user.first_name} successfully logged in"), user=user.username, id=user.id, token=token), 201
+    return jsonify(message=Markup(f"{user.first_name} successfully created and logged in"), user=user.username, id=user.id, token=token), 201
 
 
 @auth.route("/login", methods=["GET"])

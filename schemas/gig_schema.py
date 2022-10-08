@@ -8,7 +8,7 @@ class GigSchema(ma.Schema):
         ordered = True
         fields = ("id", "title", "gig_venue", "artists", "description", "start_time", "price", "tickets_url", "date_added", "posted_by", "is_expired", "venue_id", "user_id", "performances", "gig_artists")
 
-    title = ma.String(required=True, validate=Length(max=32))
+    title = ma.String(required=True, validate=Length(max=50))
     description = ma.String(validate=Length(max=100))
     artists = ma.String(required=True)
     start_time = ma.DateTime(required=True)

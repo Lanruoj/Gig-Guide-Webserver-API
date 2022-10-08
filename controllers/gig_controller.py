@@ -182,10 +182,7 @@ def update_gig(gig_id):
     # IF INVALID, RETURN A DESCRIPTIVE ERROR
     except ValidationError as err:
         return jsonify(err.messages)
-    # GET GIG 
-    gig = Gig.query.get(gig_id)
-    if not gig:
-        return abort(404, description=Markup(f"No gigs found with ID: {gig.id}"))
+        
     # PARSE JSON DATA FROM REQUEST
     request_data = request.get_json()
     fields, new_values = [], []

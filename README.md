@@ -1191,6 +1191,13 @@ I will be utilising a database toolkit called *SQLAlchemy* as my Object Relation
 ```
 
 
+***
+### **Entity Relationship Diagram**
+***
+
+<img src="img/erd.png">
+
+
 
 
 ***
@@ -1241,4 +1248,4 @@ A `User` posts `Gigs` (1-M), so each `Gig` will inherit a `user_id` as a foreign
 
 I will be using **Trello**, a web-based project management application as my task manager for the project. 
 I will be employing a loose *kanban* framework to my Trello board and distinctly categorising tasks into these columns: `Ideas` are loose ideas that I may come up with that don't have any clear actions yet - `Backlog` are tasks that I would like to achieve but aren't totally necessary right now, `To-do` are tasks flagged as needing to be done in the near future, `Doing` are tasks that I have actually starting and am actively working on and `Completed` are tasks that I have completed. Within each "card" (task) I store checklists if necessary to keep track of each step/mini-task and assign due dates/times if it is time sensitive, as well as labelling each task by their priority level. 
-<img src="trello.png">
+<img src="img/trello.png">

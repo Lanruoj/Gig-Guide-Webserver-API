@@ -10,7 +10,7 @@ class User(db.Model):
     email = db.Column(db.String(), nullable=False, unique=True)
     first_name = db.Column(db.String(), nullable=False)
     last_name = db.Column(db.String(), nullable=False)
-    admin = db.Column(db.Boolean, default=False)
+    admin = db.Column(db.Boolean, default=False, nullable=False)
     logged_in = db.Column(db.Boolean, default=False, nullable=False)
 
     gigs = db.relationship(

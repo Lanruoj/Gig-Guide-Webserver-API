@@ -41,6 +41,7 @@ def auth_register():
         password = bcrypt.generate_password_hash(user_fields["password"]).decode("utf-8"),
         first_name = user_fields["first_name"],
         last_name = user_fields["last_name"],
+        admin = False,
         logged_in = True
     )
     # ADD NEW RECORD TO SESSION TO DATABASE AND COMMIT

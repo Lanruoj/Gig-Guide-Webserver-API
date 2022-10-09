@@ -833,6 +833,50 @@ I will be utilising a database toolkit called *SQLAlchemy* as my Object Relation
 }
 ```
 
+
+> `[GET] localhost:5000/venues/cities`
+
+* Search `Cities` - by default returns all `Cities` but takes optional query string arguements for filtering and sorting
+
+*For example*:`[GET] localhost:5000/venues/cities?name=Melbourne` will perform a case-insensitive search on `Cities` table for `City` with `name` matching "Melbourne"
+
+*Expected response (`200 OK`):*
+```
+[
+    {
+        "id": 1,
+        "name": "Melbourne",
+        "state_id": 1,
+        "state": {
+            "id": 1,
+            "name": "Victoria",
+            "country_id": 1,
+            "country": {
+                "id": 1,
+                "name": "Australia"
+            }
+        }
+    }
+]
+```
+
+
+> `[GET] localhost:5000/venues/types`
+
+* Search `VenueTypes` - by default returns all `VenueTypes` but takes optional query string arguements for filtering and sorting
+
+*For example*:`[GET] localhost:5000/venues/types?name=Pub` will perform a case-insensitive search on `VenueTypes` table for a record with `name` matching "Pub"
+
+*Expected response (`200 OK`):*
+```
+[
+    {
+        "id": 2,
+        "name": "Pub"
+    }
+]
+```
+
 ***
 ### ***Artist controller*** `/artists`
 ***

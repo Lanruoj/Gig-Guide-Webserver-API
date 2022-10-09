@@ -9,6 +9,8 @@ class StateSchema(ma.Schema):
         ordered = True
         fields = ("id", "name", "country_id", "country")
 
+    country_id = ma.Integer(required=True)
+    
     country = fields.Nested(CountrySchema)
 
 state_schema = StateSchema()

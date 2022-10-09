@@ -8,6 +8,9 @@ class ArtistGenreSchema(ma.Schema):
         ordered = True
         fields = ("id", "artist_id", "genre_id", "ag_genre")
 
+    artist_id = ma.Integer(required=True)
+    genre_id = ma.Integer(required=True)
+    
     ag_genre = fields.Nested(GenreSchema)
 
 

@@ -6,6 +6,8 @@ class GenreSchema(ma.Schema):
         ordered = True
         fields = ("id", "name")
 
+    name = ma.String(required=True)
+
 
 genre_schema = GenreSchema()
 genres_schema = GenreSchema(many=True)

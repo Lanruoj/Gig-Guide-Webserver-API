@@ -6,6 +6,7 @@ class CountrySchema(ma.Schema):
         ordered = True
         fields = ("id", "name")
 
+    name = ma.String(required=True)
 
 country_schema = CountrySchema()
 countries_schema = CountrySchema(many=True)

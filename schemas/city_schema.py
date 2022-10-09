@@ -8,6 +8,9 @@ class CitySchema(ma.Schema):
         ordered = True
         fields = ("id", "name", "state_id", "state")
 
+    name = ma.String(required=True)
+    state_id = ma.Integer(required=True)
+    
     state = fields.Nested(StateSchema)
 
 

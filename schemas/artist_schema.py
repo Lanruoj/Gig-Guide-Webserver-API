@@ -9,10 +9,10 @@ class ArtistSchema(ma.Schema):
         fields = ("id", "name", "country_id", "country", "genres", "artist_genres", "performances")
 
     name = ma.String(required=True, validate=Length(min=1))
-
-    artist_genres = fields.List(fields.Nested("ArtistGenreSchema"))
-
+    country_id = ma.Integer()
+    
     country = fields.Nested("CountrySchema")
+    artist_genres = fields.List(fields.Nested("ArtistGenreSchema"))
     performances = fields.List(fields.Nested("PerformanceSchema"))
 
 

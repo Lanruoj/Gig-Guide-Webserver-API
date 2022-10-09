@@ -1019,7 +1019,7 @@ I will be utilising a database toolkit called *SQLAlchemy* as my Object Relation
 ```
 {
     "name": "[string]",
-    "genres": "[string: e.g: Rock, Pop, Jazz]",
+    "genres": "[string: e.g Rock, Pop, Jazz -> http://localhost:5000/artists/genres",
     "country_id": "[integer: optional]"
 }
 ```

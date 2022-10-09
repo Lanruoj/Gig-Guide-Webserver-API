@@ -36,10 +36,9 @@ def get_venue(venue_id):
 def get_new_venue_form():
     # RETURN AN EMPTY VENUE JSON ARRAY FOR USER TO ADD NEW VENUE WITH
     venue_template = {
-        "name": "[string]",
-        "venue_type_id": "[integer: optional, for a list of valid venue types -> localhost:5000/venues/types]",
-        "street_address": "[string]",
-        "city_id": "[integer: to search for valid venue types -> localhost:5000/venues/cities?name=<name of city>]"
+    "name": "[string]",
+    "genres": "[string: e.g Rock, Pop, Jazz -> http://localhost:5000/artists/genres",
+    "country_id": "[integer: optional]"
     }
     return venue_template, 200
 
@@ -107,12 +106,10 @@ def update_venue(venue_id):
     if not user or not user.logged_in:
         return abort(401, description="User must be logged in")
     # UPDATE VENUE FROM REQUEST BODY
-
     update = update_record(db, venue_id, Venue, venue_schema)
-    print(update)
     if update[1]:
         return abort(422, description=Markup(f"Invalid value/s for {update[1]}. Please try again"))
-        
+
     # IF VALID INPUT COMMIT CHANGES TO DATABASE
     db.session.commit()
     updated_schema = VenueSchema(exclude=("venue_gigs",))

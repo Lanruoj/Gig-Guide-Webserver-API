@@ -1,6 +1,6 @@
 from main import db
 from utils import search_table, update_record
-from flask import Blueprint, jsonify, request, abort
+from flask import Blueprint, jsonify, request, abort, Markup
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from models.artist import Artist
 from schemas.artist_schema import artist_schema, ArtistSchema
@@ -30,7 +30,7 @@ def get_new_artist_form():
     # RETURN AN EMPTY ARTIST JSON ARRAY TEMPLATE
     artist_template = {
         "name": "[string]",
-        "genres": "[string: e.g: Rock, Pop, Jazz]",
+        "genres": "[string: e.g Rock, Pop, Jazz | get a list of valid genre name's -> http://localhost:5000/artists/genres",
         "country_id": "[integer: optional]"
     }
 
@@ -125,11 +125,13 @@ def update_artist(artist_id):
     if not user or not user.logged_in:
         return abort(401, description="User must be logged in")
     # UPDATE ARTIST FROM REQUEST BODY
-    artist = update_record(artist_id, Artist, artist_schema)
+    artist = update_record(db, artist_id, Artist, artist_schema)
+    if artist[1]:
+        return abort(422, description=Markup(f"Invalid value/s for {artist[1]}. Please try again"))
     # COMMIT CHANGES TO DATABASE
     db.session.commit()
 
-    return jsonify(message="Artist successfully updated", result=result_schema.dump(artist), location=f"[GET] http://localhost:5000/artists/{artist.id}"), 200
+    return jsonify(message="Artist successfully updated", result=result_schema.dump(artist[0]), location=f"[GET] http://localhost:5000/artists/{artist[0].id}"), 200
 
 
 @artists.route("/<int:artist_id>", methods=["DELETE"])

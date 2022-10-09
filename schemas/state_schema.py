@@ -1,6 +1,5 @@
 from main import ma
 from marshmallow import fields
-from marshmallow.validate import Length
 from schemas.country_schema import CountrySchema
 
 
@@ -10,7 +9,7 @@ class StateSchema(ma.Schema):
         fields = ("id", "name", "country_id", "country")
 
     country_id = ma.Integer(required=True)
-    
+
     country = fields.Nested(CountrySchema)
 
 state_schema = StateSchema()

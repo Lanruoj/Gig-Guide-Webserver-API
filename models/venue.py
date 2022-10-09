@@ -7,8 +7,8 @@ class Venue(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), nullable=False)
     street_address = db.Column(db.String(), nullable=False)
-    type = db.Column(db.String())
-    
+
+    venue_type_id = db.Column(db.Integer, db.ForeignKey("venue_types.id"))  
     city_id = db.Column(db.Integer, db.ForeignKey("cities.id"), nullable=False)
 
     city = db.relationship(
@@ -26,5 +26,10 @@ class Venue(db.Model):
         "WatchVenue",
         back_populates="venue",
         cascade="all, delete"
+    )
+
+    venue_type = db.relationship(
+        "VenueType",
+        back_populates="venues"
     )
     

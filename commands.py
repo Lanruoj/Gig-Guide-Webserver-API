@@ -6,16 +6,15 @@ from models.artist import Artist
 from models.gig import Gig
 from models.user import User
 from models.venue import Venue
-from models.performance import Performance
 from datetime import datetime
 from models.watch_venue import WatchVenue
-from schemas.watch_venue_schema import watch_venue_schema, watch_venues_schema
 from models.watch_artist import WatchArtist
 from models.country import Country
 from models.state import State
 from models.city import City
 from models.genre import Genre
 from models.artist_genre import ArtistGenre
+from models.venue_type import VenueType
 
 
 db_commands = Blueprint("db", __name__)
@@ -219,26 +218,106 @@ def seed_db():
     db.session.add(test_artist9)
     db.session.commit()
 
+    # VENUE TYPE SEEDS
+    vt1 = VenueType(
+        name = "Music venue"
+    )
+    db.session.add(vt1)
+    vt2 = VenueType(
+        name = "Pub"
+    )
+    db.session.add(vt2)
+    vt3 = VenueType(
+        name = "Concert hall"
+    )
+    db.session.add(vt3)
+    db.session.add(vt2)
+    vt4 = VenueType(
+        name = "Stadium"
+    )
+    db.session.add(vt4)
+    vt5 = VenueType(
+        name = "Divebar"
+    )
+    db.session.add(vt5)
+    vt6 = VenueType(
+        name = "Restaurant"
+    )
+    db.session.add(vt6)
+    vt7 = VenueType(
+        name = "Theatre"
+    )
+    db.session.add(vt7)
+    vt8 = VenueType(
+        name = "Hotel"
+    )
+    db.session.add(vt8)
+    vt9 = VenueType(
+        name = "Amphitheatre"
+    )
+    db.session.add(vt9)
+    vt10 = VenueType(
+        name = "House"
+    )
+    db.session.add(vt10)
+    vt11 = VenueType(
+        name = "Warehouse"
+    )
+    db.session.add(vt11)
+    vt12 = VenueType(
+        name = "Jazz club"
+    )
+    db.session.add(vt12)
+    vt13 = VenueType(
+        name = "Nightclub"
+    )
+    db.session.add(vt13)
+    vt14 = VenueType(
+        name = "Discotheque"
+    )
+    db.session.add(vt14)
+    vt15 = VenueType(
+        name = "Festival"
+    )
+    db.session.add(vt15)
+    vt15 = VenueType(
+        name = "Bowls Club"
+    )
+    db.session.add(vt15)
+    vt15 = VenueType(
+        name = "Park"
+    )
+    db.session.add(vt15)
+    vt16 = VenueType(
+        name = "Beach"
+    )
+    db.session.add(vt16)
+    vt17 = VenueType(
+        name = "Record/music store"
+    )
+    db.session.add(vt17)
+    db.session.commit()
+
     # VENUE SEEDS
     test_venue1 = Venue(
         name = "The Gasometer Hotel",
         street_address = "484 Smith St",
         city_id = 1,
-        type = "Music venue"
+        venue_type_id = 1
     )
     db.session.add(test_venue1)
     test_venue2 = Venue(
         name = "The Forum",
         street_address = "154 Flinders St",
         city_id = 1,
-        type = "Music venue"
+        venue_type_id = 7
     )
     db.session.add(test_venue2)
     test_venue3 = Venue(
         name = "The Jazzlab",
         street_address = "27 Leslie street",
         city_id = 1,
-        type = "Music venue"
+        venue_type_id = 12
     )
     db.session.add(test_venue3)
     db.session.commit()

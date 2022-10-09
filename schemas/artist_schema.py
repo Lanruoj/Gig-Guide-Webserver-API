@@ -1,14 +1,12 @@
 from main import ma
 from marshmallow import fields
 from marshmallow.validate import Length
-from schemas.artist_genre_schema import ArtistGenreSchema
 
 
 class ArtistSchema(ma.Schema):
     class Meta:
         ordered = True
         fields = ("id", "name", "country_id", "country", "genres", "artist_genres", "performances")
-        # load_only = ["genres"]
 
     name = ma.String(required=True, validate=Length(min=1))
 

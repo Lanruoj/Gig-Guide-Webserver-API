@@ -1,5 +1,4 @@
 from main import db
-from datetime import timedelta, datetime
 
 
 class Gig(db.Model):

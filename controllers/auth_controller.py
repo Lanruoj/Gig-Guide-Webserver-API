@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request, abort, Markup
-from main import db, bcrypt, jwt
+from main import db, bcrypt
 from datetime import timedelta
 from flask_jwt_extended import create_access_token, get_jwt_identity,jwt_required
 from models.user import User

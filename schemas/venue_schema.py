@@ -12,7 +12,6 @@ class VenueSchema(ma.Schema):
     class Meta:
         ordered = True
         fields = ("id", "name", "type", "street_address", "city_id", "city", "venue_gigs")
-        # load_only = ["city_id"]
     
     name = ma.String(required=True)
     street_address = ma.String(required=True, validate=ContainsOnly(alphanumeric + " /-,()&."))

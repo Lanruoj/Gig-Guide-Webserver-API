@@ -1,23 +1,12 @@
-from main import db, bcrypt, jwt
+from main import db
 from utils import search_table, update_record
 from flask import Blueprint, jsonify, request, abort, Markup
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
-from sqlalchemy import func
-from datetime import datetime
-from models.gig import Gig
-from schemas.gig_schema import gig_schema, gigs_schema
-from models.performance import Performance
-from schemas.performance_schema import performance_schema
-from models.artist import Artist
-from schemas.artist_schema import artist_schema, artists_schema
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from models.venue import Venue
 from schemas.venue_schema import venue_schema, venues_schema, VenueSchema
 from models.user import User
-from schemas.user_schema import user_schema
-from models.watch_venue import WatchVenue
-from schemas.watch_venue_schema import watch_venue_schema
 from models.city import City
-from schemas.city_schema import cities_schema, city_schema
+from schemas.city_schema import cities_schema
 
 
 venues = Blueprint("venues", __name__, url_prefix="/venues")

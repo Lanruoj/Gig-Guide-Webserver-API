@@ -1,18 +1,10 @@
-from main import db, bcrypt, jwt
+from main import db
 from utils import search_table, update_record
-from flask import Blueprint, jsonify, request, abort, Markup, Response
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
-# from marshmallow.exceptions import ValidationError
-# from models.gig import Gig
-# from schemas.gig_schema import gig_schema, gigs_schema
-# from models.performance import Performance
-# from schemas.performance_schema import performance_schema
+from flask import Blueprint, jsonify, request, abort
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from models.artist import Artist
-from schemas.artist_schema import artist_schema, artists_schema, ArtistSchema
-# from models.watch_artist import WatchArtist
-# from schemas.watch_artist_schema import watch_artist_schema
+from schemas.artist_schema import artist_schema, ArtistSchema
 from models.user import User
-# from schemas.user_schema import user_schema
 from models.genre import Genre
 from schemas.genre_schema import genres_schema
 from models.artist_genre import ArtistGenre

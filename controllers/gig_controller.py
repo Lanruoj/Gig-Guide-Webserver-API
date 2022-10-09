@@ -1,25 +1,17 @@
 from re import S
-from main import db, bcrypt, jwt
+from main import db
 from utils import search_table
 from flask import Blueprint, jsonify, request, abort, Markup
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from marshmallow.exceptions import ValidationError
-from sqlalchemy import func, desc, and_
-from datetime import datetime, date, time, timedelta
+from sqlalchemy import func
+from datetime import datetime
 from models.gig import Gig
 from schemas.gig_schema import gig_schema, gigs_schema, GigSchema
 from models.performance import Performance
-from schemas.performance_schema import performance_schema
 from models.artist import Artist
-from schemas.artist_schema import artist_schema, artists_schema
 from models.user import User
-from schemas.user_schema import user_schema, UserSchema
 from models.venue import Venue
-from schemas.venue_schema import venue_schema, venues_schema
-from models.watch_venue import WatchVenue
-from schemas.watch_venue_schema import watch_venue_schema, watch_venues_schema
-from models.watch_artist import WatchArtist
-from schemas.watch_artist_schema import watch_artist_schema, watch_artists_schema
 
 
 gigs = Blueprint("gigs", __name__, url_prefix="/gigs")

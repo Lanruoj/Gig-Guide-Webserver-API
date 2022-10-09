@@ -1,6 +1,5 @@
 from main import ma
 from marshmallow import fields
-from marshmallow.validate import Length
 from schemas.state_schema import StateSchema
 
 

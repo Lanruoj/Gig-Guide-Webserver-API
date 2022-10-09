@@ -72,7 +72,13 @@ def venues_add():
     # OPTIONAL FIELDS
     request_data = request.get_json()
     if "venue_type_id" in request_data.keys():
-        venue.venue_type_id = venue_fields["venue_type_id"]
+        # QUERY VENUETYPE TABLE TO CHECK IF VENUE TYPE FROM REQUEST EXISTS
+        type_exists = VenueType.query.filter(VenueType.id==venue_fields["venue_type_id"]).first()
+        if not type_exists:
+            return abort(422, description="Invalid venue type, get a list of valid types at [GET] http://localhost:5000/venues/types")
+        else:
+            venue.venue_type_id = venue_fields["venue_type_id"]
+
     # ADD NEW RECORD TO SESSION AND COMMIT TO DATABASE
     db.session.add(venue)
     db.session.commit()

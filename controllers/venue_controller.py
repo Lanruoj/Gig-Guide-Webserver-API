@@ -2,6 +2,7 @@ from main import db
 from utils import search_table, update_record
 from flask import Blueprint, jsonify, request, abort, Markup
 from flask_jwt_extended import get_jwt_identity, jwt_required
+from sqlalchemy import exc
 from models.venue import Venue
 from schemas.venue_schema import venue_schema, venues_schema, VenueSchema
 from models.user import User
@@ -106,13 +107,17 @@ def update_venue(venue_id):
     if not user or not user.logged_in:
         return abort(401, description="User must be logged in")
     # UPDATE VENUE FROM REQUEST BODY
-    update = update_record(venue_id, Venue, venue_schema)
-    # COMMIT CHANGES TO DATABASE
-    db.session.commit()
 
+    update = update_record(db, venue_id, Venue, venue_schema)
+    print(update)
+    if update[1]:
+        return abort(422, description=Markup(f"Invalid value/s for {update[1]}. Please try again"))
+        
+    # IF VALID INPUT COMMIT CHANGES TO DATABASE
+    db.session.commit()
     updated_schema = VenueSchema(exclude=("venue_gigs",))
 
-    return jsonify(message="Venue successfully updated", venue=updated_schema.dump(update), location=f"[GET] http://localhost:5000/venues/{update.id}"), 200
+    return jsonify(message="Venue successfully updated", venue=updated_schema.dump(update[0]), location=f"[GET] http://localhost:5000/venues/{update[0].id}"), 200
 
 
 @venues.route("/<int:venue_id>", methods=["DELETE"])

@@ -16,7 +16,8 @@ class VenueSchema(ma.Schema):
     
     name = ma.String(required=True)
     street_address = ma.String(required=True, validate=ContainsOnly(alphanumeric + " /-,()&."))
-
+    venue_type_id = ma.Integer()
+    
     venue_type = fields.Nested(VenueTypeSchema)
 
     city = fields.Nested(CitySchema)

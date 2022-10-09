@@ -7,6 +7,7 @@ from schemas.venue_schema import venue_schema, venues_schema, VenueSchema
 from models.user import User
 from models.city import City
 from schemas.city_schema import cities_schema
+from models.venue_type import VenueType
 
 
 venues = Blueprint("venues", __name__, url_prefix="/venues")
@@ -35,9 +36,9 @@ def get_new_venue_form():
     # RETURN AN EMPTY VENUE JSON ARRAY FOR USER TO ADD NEW VENUE WITH
     venue_template = {
         "name": "[string]",
-        "type": "[string: optional e.g: Music venue, Pub, Nightclub etc.]",
+        "venue_type_id": "[integer: optional, for a list of valid venue types -> localhost:5000/venues/types]",
         "street_address": "[string]",
-        "city_id": "[integer]"
+        "city_id": "[integer: to search for valid venue types -> localhost:5000/venues/cities?name=<name of city>]"
     }
     return venue_template, 200
 
@@ -70,8 +71,8 @@ def venues_add():
     )
     # OPTIONAL FIELDS
     request_data = request.get_json()
-    if "type" in request_data.keys():
-        venue.type = venue_fields["type"]
+    if "venue_type_id" in request_data.keys():
+        venue.venue_type_id = venue_fields["venue_type_id"]
     # ADD NEW RECORD TO SESSION AND COMMIT TO DATABASE
     db.session.add(venue)
     db.session.commit()
@@ -86,7 +87,7 @@ def get_venue_form(venue_id):
     if not venue:
         return abort(404, description="Venue does not exist")
     # CREATE FORM FOR USER TO UPDATE VENUE WITH
-    update_form = VenueSchema(only=("name", "type", "street_address", "city_id"))
+    update_form = VenueSchema(only=("name", "venue_type_id", "street_address", "city_id"))
 
     return jsonify(update_form.dump(venue)), 200
 
@@ -132,3 +133,11 @@ def get_cities():
     cities = search_table(City)
 
     return jsonify(cities_schema.dump(cities))
+
+
+@venues.route("/types", methods=["GET"])
+def get_venue_types():
+    # FETCH ALL VENUE TYPES BY DEFAULT OR TAKE QUERY STRING ARGUMENTS AS SEARCH/SORTING CRITERIA
+    types = search_table(VenueType)
+
+    return jsonify(cities_schema.dump(types))

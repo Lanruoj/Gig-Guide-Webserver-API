@@ -613,7 +613,7 @@ I will be utilising a database toolkit called *SQLAlchemy* as my Object Relation
 > `[GET] localhost:5000/venues/search`
 
 * Search `Venues` - by default all upcoming gigs, but takes query string arguments for filtering and sorting
-* For example: `[GET] localhost:5000/venues?name=The+Jazzlab&sort:asc=city` performs a case insensitive search on `Venues` with `name` matching `The Jazzlab` and sorts the results alphabetically by their `city` name in ascending order
+* For example: `[GET] localhost:5000/venues/search?name=The+Jazzlab` performs a case insensitive search on `Venues` with `name` matching `The Jazzlab`
 
 *Expected response (`200 OK`):*
 ```
@@ -621,7 +621,11 @@ I will be utilising a database toolkit called *SQLAlchemy* as my Object Relation
     {
         "id": 3,
         "name": "The Jazzlab",
-        "type": "Music venue",
+        "venue_type_id": 12,
+        "venue_type": {
+            "id": 12,
+            "name": "Jazz club"
+        },
         "street_address": "27 Leslie street",
         "city_id": 1,
         "city": {
@@ -652,15 +656,19 @@ I will be utilising a database toolkit called *SQLAlchemy* as my Object Relation
 * Retrieves `Venue` with `id` as specified in URL argument
 
 *Example URL path:*
-`[GET] /venues/<venue_id>` 
+`[GET] /venues/2` 
 
 *Expected resposnse (`200 OK`):*
 ```
 {
     "id": 2,
-    "name": "Venue #2",
-    "type": "Music venue",
-    "street_address": "123 Venue street",
+    "name": "The Forum",
+    "venue_type_id": 7,
+    "venue_type": {
+        "id": 7,
+        "name": "Theatre"
+    },
+    "street_address": "154 Flinders St",
     "city_id": 1,
     "city": {
         "id": 1,
@@ -694,9 +702,9 @@ I will be utilising a database toolkit called *SQLAlchemy* as my Object Relation
 ```
 {
     "name": "[string]",
-    "type": "[string: optional e.g: Music venue, Pub, Nightclub etc.]",
+    "venue_type_id": "[integer: optional, for a list of valid venue types -> localhost:5000/venues/types]",
     "street_address": "[string]",
-    "city_id": "[integer]"
+    "city_id": "[integer: to search for valid venue types -> localhost:5000/venues/cities?name=<name of city>]"
 }
 ```
 
@@ -711,7 +719,7 @@ I will be utilising a database toolkit called *SQLAlchemy* as my Object Relation
 ```
 {
     "name": "New Venue",
-    "type": "Concert Hall",
+    "venue_type_id": 1,
     "street_address": "123 Venue street",
     "city_id": 1
 }
@@ -721,9 +729,13 @@ I will be utilising a database toolkit called *SQLAlchemy* as my Object Relation
 {
     "message": "Venue successfully added",
     "result": {
-        "id": 6,
+        "id": 8,
         "name": "New Venue",
-        "type": "Concert Hall",
+        "venue_type_id": 1,
+        "venue_type": {
+            "id": 1,
+            "name": "Music venue"
+        },
         "street_address": "123 Venue street",
         "city_id": 1,
         "city": {
@@ -742,7 +754,7 @@ I will be utilising a database toolkit called *SQLAlchemy* as my Object Relation
         },
         "venue_gigs": []
     },
-    "location": "[GET] http://localhost:5000/venues/6"
+    "location": "[GET] http://localhost:5000/venues/8"
 }
 ```
 
@@ -755,7 +767,7 @@ I will be utilising a database toolkit called *SQLAlchemy* as my Object Relation
 ```
 {
     "name": "New Venue",
-    "type": "Concert Hall",
+    "venue_type_id": 1,
     "street_address": "123 Venue street",
     "city_id": 1
 }
@@ -781,9 +793,13 @@ I will be utilising a database toolkit called *SQLAlchemy* as my Object Relation
 {
     "message": "Venue successfully updated",
     "venue": {
-        "id": 6,
-        "name": "New Venue",
-        "type": "Restaurant",
+        "id": 8,
+        "name": "Updated Venue",
+        "venue_type_id": 2,
+        "venue_type": {
+            "id": 2,
+            "name": "Pub"
+        },
         "street_address": "456 Venue street",
         "city_id": 1,
         "city": {
@@ -801,7 +817,7 @@ I will be utilising a database toolkit called *SQLAlchemy* as my Object Relation
             }
         }
     },
-    "location": "[GET] http://localhost:5000/venues/6"
+    "location": "[GET] http://localhost:5000/venues/8"
 }
 ```
 
@@ -813,7 +829,7 @@ I will be utilising a database toolkit called *SQLAlchemy* as my Object Relation
 *Expected response (`200 OK`):*
 ```
 {
-    "message": "New Venue has been deleted"
+    "message": "Updated Venue has been deleted"
 }
 ```
 

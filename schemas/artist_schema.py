@@ -1,6 +1,8 @@
 from main import ma
 from marshmallow import fields
 from marshmallow.validate import Length
+from schemas.artist_genre_schema import ArtistGenreSchema
+from schemas.performance_schema import PerformanceSchema
 
 
 class ArtistSchema(ma.Schema):
@@ -12,8 +14,8 @@ class ArtistSchema(ma.Schema):
     country_id = ma.Integer()
     
     country = fields.Nested("CountrySchema")
-    artist_genres = fields.List(fields.Nested("ArtistGenreSchema"))
-    performances = fields.List(fields.Nested("PerformanceSchema"))
+    artist_genres = fields.List(fields.Nested(ArtistGenreSchema))
+    performances = fields.List(fields.Nested(PerformanceSchema))
 
 
 artist_schema = ArtistSchema()
